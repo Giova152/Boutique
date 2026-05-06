@@ -407,6 +407,38 @@
   background: #3d8b5a;
 }
 
+.customers-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customers-list th,
+.customers-list td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.customers-list th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.customer-name {
+  font-weight: 600;
+}
+
+.customer-spent {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.customer-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .empty-state {
   text-align: center;
   padding: 60px;

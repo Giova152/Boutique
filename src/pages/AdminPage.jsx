@@ -13,7 +13,7 @@ export default function AdminPage() {
   const { isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);
   const {
-    products, promoCodes, orders, getStats,
+    products, promoCodes, orders, getStats, getCustomers, downloadInvoice,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
@@ -36,7 +36,6 @@ export default function AdminPage() {
   
   const [orderFilter, setOrderFilter] = useState('all');
 
-  const stats = getStats();
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -109,8 +108,12 @@ export default function AdminPage() {
     { id: 'products', label: 'Produits', icon: Package, count: products.length },
     { id: 'promos', label: 'Promos', icon: Tag, count: Object.keys(promoCodes).length },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart, count: orders.length },
+    { id: 'customers', label: 'Clients', icon: Users, count: getCustomers().length },
     { id: 'stats', label: 'Stats', icon: BarChart3 }
   ];
+
+  const stats = getStats();
+  const customers = getCustomers();
 
   return (
     <main className="admin-page">
@@ -481,6 +484,65 @@ export default function AdminPage() {
                                 <Truck size={16} /> Expédier
                               </button>
                             )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'customers' && (
+          <div className="admin-content">
+            <div className="customers-list">
+              {customers.length === 0 ? (
+                <div className="empty-state">
+                  <Users size={48} />
+                  <p>Aucun client</p>
+                </div>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Email</th>
+                      <th>Commandes</th>
+                      <th>Total dépensé</th>
+                      <th>Dernière commande</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {customers.map(customer => (
+                      <tr key={customer.email}>
+                        <td className="customer-name">
+                          {customer.name}
+                        </td>
+                        <td>{customer.email}</td>
+                        <td>{customer.orderCount}</td>
+                        <td className="customer-spent">{customer.totalSpent.toFixed(2)} $</td>
+                        <td>{customer.lastOrder ? new Date(customer.lastOrder).toLocaleDateString('fr-CA') : '-'}</td>
+                        <td>
+                          <div className="customer-actions">
+                            <button 
+                              className="btn-icon"
+                              onClick={() => downloadInvoice(customer.orders[customer.orders.length - 1])}
+                              title="Dernière facture"
+                            >
+                              <DollarSign size={16} />
+                            </button>
+                            <button 
+                              className="btn-icon"
+                              onClick={() => {
+                                customer.orders.forEach(order => downloadInvoice(order));
+                              }}
+                              title="Toutes les factures"
+                            >
+                              <PackageIcon size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
