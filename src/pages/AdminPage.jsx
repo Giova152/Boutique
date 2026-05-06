@@ -13,7 +13,7 @@ export default function AdminPage() {
   const { isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);
   const {
-    products, promoCodes, orders, getStats, getCustomers, downloadInvoice,
+    products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
@@ -533,17 +533,17 @@ export default function AdminPage() {
                           <div className="customer-actions">
                             <button 
                               className="btn-icon"
-                              onClick={() => downloadInvoice(customer.orders[customer.orders.length - 1])}
-                              title="Dernière facture"
+                              onClick={() => downloadPDF(customer.orders[customer.orders.length - 1])}
+                              title="Dernière facture PDF"
                             >
                               <DollarSign size={16} />
                             </button>
                             <button 
                               className="btn-icon"
                               onClick={() => {
-                                customer.orders.forEach(order => downloadInvoice(order));
+                                customer.orders.forEach(order => downloadPDF(order));
                               }}
-                              title="Toutes les factures"
+                              title="Toutes les factures PDF"
                             >
                               <PackageIcon size={16} />
                             </button>

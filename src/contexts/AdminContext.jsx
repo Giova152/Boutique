@@ -170,78 +170,118 @@ export function AdminProvider({ children }) {
   };
 
   const generateInvoice = (order) => {
+    const itemsList = order.items?.map(item => `
+      <tr>
+        <td>${item.name}</td>
+        <td style="text-align:center">${item.quantity}</td>
+        <td style="text-align:right">${parseFloat(item.price).toFixed(2)} $</td>
+        <td style="text-align:right">${(parseFloat(item.price) * item.quantity).toFixed(2)} $</td>
+      </tr>
+    `).join('') || '';
+
     const invoiceHTML = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Facture ${order.id}</title>
+  <title>Facture ${order.id} - VEGEDERM</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
-    .company { font-size: 24px; font-weight: bold; color: #1d4e38; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #1d4e38; }
+    .logo { font-size: 32px; font-weight: bold; color: #1d4e38; }
+    .logo span { color: #c9a86c; }
     .invoice-info { text-align: right; }
-    .invoice-number { font-size: 18px; font-weight: bold; }
-    .invoice-date { color: #666; }
-    .customer { margin-bottom: 30px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+    .invoice-num { font-size: 20px; font-weight: bold; color: #1d4e38; }
+    .invoice-date { color: #666; margin-top: 5px; }
+    .invoice-status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 5px; }
+    .status-livrée { background: #28a745; color: white; }
+    .status-expéditée { background: #007bff; color: white; }
+    .status-validée { background: #ffc107; color: #333; }
+    .status-en-cours { background: #6c757d; color: white; }
+    .section { margin-bottom: 30px; }
+    .section-title { font-size: 14px; font-weight: bold; color: #1d4e38; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .client-box { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+    .client-name { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+    .client-info { color: #666; line-height: 1.8; }
     table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #1d4e38; color: white; }
-    .totals { text-align: right; margin-top: 20px; }
-    .total-row { font-size: 18px; font-weight: bold; }
-    .footer { margin-top: 40px; text-align: center; color: #666; font-size: 12px; }
+    th { background: #1d4e38; color: white; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; }
+    td { padding: 15px 12px; border-bottom: 1px solid #eee; }
+    .totals { margin-top: 30px; }
+    .totals-row { display: flex; justify-content: flex-end; padding: 8px 0; }
+    .totals-label { width: 150px; text-align: right; color: #666; }
+    .totals-value { width: 100px; text-align: right; font-weight: bold; }
+    .totals-row.total { border-top: 2px solid #1d4e38; padding-top: 12px; margin-top: 8px; }
+    .totals-row.total .totals-value { font-size: 18px; color: #1d4e38; }
+    .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px; }
+    .footer-contact { margin-bottom: 5px; }
+    @media print { body { padding: 20px; } }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="company">VEGEDERM</div>
+    <div class="logo">VEGE<span>DERM</span></div>
     <div class="invoice-info">
-      <div class="invoice-number">Facture ${order.id}</div>
-      <div class="invoice-date">Date: ${new Date(order.date).toLocaleDateString('fr-CA')}</div>
-      <div>Status: ${order.status}</div>
+      <div class="invoice-num">Facture #${order.id}</div>
+      <div class="invoice-date">Date: ${new Date(order.date).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+      <span class="invoice-status status-${order.status}">${order.status}</span>
     </div>
   </div>
   
-  <div class="customer">
-    <strong>Client:</strong><br>
-    ${order.customer?.firstName} ${order.customer?.lastName}<br>
-    ${order.customer?.email}<br>
-    ${order.customer?.phone}<br>
-    ${order.customer?.address}<br>
-    ${order.customer?.city}, ${order.customer?.province} ${order.customer?.postalCode}
+  <div class="section">
+    <div class="section-title">Informations Client</div>
+    <div class="client-box">
+      <div class="client-name">${order.customer?.firstName} ${order.customer?.lastName}</div>
+      <div class="client-info">
+        ${order.customer?.email}<br>
+        ${order.customer?.phone}<br>
+        ${order.customer?.address}<br>
+        ${order.customer?.city}, ${order.customer?.province} ${order.customer?.postalCode}
+      </div>
+    </div>
   </div>
   
-  <table>
-    <thead>
-      <tr>
-        <th>Produit</th>
-        <th>Qté</th>
-        <th>Prix</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${order.items?.map(item => `
+  <div class="section">
+    <div class="section-title">Produits</div>
+    <table>
+      <thead>
         <tr>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${parseFloat(item.price).toFixed(2)} $</td>
-          <td>${(parseFloat(item.price) * item.quantity).toFixed(2)} $</td>
+          <th>Produit</th>
+          <th style="text-align:center">Qté</th>
+          <th style="text-align:right">Prix</th>
+          <th style="text-align:right">Total</th>
         </tr>
-      `).join('')}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        ${itemsList}
+      </tbody>
+    </table>
+  </div>
   
   <div class="totals">
-    <div>Sous-total: ${parseFloat(order.subtotal).toFixed(2)} $</div>
-    ${order.discount > 0 ? `<div>Réduction: -${parseFloat(order.discount).toFixed(2)} $</div>` : ''}
-    <div>Livraison: ${parseFloat(order.shipping).toFixed(2)} $</div>
-    <div class="total-row">Total: ${parseFloat(order.total).toFixed(2)} $</div>
+    <div class="totals-row">
+      <div class="totals-label">Sous-total:</div>
+      <div class="totals-value">${parseFloat(order.subtotal || 0).toFixed(2)} $</div>
+    </div>
+    ${order.discount > 0 ? `
+    <div class="totals-row">
+      <div class="totals-label">Réduction:</div>
+      <div class="totals-value" style="color:#28a745">-${parseFloat(order.discount).toFixed(2)} $</div>
+    </div>` : ''}
+    <div class="totals-row">
+      <div class="totals-label">Livraison:</div>
+      <div class="totals-value">${parseFloat(order.shipping || 0).toFixed(2)} $</div>
+    </div>
+    <div class="totals-row total">
+      <div class="totals-label">Total:</div>
+      <div class="totals-value">${parseFloat(order.total || 0).toFixed(2)} $</div>
+    </div>
   </div>
   
   <div class="footer">
-    <p>VEGEDERM - Cosmétiques Naturels & Bio</p>
-    <p>zoumcosmo@gmail.com</p>
+    <div class="footer-contact">VEGEDERM - Cosmétiques Naturels & Bio</div>
+    <div class="footer-contact">zoumcosmo@gmail.com | +1 514-264-5963</div>
+    <div>Merci pour votre confiance!</div>
   </div>
 </body>
 </html>
@@ -258,6 +298,14 @@ export function AdminProvider({ children }) {
     a.download = `facture-${order.id}.html`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const downloadPDF = (order) => {
+    const invoiceHTML = generateInvoice(order);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(invoiceHTML);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   return (
