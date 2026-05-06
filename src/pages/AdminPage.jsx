@@ -448,8 +448,10 @@ export default function AdminPage() {
                 <table>
                   <thead>
                     <tr>
+                      <th>Date</th>
                       <th>Commande</th>
                       <th>Client</th>
+                      <th>Produits</th>
                       <th>Total</th>
                       <th>Status</th>
                       <th>Actions</th>
@@ -458,9 +460,11 @@ export default function AdminPage() {
                   <tbody>
                     {orders.filter(o => orderFilter === 'all' || o.status === orderFilter).map(order => (
                       <tr key={order.id}>
+                        <td>{order.date ? new Date(order.date).toLocaleDateString('fr-CA') : '-'}</td>
                         <td>{order.id}</td>
-                        <td>{order.customer?.firstName} {order.customer?.lastName}</td>
-                        <td>{order.total?.toFixed(2)} $</td>
+                        <td>{order.customer?.firstName} {order.customer?.lastName}<br/><small>{order.customer?.email}</small></td>
+                        <td>{order.items?.length || 0} produit(s)</td>
+                        <td>{parseFloat(order.total).toFixed(2)} $</td>
                         <td>
                           <span className={`status-badge ${order.status}`}>
                             {order.status}
