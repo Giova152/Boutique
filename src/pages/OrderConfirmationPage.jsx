@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Loader2, CheckCircle, AlertCircle, Package } from 'lucide-react';
-import { paymentConfig } from '../../data/paymentConfig';
-import { useCart } from '../../contexts/CartContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { useAdmin } from '../../contexts/AdminContext';
-import { sendOrderEmail } from '../../services/emailService';
+import { paymentConfig } from '../data/paymentConfig';
+import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
+import { sendOrderEmail } from '../services/emailService';
 
 const stripePromise = loadStripe(paymentConfig.stripe.publishableKey);
 
