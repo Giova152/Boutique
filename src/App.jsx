@@ -23,6 +23,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import AdminPage from './pages/AdminPage';
 import './components/payment/LegalStyles.css';
 import './components/admin/AdminStyles.css';
+import './components/profile/ProfileStyles.css';
 import './App.css';
 
 function AppContent() {
