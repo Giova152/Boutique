@@ -1,10 +1,27 @@
 export const dynamic = 'force-dynamic';
 
-export async function GET(request) {
-  return new Response('Stripe API is running', { status: 200 });
+export function fetch(request) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
+
+  if (request.method === 'GET') {
+    return new Response('Stripe API is running', { status: 200 });
+  }
+
+  if (request.method === 'POST') {
+    return handlePost(request);
+  }
+
+  return new Response('Method not allowed', { status: 405 });
 }
 
-export async function POST(request) {
+async function handlePost(request) {
   try {
     const body = await request.json();
     const { amount, email } = body;
@@ -15,7 +32,7 @@ export async function POST(request) {
 
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) {
-      return new Response(JSON.stringify({ error: 'Stripe not configured on server' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Stripe not configured' }), { status: 500 });
     }
 
     const stripeRes = await fetch('https://api.stripe.com/v1/payment_intents', {
