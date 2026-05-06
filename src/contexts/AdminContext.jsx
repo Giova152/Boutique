@@ -17,7 +17,67 @@ export function AdminProvider({ children }) {
 
   const [orders, setOrders] = useState(() => {
     const saved = localStorage.getItem('vegederm_orders');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) return JSON.parse(saved);
+    
+    return [
+      {
+        id: 'CMD-1746512000001',
+        date: '2026-05-01T10:00:00.000Z',
+        status: 'livrée',
+        customer: { firstName: 'Marie', lastName: 'Dupont', email: 'marie.dupont@email.com', phone: '+1 514-111-1111', address: '123 Rue Principale', city: 'Montréal', province: 'Québec', postalCode: 'H2X 1A1' },
+        items: [
+          { id: 1, name: 'Crème Hydratante Lumineuse', price: 48.99, quantity: 2 },
+          { id: 2, name: 'Sérum Vitaminé Éclat', price: 62.99, quantity: 1 }
+        ],
+        subtotal: 160.97,
+        discount: 0,
+        shipping: 9.99,
+        total: 170.96
+      },
+      {
+        id: 'CMD-1746512000002',
+        date: '2026-05-03T14:30:00.000Z',
+        status: 'expéditée',
+        shippedAt: '2026-05-05T09:00:00.000Z',
+        customer: { firstName: 'Jean', lastName: 'Martin', email: 'jean.martin@email.com', phone: '+1 514-222-2222', address: '456 Avenue des Pins', city: 'Québec', province: 'Québec', postalCode: 'G1R 4P7' },
+        items: [
+          { id: 1, name: 'Beurre de Karité Brut', price: 35.00, quantity: 3 },
+          { id: 3, name: 'Gel Nettoyant Doux', price: 28.99, quantity: 2 }
+        ],
+        subtotal: 164.97,
+        discount: 16.50,
+        shipping: 0,
+        total: 148.47
+      },
+      {
+        id: 'CMD-1746512000003',
+        date: '2026-05-05T16:00:00.000Z',
+        status: 'validée',
+        customer: { firstName: 'Sophie', lastName: 'Lessard', email: 'sophie.lessard@email.com', phone: '+1 514-333-3333', address: '789 Boulevard Saint-Laurent', city: 'Laval', province: 'Québec', postalCode: 'H7M 2Y9' },
+        items: [
+          { id: 5, name: 'Masque Argile Purifiant', price: 34.99, quantity: 4 },
+          { id: 7, name: 'Crème Anti-Âge', price: 55.00, quantity: 1 }
+        ],
+        subtotal: 194.96,
+        discount: 0,
+        shipping: 9.99,
+        total: 204.95
+      },
+      {
+        id: 'CMD-1746512000004',
+        date: '2026-05-06T09:00:00.000Z',
+        status: 'en cours',
+        customer: { firstName: 'Pierre', lastName: 'Gagnon', email: 'pierre.gagnon@email.com', phone: '+1 514-444-4444', address: '321 Rue Saint-Jean', city: 'Longueuil', province: 'Québec', postalCode: 'J4K 3P8' },
+        items: [
+          { id: 2, name: 'Sérum Vitaminé Éclat', price: 62.99, quantity: 2 },
+          { id: 4, name: 'Crème Hydratante Lumineuse', price: 48.99, quantity: 1 }
+        ],
+        subtotal: 174.97,
+        discount: 17.50,
+        shipping: 9.99,
+        total: 167.46
+      }
+    ];
   });
 
   const [stats, setStats] = useState(() => {
