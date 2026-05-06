@@ -1,198 +1,121 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { products as initialProducts } from '../data/products';
-import { promoCodes as initialPromoCodes } from '../data/config';
+import { supabase } from '../lib/supabase';
 
 const AdminContext = createContext();
 
 export function AdminProvider({ children }) {
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('vegederm_products');
-    return saved ? JSON.parse(saved) : initialProducts;
-  });
-
-  const [promoCodes, setPromoCodes] = useState(() => {
-    const saved = localStorage.getItem('vegederm_promos');
-    return saved ? JSON.parse(saved) : initialPromoCodes;
-  });
-
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('vegederm_orders');
-    if (saved) return JSON.parse(saved);
-    
-    return [
-      {
-        id: 'CMD-1746512000001',
-        date: '2026-05-01T10:00:00.000Z',
-        status: 'livrée',
-        customer: { firstName: 'Marie', lastName: 'Dupont', email: 'marie.dupont@email.com', phone: '+1 514-111-1111', address: '123 Rue Principale', city: 'Montréal', province: 'Québec', postalCode: 'H2X 1A1' },
-        items: [
-          { id: 1, name: 'Crème Hydratante Lumineuse', price: 48.99, quantity: 2 },
-          { id: 2, name: 'Sérum Vitaminé Éclat', price: 62.99, quantity: 1 }
-        ],
-        subtotal: 160.97,
-        discount: 0,
-        shipping: 9.99,
-        total: 170.96
-      },
-      {
-        id: 'CMD-1746512000002',
-        date: '2026-05-03T14:30:00.000Z',
-        status: 'expéditée',
-        shippedAt: '2026-05-05T09:00:00.000Z',
-        customer: { firstName: 'Jean', lastName: 'Martin', email: 'jean.martin@email.com', phone: '+1 514-222-2222', address: '456 Avenue des Pins', city: 'Québec', province: 'Québec', postalCode: 'G1R 4P7' },
-        items: [
-          { id: 1, name: 'Beurre de Karité Brut', price: 35.00, quantity: 3 },
-          { id: 3, name: 'Gel Nettoyant Doux', price: 28.99, quantity: 2 }
-        ],
-        subtotal: 164.97,
-        discount: 16.50,
-        shipping: 0,
-        total: 148.47
-      },
-      {
-        id: 'CMD-1746512000003',
-        date: '2026-05-05T16:00:00.000Z',
-        status: 'validée',
-        customer: { firstName: 'Sophie', lastName: 'Lessard', email: 'sophie.lessard@email.com', phone: '+1 514-333-3333', address: '789 Boulevard Saint-Laurent', city: 'Laval', province: 'Québec', postalCode: 'H7M 2Y9' },
-        items: [
-          { id: 5, name: 'Masque Argile Purifiant', price: 34.99, quantity: 4 },
-          { id: 7, name: 'Crème Anti-Âge', price: 55.00, quantity: 1 }
-        ],
-        subtotal: 194.96,
-        discount: 0,
-        shipping: 9.99,
-        total: 204.95
-      },
-      {
-        id: 'CMD-1746512000004',
-        date: '2026-05-06T09:00:00.000Z',
-        status: 'en cours',
-        customer: { firstName: 'Pierre', lastName: 'Gagnon', email: 'pierre.gagnon@email.com', phone: '+1 514-444-4444', address: '321 Rue Saint-Jean', city: 'Longueuil', province: 'Québec', postalCode: 'J4K 3P8' },
-        items: [
-          { id: 2, name: 'Sérum Vitaminé Éclat', price: 62.99, quantity: 2 },
-          { id: 4, name: 'Crème Hydratante Lumineuse', price: 48.99, quantity: 1 }
-        ],
-        subtotal: 174.97,
-        discount: 17.50,
-        shipping: 9.99,
-        total: 167.46
-      }
-    ];
-  });
-
-  const [stats, setStats] = useState(() => {
-    const saved = localStorage.getItem('vegederm_stats');
-    return saved ? JSON.parse(saved) : { visits: [], dailyVisits: {} };
-  });
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [promoCodes, setPromoCodes] = useState({});
+  const [stats, setStats] = useState({ visits: [], dailyVisits: {} });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setOrders(prev => prev.map(o => {
-        if (o.status === 'expéditée' && o.shippedAt) {
-          const shippedDate = new Date(o.shippedAt);
-          const now = new Date();
-          const hoursSinceShipped = Math.floor((now - shippedDate) / (1000 * 60 * 60));
-          if (hoursSinceShipped >= 24) {
-            return { ...o, status: 'livrée' };
-          }
-        }
-        return o;
-      }));
-    }, 60000);
-    return () => clearInterval(interval);
+    loadData();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('vegederm_products', JSON.stringify(products));
-  }, [products]);
+  async function loadData() {
+    try {
+      const [productsRes, ordersRes, promoRes, statsRes] = await Promise.all([
+        supabase.from('products').select('*'),
+        supabase.from('orders').select('*').order('date', { ascending: false }),
+        supabase.from('promo_codes').select('*'),
+        supabase.from('stats').select('*').eq('id', 1).single()
+      ]);
 
-  useEffect(() => {
-    localStorage.setItem('vegederm_promos', JSON.stringify(promoCodes));
-  }, [promoCodes]);
+      if (productsRes.data) setProducts(productsRes.data);
+      if (ordersRes.data) setOrders(ordersRes.data);
+      if (promoRes.data) {
+        const codes = {};
+        promoRes.data.forEach(p => codes[p.code] = p);
+        setPromoCodes(codes);
+      }
+      if (statsRes.data) setStats(statsRes.data);
+    } catch (err) {
+      console.error('Erreur chargement:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  useEffect(() => {
-    localStorage.setItem('vegederm_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem('vegederm_stats', JSON.stringify(stats));
-  }, [stats]);
-
-  const addProduct = (product) => {
-    const newProduct = { ...product, id: Date.now() };
-    setProducts(prev => [...prev, newProduct]);
+  const addProduct = async (product) => {
+    const newProduct = { ...product, created_at: new Date().toISOString() };
+    const { data, error } = await supabase.from('products').insert([newProduct]).select();
+    if (!error && data) {
+      setProducts(prev => [...prev, data[0]]);
+    }
+    return { success: !error };
   };
 
-  const updateProduct = (id, updates) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const updateProduct = async (id, updates) => {
+    const { error } = await supabase.from('products').update(updates).eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    }
   };
 
-  const deleteProduct = (id) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  const deleteProduct = async (id) => {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.filter(p => p.id !== id));
+    }
   };
 
-  const updateStock = (id, quantity) => {
-    setProducts(prev => prev.map(p => 
-      p.id === id ? { ...p, inStock: Math.max(0, quantity) } : p
-    ));
+  const updateStock = async (id, inStock) => {
+    await supabase.from('products').update({ in_stock: inStock }).eq('id', id);
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, in_stock: inStock } : p));
   };
 
-  const addPromoCode = (code, type, value, description) => {
-    setPromoCodes(prev => ({
-      ...prev,
-      [code]: { type, value, description }
-    }));
+  const addPromoCode = async (code, type, value, description) => {
+    const { error } = await supabase.from('promo_codes').insert([{ code, type, value, description }]);
+    if (!error) {
+      setPromoCodes(prev => ({ ...prev, [code]: { code, type, value, description } }));
+    }
   };
 
-  const deletePromoCode = (code) => {
-    setPromoCodes(prev => {
-      const newCodes = { ...prev };
+  const deletePromoCode = async (code) => {
+    const { error } = await supabase.from('promo_codes').delete().eq('code', code);
+    if (!error) {
+      const newCodes = { ...promoCodes };
       delete newCodes[code];
-      return newCodes;
-    });
-};
-
-  const updateOrderStatus = (orderId, status) => {
-    setOrders(prev => prev.map(o => {
-      if (o.id === orderId) {
-        const updated = { ...o, status };
-        if (status === 'expéditée') {
-          updated.shippedAt = new Date().toISOString();
-        }
-        if (status === 'livrée') {
-          updated.deliveredAt = new Date().toISOString();
-        }
-        return updated;
-      }
-      return o;
-    }));
+      setPromoCodes(newCodes);
+    }
   };
 
-  const confirmDelivery = (orderId) => {
-    setOrders(prev => prev.map(o => 
-      o.id === orderId ? { ...o, status: 'livrée', deliveredAt: new Date().toISOString() } : o
-    ));
+  const addOrder = async (order) => {
+    const newOrder = { ...order, created_at: new Date().toISOString() };
+    const { data, error } = await supabase.from('orders').insert([newOrder]).select();
+    if (!error && data) {
+      setOrders(prev => [data[0], ...prev]);
+    }
   };
 
-  const addOrder = (order) => {
-    setOrders(prev => [{
-      ...order,
-      id: `CMD-${Date.now()}`,
-      date: new Date().toISOString(),
-      status: 'en cours'
-    }, ...prev]);
+  const updateOrderStatus = async (orderId, status) => {
+    const updates = { status };
+    if (status === 'expéditée') updates.shipped_at = new Date().toISOString();
+    if (status === 'livrée') updates.delivered_at = new Date().toISOString();
+    
+    const { error } = await supabase.from('orders').update(updates).eq('id', orderId);
+    if (!error) {
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
+    }
   };
 
-  const recordVisit = () => {
+  const recordVisit = async () => {
     const today = new Date().toISOString().split('T')[0];
-    setStats(prev => ({
-      ...prev,
-      visits: [...(prev.visits || []), new Date().toISOString()],
-      dailyVisits: {
-        ...prev.dailyVisits,
-        [today]: (prev.dailyVisits[today] || 0) + 1
-      }
-    }));
+    const currentStats = stats;
+    const newVisits = [...(currentStats.visits || []), new Date().toISOString()];
+    const newDailyVisits = {
+      ...(currentStats.daily_visits || {}),
+      [today]: (currentStats.daily_visits?.[today] || 0) + 1
+    };
+    
+    await supabase.from('stats').update({
+      visits: newVisits,
+      daily_visits: newDailyVisits
+    }).eq('id', 1);
+    
+    setStats({ ...currentStats, visits: newVisits, daily_visits: newDailyVisits });
   };
 
   const getStats = () => {
@@ -200,7 +123,7 @@ export function AdminProvider({ children }) {
     const thisMonth = new Date().toISOString().slice(0, 7);
     
     const visits = stats.visits || [];
-    const dailyVisits = stats.dailyVisits || {};
+    const dailyVisits = stats.daily_visits || {};
     
     const todayVisits = dailyVisits[today] || 0;
     const monthVisits = Object.entries(dailyVisits)
@@ -211,7 +134,7 @@ export function AdminProvider({ children }) {
     const totalOrders = orders.length;
     const totalRevenue = orders
       .filter(o => o.status !== 'en cours')
-      .reduce((sum, o) => sum + (o.total || 0), 0);
+      .reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
     
     return { todayVisits, monthVisits, totalVisits, totalOrders, totalRevenue };
   };
@@ -236,7 +159,7 @@ export function AdminProvider({ children }) {
           };
         }
         customerMap[email].orders.push(order);
-        customerMap[email].totalSpent += order.total || 0;
+        customerMap[email].totalSpent += parseFloat(order.total) || 0;
         customerMap[email].orderCount += 1;
         if (!customerMap[email].lastOrder || new Date(order.date) > new Date(customerMap[email].lastOrder)) {
           customerMap[email].lastOrder = order.date;
@@ -302,18 +225,18 @@ export function AdminProvider({ children }) {
         <tr>
           <td>${item.name}</td>
           <td>${item.quantity}</td>
-          <td>${item.price.toFixed(2)} $</td>
-          <td>${(item.price * item.quantity).toFixed(2)} $</td>
+          <td>${parseFloat(item.price).toFixed(2)} $</td>
+          <td>${(parseFloat(item.price) * item.quantity).toFixed(2)} $</td>
         </tr>
       `).join('')}
     </tbody>
   </table>
   
   <div class="totals">
-    <div>Sous-total: ${order.subtotal?.toFixed(2)} $</div>
-    ${order.discount > 0 ? `<div>Réduction: -${order.discount.toFixed(2)} $</div>` : ''}
-    <div>Livraison: ${order.shipping?.toFixed(2)} $</div>
-    <div class="total-row">Total: ${order.total?.toFixed(2)} $</div>
+    <div>Sous-total: ${parseFloat(order.subtotal).toFixed(2)} $</div>
+    ${order.discount > 0 ? `<div>Réduction: -${parseFloat(order.discount).toFixed(2)} $</div>` : ''}
+    <div>Livraison: ${parseFloat(order.shipping).toFixed(2)} $</div>
+    <div class="total-row">Total: ${parseFloat(order.total).toFixed(2)} $</div>
   </div>
   
   <div class="footer">
@@ -340,9 +263,10 @@ export function AdminProvider({ children }) {
   return (
     <AdminContext.Provider value={{
       products,
-      promoCodes,
       orders,
+      promoCodes,
       stats,
+      loading,
       getCustomers,
       generateInvoice,
       downloadInvoice,
@@ -352,9 +276,8 @@ export function AdminProvider({ children }) {
       updateStock,
       addPromoCode,
       deletePromoCode,
-      updateOrderStatus,
-      confirmDelivery,
       addOrder,
+      updateOrderStatus,
       recordVisit,
       getStats
     }}>
