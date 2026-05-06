@@ -73,6 +73,13 @@ export default function PaymentMethods({
       onPaymentSuccess();
       return;
     }
+
+    const orderData = {
+      items: cartItems,
+      customer: { email: customerEmail },
+      timestamp: Date.now()
+    };
+    localStorage.setItem('pendingOrder', JSON.stringify(orderData));
     
     setIsProcessing(true);
     setError('');
