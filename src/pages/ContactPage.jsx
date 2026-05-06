@@ -2,13 +2,30 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { storeConfig } from '../data/config';
+import { sanitizeInput, validateEmail } from '../utils/validation';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: sanitizeInput(value) });
+    if (errors[name]) setErrors({ ...errors, [name]: null });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (formData.name.length < 2) newErrors.name = 'Nom invalide';
+    if (!validateEmail(formData.email)) newErrors.email = 'Email invalide';
+    if (formData.message.length < 10) newErrors.message = 'Message trop court';
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     setSubmitted(true);
   };
 
@@ -101,31 +118,40 @@ export default function ContactPage() {
                       <label>Nom complet</label>
                       <input 
                         type="text" 
+                        name="name"
                         value={formData.name} 
-                        onChange={e => setFormData({...formData, name: e.target.value})} 
+                        onChange={handleChange}
                         required 
                         placeholder="Votre nom"
+                        className={errors.name ? 'error' : ''}
                       />
+                      {errors.name && <span className="error-text">{errors.name}</span>}
                     </div>
                     <div className="form-group">
                       <label>Email</label>
                       <input 
                         type="email" 
+                        name="email"
                         value={formData.email} 
-                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                        onChange={handleChange}
                         required 
                         placeholder="votre@email.com"
+                        className={errors.email ? 'error' : ''}
                       />
+                      {errors.email && <span className="error-text">{errors.email}</span>}
                     </div>
                     <div className="form-group">
                       <label>Message</label>
                       <textarea 
+                        name="message"
                         rows={5} 
                         value={formData.message} 
-                        onChange={e => setFormData({...formData, message: e.target.value})} 
+                        onChange={handleChange}
                         required 
                         placeholder="Comment pouvons-nous vous aider?"
+                        className={errors.message ? 'error' : ''}
                       />
+                      {errors.message && <span className="error-text">{errors.message}</span>}
                     </div>
                     <button type="submit" className="btn-primary btn-submit">
                       <Send size={18} /> Envoyer le message

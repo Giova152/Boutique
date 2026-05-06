@@ -7,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAdmin } from '../contexts/AdminContext';
 import { getTranslation } from '../data/translations';
 import { sendOrderEmail } from '../services/emailService';
+import { validateCheckoutForm, sanitizeInput } from '../utils/validation';
 import PaymentMethods from '../components/payment/PaymentMethods';
 import '../components/payment/PaymentMethods.css';
 import '../components/payment/CheckoutStyles.css';
@@ -21,6 +22,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.name?.split(' ')[0] || '',
@@ -37,7 +39,18 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('stripe');
 
   const handleShippingChange = (e) => {
-    setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const sanitized = name === 'email' ? value : sanitizeInput(value);
+    setShippingInfo({ ...shippingInfo, [name]: sanitized });
+    if (formErrors[name]) {
+      setFormErrors({ ...formErrors, [name]: null });
+    }
+  };
+
+  const validateStep1 = () => {
+    const validation = validateCheckoutForm(shippingInfo);
+    setFormErrors(validation.errors);
+    return validation.isValid;
   };
 
   const handlePaymentSuccess = () => {
@@ -119,9 +132,20 @@ export default function CheckoutPage() {
               <div className="form-step">
                 <h2>{t('shippingInfo')}</h2>
                 <div className="form-grid">
-                  <div className="form-group">
+<div className="form-group">
                     <label>Prénom</label>
-                    <input type="text" name="firstName" value={shippingInfo.firstName} onChange={handleShippingChange} />
+                    <input type="text" name="firstName" value={shippingInfo.firstName} onChange={handleShippingChange} className={formErrors.firstName ? 'error' : ''} />
+                    {formErrors.firstName && <span className="error-text">{formErrors.firstName}</span>}
+                  </div>
+                  <div className="form-group">
+                    <label>Nom</label>
+                    <input type="text" name="lastName" value={shippingInfo.lastName} onChange={handleShippingChange} className={formErrors.lastName ? 'error' : ''} />
+                    {formErrors.lastName && <span className="error-text">{formErrors.lastName}</span>}
+                  </div>
+                  <div className="form-group full">
+                    <label>Email</label>
+                    <input type="email" name="email" value={shippingInfo.email} onChange={handleShippingChange} className={formErrors.email ? 'error' : ''} />
+                    {formErrors.email && <span className="error-text">{formErrors.email}</span>}
                   </div>
                   <div className="form-group">
                     <label>Nom</label>
@@ -135,9 +159,15 @@ export default function CheckoutPage() {
                     <label>Adresse</label>
                     <input type="text" name="address" value={shippingInfo.address} onChange={handleShippingChange} />
                   </div>
+<div className="form-group">
+                    <label>Adresse</label>
+                    <input type="text" name="address" value={shippingInfo.address} onChange={handleShippingChange} className={formErrors.address ? 'error' : ''} />
+                    {formErrors.address && <span className="error-text">{formErrors.address}</span>}
+                  </div>
                   <div className="form-group">
                     <label>Ville</label>
-                    <input type="text" name="city" value={shippingInfo.city} onChange={handleShippingChange} />
+                    <input type="text" name="city" value={shippingInfo.city} onChange={handleShippingChange} className={formErrors.city ? 'error' : ''} />
+                    {formErrors.city && <span className="error-text">{formErrors.city}</span>}
                   </div>
                   <div className="form-group">
                     <label>Province</label>
@@ -150,14 +180,16 @@ export default function CheckoutPage() {
                   </div>
                   <div className="form-group">
                     <label>Code postal</label>
-                    <input type="text" name="postalCode" value={shippingInfo.postalCode} onChange={handleShippingChange} />
+                    <input type="text" name="postalCode" value={shippingInfo.postalCode} onChange={handleShippingChange} className={formErrors.postalCode ? 'error' : ''} placeholder="H1H 1H1" />
+                    {formErrors.postalCode && <span className="error-text">{formErrors.postalCode}</span>}
                   </div>
                   <div className="form-group">
                     <label>Téléphone</label>
-                    <input type="tel" name="phone" value={shippingInfo.phone} onChange={handleShippingChange} />
+                    <input type="tel" name="phone" value={shippingInfo.phone} onChange={handleShippingChange} className={formErrors.phone ? 'error' : ''} placeholder="514-123-4567" />
+                    {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                   </div>
                 </div>
-                <button className="btn-primary" onClick={() => setStep(2)}>Continuer</button>
+                <button className="btn-primary" onClick={() => validateStep1() && setStep(2)}>Continuer</button>
               </div>
             )}
 

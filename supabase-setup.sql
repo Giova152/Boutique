@@ -60,16 +60,26 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stats ENABLE ROW LEVEL SECURITY;
 
--- Politique d'accès public
+-- Politique d'accès public (lecture seule)
 CREATE POLICY "Tout le monde peut lire products" ON products FOR SELECT USING (true);
 CREATE POLICY "Tout le monde peut lire orders" ON orders FOR SELECT USING (true);
 CREATE POLICY "Tout le monde peut lire promo_codes" ON promo_codes FOR SELECT USING (true);
 CREATE POLICY "Tout le monde peut lire stats" ON stats FOR SELECT USING (true);
 
-CREATE POLICY "Admin peut modifier products" ON products FOR ALL USING (true);
-CREATE POLICY "Admin peut modifier orders" ON orders FOR ALL USING (true);
-CREATE POLICY "Admin peut modifier promo_codes" ON promo_codes FOR ALL USING (true);
-CREATE POLICY "Admin peut modifier stats" ON stats FOR ALL USING (true);
+-- Politique admin stricte (admins peuvent modifier)
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM auth.users 
+    WHERE id = auth.uid() 
+    AND email IN ('zoumcosmo@gmail.com', 'midogiova@gmail.com')
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE POLICY "Admin peut modifier products" ON products FOR ALL USING (is_admin());
+CREATE POLICY "Admin peut modifier orders" ON orders FOR ALL USING (is_admin());
+CREATE POLICY "Admin peut modifier promo_codes" ON promo_codes FOR ALL USING (is_admin());
+CREATE POLICY "Admin peut modifier stats" ON stats FOR ALL USING (is_admin());
 
 -- Insérer données initiales
 INSERT INTO stats (id) VALUES (1);

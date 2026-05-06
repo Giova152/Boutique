@@ -22,6 +22,7 @@ import ContactPage from './pages/ContactPage';
 import CGVPage from './pages/CGVPage';
 import PrivacyPage from './pages/PrivacyPage';
 import AdminPage from './pages/AdminPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 import './components/payment/LegalStyles.css';
 import './components/admin/AdminStyles.css';
 import './components/profile/ProfileStyles.css';
@@ -46,6 +47,7 @@ function AppContent() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/cgv" element={<CGVPage />} />
         <Route path="/confidentialite" element={<PrivacyPage />} />
+        <Route path="/admin-login" element={<AdminLoginPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <Footer />

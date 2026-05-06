@@ -13,8 +13,8 @@ export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);
 
-  const ADMIN_EMAIL = 'zoumcosmo@gmail.com';
-  const isAdmin = user?.email === ADMIN_EMAIL || user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
+  const isAdmin = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
@@ -31,7 +31,7 @@ export default function AdminPage() {
               <p className="login-subtitle">
                 Vous devez être connecté en tant qu'administrateur pour accéder à cette page.
               </p>
-              <Link to="/login" className="btn-primary">Se connecter</Link>
+              <Link to="/admin-login" className="btn-primary">Connexion Admin</Link>
             </div>
           </div>
         </div>
