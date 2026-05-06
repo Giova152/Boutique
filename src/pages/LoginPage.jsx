@@ -19,28 +19,32 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (mode === 'register') {
-      const result = register(formData.name, formData.email, formData.password);
-      if (result.success) {
-        addToast('Compte créé avec succès ! Bienvenue chez ' + storeConfig.name, 'success');
-        navigate('/profile');
+    try {
+      if (mode === 'register') {
+        const result = await register(formData.name, formData.email, formData.password);
+        if (result.success) {
+          addToast('Compte créé ! Veuillez confirmer votre email.', 'success');
+          navigate('/profile');
+        } else {
+          addToast(result.message || 'Erreur lors de l\'inscription', 'error');
+        }
+      } else if (mode === 'login') {
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          addToast('Connexion réussie !', 'success');
+          navigate('/profile');
+        } else {
+          addToast(result.message || 'Email ou mot de passe incorrect', 'error');
+        }
+      } else if (mode === 'forgot') {
+        addToast('Un lien de réinitialisation a été envoyé à ' + formData.email, 'success');
+        setMode('login');
       }
-    } else if (mode === 'login') {
-      const result = login(formData.email, formData.password);
-      if (result.success) {
-        addToast('Connexion réussie !', 'success');
-        navigate('/profile');
-      } else {
-        addToast('Email ou mot de passe incorrect', 'error');
-      }
-    } else if (mode === 'forgot') {
-      addToast('Un lien de réinitialisation a été envoyé à ' + formData.email, 'success');
-      setMode('login');
+    } catch (err) {
+      addToast('Une erreur est survenue', 'error');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const switchMode = (newMode) => {
