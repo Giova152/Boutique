@@ -1,9 +1,9 @@
 export const paymentConfig = {
   stripe: {
-    publishableKey: '', // Ajouter ta clé Stripe publique ici
+    publishableKey: 'pk_live_51OwDrqHquq8rN1FFAHgsqOmSrwDxELKD2oI6eJxEGUsgqTrAh7g2GwGdfwRbTZgcVpFWl0gRon5MnNdR8pcVMPrz00agnh640A',
   },
   paypal: {
-    clientId: '', // Ajouter ton client PayPal ici
+    clientId: ''
   }
 };
 
