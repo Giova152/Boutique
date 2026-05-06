@@ -10,13 +10,34 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);
-  const {
-    products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
+
+  const ADMIN_EMAIL = 'zoumcosmo@gmail.com';
+  const isAdmin = user?.email === ADMIN_EMAIL || user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+  const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
+
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <main className="login-page">
+        <div className="container">
+          <div className="login-container">
+            <div className="login-header-section">
+              <h1>Accès refusé</h1>
+              <p className="login-subtitle">
+                Vous devez être connecté en tant qu'administrateur pour accéder à cette page.
+              </p>
+              <Link to="/login" className="btn-primary">Se connecter</Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const [activeTab, setActiveTab] = useState('products');
   const [searchTerm, setSearchTerm] = useState('');
