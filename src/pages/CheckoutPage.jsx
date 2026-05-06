@@ -198,6 +198,8 @@ export default function CheckoutPage() {
                   onPaymentSuccess={handlePaymentSuccess}
                   isProcessing={isProcessing}
                   setIsProcessing={setIsProcessing}
+                  cartItems={cart}
+                  customerEmail={shippingInfo.email}
                 />
                 <div className="form-buttons">
                   <button className="btn-secondary" onClick={() => setStep(2)} disabled={isProcessing}>Retour</button>

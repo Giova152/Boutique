@@ -1,12 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { CreditCard, Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { paymentConfig } from '../../data/paymentConfig';
 
-const stripePromise = paymentConfig.stripe.publishableKey 
-  ? loadStripe(paymentConfig.stripe.publishableKey)
-  : null;
+const stripePromise = loadStripe(paymentConfig.stripe.publishableKey);
 
 export default function PaymentMethods({ 
   total, 
@@ -14,139 +11,165 @@ export default function PaymentMethods({
   onPaymentMethodChange, 
   onPaymentSuccess,
   isProcessing,
-  setIsProcessing
+  setIsProcessing,
+  cartItems = [],
+  customerEmail = ''
 }) {
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
+  const [error, setError] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [stripe, setStripe] = useState(null);
+  const [elements, setElements] = useState(null);
 
-  const handleStripeSubmit = async (e) => {
+  const isStripeConfigured = paymentConfig.stripe.publishableKey?.startsWith('pk_live');
+
+  useEffect(() => {
+    if (!total || total <= 0 || !isStripeConfigured) return;
+    
+    const initStripe = async () => {
+      try {
+        const stripeInstance = await stripePromise;
+        if (!stripeInstance) return;
+        setStripe(stripeInstance);
+
+        const response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            email: customerEmail
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+          
+          const elementsInstance = stripeInstance.elements({
+            clientSecret: data.clientSecret,
+            appearance: {
+              theme: 'stripe',
+              variables: { colorPrimary: '#2d5a27' },
+            },
+          });
+          
+          setElements(elementsInstance);
+          
+          const paymentEl = elementsInstance.create('payment');
+          paymentEl.mount('#payment-element');
+        }
+      } catch (err) {
+        console.error('Init error:', err);
+      }
+    };
+    
+    initStripe();
+  }, [total, customerEmail, isStripeConfigured]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripePromise) {
+    
+    if (!stripe || !clientSecret) {
       onPaymentSuccess();
       return;
     }
     
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      onPaymentSuccess();
-    }, 1500);
-  };
+    setError('');
 
-  const handlePayPalApprove = async (data, actions) => {
-    setIsProcessing(true);
     try {
-      await actions.order.capture();
-      setIsProcessing(false);
+      const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '/order-confirmation',
+        },
+        redirect: 'if_required',
+      });
+
+      if (confirmError) {
+        setError(confirmError.message);
+        setIsProcessing(false);
+        return;
+      }
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        onPaymentSuccess();
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
       onPaymentSuccess();
-    } catch (error) {
+    } finally {
       setIsProcessing(false);
-      console.error('PayPal error:', error);
     }
   };
 
-  const isStripeConfigured = paymentConfig.stripe.publishableKey !== '';
-  const isPayPalConfigured = paymentConfig.paypal.clientId !== '';
+  if (paymentMethod === 'paypal') {
+    return (
+      <div className="payment-methods">
+        <h2>Moyen de paiement</h2>
+        <p className="payment-note payment-note-demo">
+          <AlertCircle size={14} /> PayPal non configuré. Utilisez Stripe.
+        </p>
+        <button 
+          type="button" 
+          className="btn-primary"
+          onClick={() => onPaymentMethodChange('stripe')}
+        >
+          Passer à Stripe
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="payment-methods">
       <h2>Moyen de paiement</h2>
       
       <div className="payment-options">
-        <label className={`payment-option ${paymentMethod === 'stripe' ? 'selected' : ''}`}>
-          <input 
-            type="radio" 
-            name="payment" 
-            checked={paymentMethod === 'stripe'} 
-            onChange={() => onPaymentMethodChange('stripe')}
-          />
+        <label className="payment-option selected">
           <img src="https://img.icons8.com/?size=30&id=aMTIdm5CdddP&format=png&color=000000" alt="Carte" className="payment-icon-img" />
           <span>Carte de crédit</span>
-          <span className="payment-desc">Paiement sécurisé</span>
-        </label>
-
-        <label className={`payment-option ${paymentMethod === 'paypal' ? 'selected' : ''}`}>
-          <input 
-            type="radio" 
-            name="payment" 
-            checked={paymentMethod === 'paypal'} 
-            onChange={() => onPaymentMethodChange('paypal')} 
-          />
-          <img src="https://img.icons8.com/?size=30&id=13611&format=png&color=000000" alt="PayPal" className="payment-icon-img" />
-          <span>PayPal</span>
-          <span className="payment-desc">Paiement rapide</span>
+          <span className="payment-desc">Paiement sécurisé Stripe</span>
         </label>
       </div>
 
-      {paymentMethod === 'stripe' && (
-        <form onSubmit={handleStripeSubmit} className="card-form">
-          <div className="form-group">
-            <label>Numéro de carte</label>
-            <input 
-              type="text" 
-              placeholder="1234 5678 9012 3456"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').slice(0, 16))}
-              required
-            />
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Expiration</label>
-              <input 
-                type="text" 
-                placeholder="MM/AA"
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>CVC</label>
-              <input 
-                type="text" 
-                placeholder="123"
-                value={cvc}
-                onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                required
-              />
-            </div>
-          </div>
-          {!isStripeConfigured && (
-            <p className="payment-note payment-note-demo">
-              <CreditCard size={14} /> Mode démo - Pas de vrai paiement
-            </p>
+      <div className="stripe-elements-form">
+        <div className="stripe-info">
+          {isStripeConfigured ? (
+            <>
+              <CheckCircle size={18} className="text-success" />
+              <span>Paiement sécurisé par Stripe</span>
+            </>
+          ) : (
+            <>
+              <AlertCircle size={18} className="text-warning" />
+              <span>Mode démo</span>
+            </>
           )}
-          <button type="submit" className="btn-primary" disabled={isProcessing}>
-            {isProcessing ? <Loader2 className="spin" size={18} /> : null}
-            Payer {total.toFixed(2)} $
-          </button>
-        </form>
-      )}
-
-      {paymentMethod === 'paypal' && isPayPalConfigured && (
-        <div className="paypal-container">
-          <PayPalScriptProvider 
-            options={{ 
-              clientId: paymentConfig.paypal.clientId,
-              currency: 'CAD'
-            }}
-          >
-            <PayPalButtons
-              style={{ layout: 'vertical' }}
-              createOrder={(data, actions) => {
-                return actions.order.create({
-                  purchase_units: [{
-                    amount: { value: total.toFixed(2) }
-                  }]
-                });
-              }}
-              onApprove={handlePayPalApprove}
-            />
-          </PayPalScriptProvider>
         </div>
-      )}
+        
+        <div id="payment-element" className="payment-element-container">
+          {!clientSecret && isStripeConfigured && (
+            <p className="payment-note">Chargement du formulaire...</p>
+          )}
+        </div>
+        
+        {error && (
+          <p className="payment-error">
+            <AlertCircle size={14} /> {error}
+          </p>
+        )}
+        
+        <button 
+          type="submit" 
+          className="btn-primary btn-stripe-pay"
+          onClick={handleSubmit}
+          disabled={isProcessing || !clientSecret}
+        >
+          {isProcessing ? <Loader2 className="spin" size={18} /> : null}
+          Payer {total.toFixed(2)} CAD$
+        </button>
+      </div>
     </div>
   );
 }
