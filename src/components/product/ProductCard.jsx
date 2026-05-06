@@ -29,6 +29,7 @@ export default function ProductCard({ product, onQuickView }) {
         </button>
         {product.isNew && <span className="badge badge-new">{t('nouveau')}</span>}
         {product.isBestseller && <span className="badge badge-bestseller">{t('bestseller')}</span>}
+        {product.isPromo && <span className="badge badge-promo">Promo</span>}
         {showButtons && (
           <div className="product-actions">
             <button className="quick-view-btn" onClick={() => onQuickView?.(product)}>
@@ -47,7 +48,14 @@ export default function ProductCard({ product, onQuickView }) {
           {'☆'.repeat(5 - Math.floor(product.rating))}
           <span>({product.reviews})</span>
         </div>
-        <p className="product-price">{product.price.toFixed(2)} $</p>
+        {product.isPromo && product.promoPrice ? (
+          <div className="price-promo">
+            <span className="price-old">{product.price.toFixed(2)} $</span>
+            <span className="price-new">{parseFloat(product.promoPrice).toFixed(2)} $</span>
+          </div>
+        ) : (
+          <p className="product-price">{product.price.toFixed(2)} $</p>
+        )}
         <span className="stock-count">
           {product.inStock > 0 ? `${product.inStock} en stock` : 'Rupture de stock'}
         </span>

@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Search, Heart, ShoppingBag } from 'lucide-react';
-import { products, categories, skinTypes, needs } from '../data/products';
+import { categories, skinTypes, needs } from '../data/products';
+import { useAdmin } from '../contexts/AdminContext';
 import ProductModal from '../components/product/ProductModal';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -18,6 +19,7 @@ export default function BoutiquePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   
+  const { products } = useAdmin();
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();

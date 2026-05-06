@@ -1648,6 +1648,17 @@ input, textarea, select {
   margin-bottom: 8px;
 }
 
+.price-old-lg {
+  font-size: 20px;
+  text-decoration: line-through;
+  color: var(--text-light);
+  margin-right: 8px;
+}
+
+.price-new-lg {
+  color: #e74c3c;
+}
+
 .product-stock {
   font-size: 14px;
   color: var(--text-light);
@@ -2701,6 +2712,48 @@ input, textarea, select {
   font-size: 12px;
   color: var(--text-light);
   margin-top: 4px;
+}
+
+.price-promo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-old {
+  font-size: 16px;
+  text-decoration: line-through;
+  color: var(--text-light);
+}
+
+.price-new {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.badge-promo {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #e74c3c;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-bestseller {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #f39c12;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .stock-low {

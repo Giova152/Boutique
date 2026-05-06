@@ -29,6 +29,7 @@ export default function ProductModal({ product, onClose }) {
             <div className="badges">
               {product.isNew && <span className="badge badge-new">{t('nouveau')}</span>}
               {product.isBestseller && <span className="badge badge-bestseller">{t('bestseller')}</span>}
+              {product.isPromo && <span className="badge badge-promo">PROMO</span>}
             </div>
             
             <h2 className="product-title">{product.name}</h2>
@@ -40,7 +41,16 @@ export default function ProductModal({ product, onClose }) {
               <span>{product.rating} ({product.reviews} avis)</span>
             </div>
             
-            <p className="product-price-lg">{product.price.toFixed(2)} $</p>
+            <p className="product-price-lg">
+              {product.isPromo && product.promoPrice ? (
+                <>
+                  <span className="price-old-lg">{product.price.toFixed(2)} $</span>
+                  <span className="price-new-lg">{parseFloat(product.promoPrice).toFixed(2)} $</span>
+                </>
+              ) : (
+                product.price.toFixed(2) + ' $'
+              )}
+            </p>
             <p className="product-stock">
               {product.inStock > 0 ? `${product.inStock} en stock` : 'Rupture de stock'}
             </p>

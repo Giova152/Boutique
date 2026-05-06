@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3, 
-  Search, ChevronDown, ChevronUp, Check, X, Eye, RefreshCw,
-  TrendingUp, Users, DollarSign, Package as PackageIcon
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function AdminPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const fileInputRef = useRef(null);
   const {
     products, promoCodes, orders, getStats,
     addProduct, updateProduct, deleteProduct, updateStock,
@@ -22,35 +22,51 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
 
   const [productForm, setProductForm] = useState({
     name: '', price: '', description: '', inStock: 25,
-    category: 'cremes', image: '', isNew: false, isBestseller: false
+    category: 'cremes', image: '', isNew: false, isBestseller: false,
+    isPromo: false, promoPrice: ''
   });
 
   const [promoForm, setPromoForm] = useState({
     code: '', type: 'percentage', value: 10, description: ''
   });
+  
+  const [orderFilter, setOrderFilter] = useState('all');
 
   const stats = getStats();
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result);
+        setProductForm({ ...productForm, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveProduct = () => {
+    const productData = {
+      ...productForm,
+      price: parseFloat(productForm.price),
+      inStock: parseInt(productForm.inStock),
+      promoPrice: productForm.promoPrice ? parseFloat(productForm.promoPrice) : null,
+      images: imagePreview || productForm.image || products.find(p => p.id === editingProduct?.id)?.images || ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'],
+    };
+    
     if (editingProduct) {
-      updateProduct(editingProduct.id, {
-        ...productForm,
-        price: parseFloat(productForm.price),
-        inStock: parseInt(productForm.inStock),
-        images: productForm.image ? [productForm.image] : products.find(p => p.id === editingProduct.id)?.images || []
-      });
+      updateProduct(editingProduct.id, productData);
     } else {
       addProduct({
-        ...productForm,
-        price: parseFloat(productForm.price),
-        inStock: parseInt(productForm.inStock),
-        images: productForm.image ? [productForm.image] : ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'],
+        ...productData,
         rating: 4.5,
         reviews: 0,
         benefits: [],
@@ -60,7 +76,26 @@ export default function AdminPage() {
     }
     setShowProductForm(false);
     setEditingProduct(null);
-    setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false });
+    setImagePreview('');
+    setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false, isPromo: false, promoPrice: '' });
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setImagePreview('');
+    setProductForm({
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      inStock: product.inStock,
+      category: product.category,
+      image: '',
+      isNew: product.isNew || false,
+      isBestseller: product.isBestseller || false,
+      isPromo: product.isPromo || false,
+      promoPrice: product.promoPrice || ''
+    });
+    setShowProductForm(true);
   };
 
   const handleAddPromo = () => {
@@ -177,13 +212,31 @@ export default function AdminPage() {
                       />
                     </div>
                     <div className="form-group full">
-                      <label>Image URL</label>
-                      <input
-                        type="text"
-                        value={productForm.image}
-                        onChange={(e) => setProductForm({...productForm, image: e.target.value})}
-                        placeholder="https://..."
-                      />
+                      <label>Image</label>
+                      <div className="image-upload">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={fileInputRef}
+                          onChange={handleImageChange}
+                          style={{ display: 'none' }}
+                        />
+                        <button type="button" className="btn-secondary" onClick={() => fileInputRef.current?.click()}>
+                          <Upload size={16} /> Choisir fichier
+                        </button>
+                        <span>ou</span>
+                        <input
+                          type="text"
+                          value={productForm.image}
+                          onChange={(e) => setProductForm({...productForm, image: e.target.value})}
+                          placeholder="Coller URL image..."
+                        />
+                      </div>
+                      {(imagePreview || productForm.image) && (
+                        <div className="image-preview">
+                          <img src={imagePreview || productForm.image} alt="Aperçu" />
+                        </div>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>
@@ -205,6 +258,28 @@ export default function AdminPage() {
                         Best-seller
                       </label>
                     </div>
+                    <div className="form-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={productForm.isPromo}
+                          onChange={(e) => setProductForm({...productForm, isPromo: e.target.checked, promoPrice: e.target.checked ? productForm.promoPrice : ''})}
+                        />
+                        En promo
+                      </label>
+                    </div>
+                    {productForm.isPromo && (
+                      <div className="form-group">
+                        <label>Prix promo ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={productForm.promoPrice}
+                          onChange={(e) => setProductForm({...productForm, promoPrice: e.target.value})}
+                          placeholder="Prix réduit"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="form-actions">
                     <button className="btn-secondary" onClick={() => { setShowProductForm(false); setEditingProduct(null); }}>Annuler</button>
@@ -328,9 +403,30 @@ export default function AdminPage() {
         {activeTab === 'orders' && (
           <div className="admin-content">
             <div className="orders-filters">
-              <button className="filter-btn active">Toutes ({orders.length})</button>
-              <button className="filter-btn">En attente ({orders.filter(o => o.status === 'en cours').length})</button>
-              <button className="filter-btn">Validées ({orders.filter(o => o.status === 'validée').length})</button>
+              <button 
+                className={`filter-btn ${orderFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('all')}
+              >
+                Toutes ({orders.length})
+              </button>
+              <button 
+                className={`filter-btn ${orderFilter === 'en cours' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('en cours')}
+              >
+                En attente ({orders.filter(o => o.status === 'en cours').length})
+              </button>
+              <button 
+                className={`filter-btn ${orderFilter === 'validée' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('validée')}
+              >
+                Validées ({orders.filter(o => o.status === 'validée').length})
+              </button>
+              <button 
+                className={`filter-btn ${orderFilter === 'livrée' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('livrée')}
+              >
+                Livrées ({orders.filter(o => o.status === 'livrée').length})
+              </button>
             </div>
 
             <div className="orders-list">
@@ -351,7 +447,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map(order => (
+                    {orders.filter(o => orderFilter === 'all' || o.status === orderFilter).map(order => (
                       <tr key={order.id}>
                         <td>{order.id}</td>
                         <td>{order.customer?.firstName} {order.customer?.lastName}</td>
@@ -362,14 +458,24 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td>
-                          {order.status === 'en cours' && (
-                            <button
-                              className="btn-primary btn-sm"
-                              onClick={() => updateOrderStatus(order.id, 'validée')}
-                            >
-                              <Check size={16} /> Valider
-                            </button>
-                          )}
+                          <div className="order-actions">
+                            {order.status === 'en cours' && (
+                              <button
+                                className="btn-primary btn-sm"
+                                onClick={() => updateOrderStatus(order.id, 'validée')}
+                              >
+                                <Check size={16} /> Valider
+                              </button>
+                            )}
+                            {order.status === 'validée' && (
+                              <button
+                                className="btn-primary btn-sm btn-success"
+                                onClick={() => updateOrderStatus(order.id, 'livrée')}
+                              >
+                                <Truck size={16} /> Livrer
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

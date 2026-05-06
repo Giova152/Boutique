@@ -49,14 +49,15 @@ export function CartProvider({ children }) {
       if (newQuantity > availableStock) {
         newQuantity = availableStock;
       }
+      const productWithStock = { ...product, quantity: newQuantity, inStock: availableStock - newQuantity };
       if (existing) {
         return prev.map(item =>
           item.id === product.id
-            ? { ...item, quantity: newQuantity }
+            ? productWithStock
             : item
         );
       }
-      return [...prev, { ...product, quantity: newQuantity }];
+      return [...prev, productWithStock];
     });
     return { success: true };
   };

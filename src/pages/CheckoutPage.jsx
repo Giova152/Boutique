@@ -14,9 +14,9 @@ import '../components/payment/CheckoutStyles.css';
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, subtotal, discount, shipping, total, clearCart } = useCart();
-  const { addOrder, user } = useAuth();
+  const { user } = useAuth();
   const { language } = useLanguage();
-  const { orders, updateStock } = useAdmin();
+  const { addOrder, updateStock, products } = useAdmin();
   const t = (key) => getTranslation(language, key);
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -55,7 +55,10 @@ export default function CheckoutPage() {
     addOrder(orderData);
     
     cart.forEach(item => {
-      updateStock(item.id, item.inStock - item.quantity);
+      const product = products.find(p => p.id === item.id);
+      if (product) {
+        updateStock(item.id, product.inStock - item.quantity);
+      }
     });
     
     sendOrderEmail(orderData);
