@@ -407,6 +407,45 @@
   background: #3d8b5a;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-bar span {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.customer-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-text:hover {
+  background: var(--primary);
+  color: white;
+}
+
 .customers-list table {
   width: 100%;
   border-collapse: collapse;
@@ -437,6 +476,22 @@
 .customer-actions {
   display: flex;
   gap: 8px;
+}
+
+.btn-text {
+  padding: 6px 12px;
+  border: 1px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-text:hover {
+  background: var(--primary);
+  color: white;
 }
 
 .empty-state {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3, 
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -35,10 +35,26 @@ export default function AdminPage() {
   });
   
   const [orderFilter, setOrderFilter] = useState('all');
+  const [customerSort, setCustomerSort] = useState('spent');
+  const [customerSortDir, setCustomerSortDir] = useState('desc');
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const sortedCustomers = [...getCustomers()].sort((a, b) => {
+    let comparison = 0;
+    if (customerSort === 'spent') {
+      comparison = a.totalSpent - b.totalSpent;
+    } else if (customerSort === 'name') {
+      comparison = a.name.localeCompare(b.name);
+    } else if (customerSort === 'date') {
+      comparison = new Date(a.lastOrder || 0) - new Date(b.lastOrder || 0);
+    } else if (customerSort === 'orders') {
+      comparison = a.orderCount - b.orderCount;
+    }
+    return customerSortDir === 'desc' ? -comparison : comparison;
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -501,8 +517,36 @@ export default function AdminPage() {
 
         {activeTab === 'customers' && (
           <div className="admin-content">
+            <div className="filter-bar">
+              <span>Trier par:</span>
+              <button 
+                className={`filter-btn ${customerSort === 'spent' ? 'active' : ''}`}
+                onClick={() => { setCustomerSort('spent'); setCustomerSortDir(customerSort === 'spent' && customerSortDir === 'desc' ? 'asc' : 'desc'); }}
+              >
+                Total dépensé {customerSort === 'spent' && (customerSortDir === 'desc' ? '↓' : '↑')}
+              </button>
+              <button 
+                className={`filter-btn ${customerSort === 'orders' ? 'active' : ''}`}
+                onClick={() => { setCustomerSort('orders'); setCustomerSortDir(customerSort === 'orders' && customerSortDir === 'desc' ? 'asc' : 'desc'); }}
+              >
+                Nb commandes {customerSort === 'orders' && (customerSortDir === 'desc' ? '↓' : '↑')}
+              </button>
+              <button 
+                className={`filter-btn ${customerSort === 'name' ? 'active' : ''}`}
+                onClick={() => { setCustomerSort('name'); setCustomerSortDir(customerSort === 'name' && customerSortDir === 'asc' ? 'desc' : 'asc'); }}
+              >
+                Nom {customerSort === 'name' && (customerSortDir === 'desc' ? '↓' : '↑')}
+              </button>
+              <button 
+                className={`filter-btn ${customerSort === 'date' ? 'active' : ''}`}
+                onClick={() => { setCustomerSort('date'); setCustomerSortDir(customerSort === 'date' && customerSortDir === 'desc' ? 'asc' : 'desc'); }}
+              >
+                Dernière commande {customerSort === 'date' && (customerSortDir === 'desc' ? '↓' : '↑')}
+              </button>
+            </div>
+            
             <div className="customers-list">
-              {customers.length === 0 ? (
+              {sortedCustomers.length === 0 ? (
                 <div className="empty-state">
                   <Users size={48} />
                   <p>Aucun client</p>
@@ -520,32 +564,20 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.map(customer => (
+                    {sortedCustomers.map(customer => (
                       <tr key={customer.email}>
-                        <td className="customer-name">
-                          {customer.name}
-                        </td>
+                        <td className="customer-name">{customer.name}</td>
                         <td>{customer.email}</td>
                         <td>{customer.orderCount}</td>
                         <td className="customer-spent">{customer.totalSpent.toFixed(2)} $</td>
                         <td>{customer.lastOrder ? new Date(customer.lastOrder).toLocaleDateString('fr-CA') : '-'}</td>
                         <td>
                           <div className="customer-actions">
-                            <button 
-                              className="btn-icon"
-                              onClick={() => downloadPDF(customer.orders[customer.orders.length - 1])}
-                              title="Dernière facture PDF"
-                            >
-                              <DollarSign size={16} />
+                            <button className="btn-text" onClick={() => downloadPDF(customer.orders[customer.orders.length - 1])}>
+                              <FileText size={14} /> Dernière facture
                             </button>
-                            <button 
-                              className="btn-icon"
-                              onClick={() => {
-                                customer.orders.forEach(order => downloadPDF(order));
-                              }}
-                              title="Toutes les factures PDF"
-                            >
-                              <PackageIcon size={16} />
+                            <button className="btn-text" onClick={() => customer.orders.forEach(order => downloadPDF(order))}>
+                              <FileText size={14} /> Toutes factures
                             </button>
                           </div>
                         </td>
