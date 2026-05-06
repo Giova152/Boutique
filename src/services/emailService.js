@@ -43,7 +43,7 @@ zoumcosmo@gmail.com
   formData.append('message', emailContent);
 
   try {
-    const response = await fetch('https://formspree.io/f/xpwzgvjq', {
+    const response = await fetch('https://formspree.io/f/mrejlbaa', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
@@ -93,7 +93,7 @@ zoumcosmo@gmail.com
   formData.append('message', emailContent);
 
   try {
-    const response = await fetch('https://formspree.io/f/xpwzgvjq', {
+    const response = await fetch('https://formspree.io/f/mrejlbaa', {
       method: 'POST',
       body: formData,
       mode: 'no-cors'
