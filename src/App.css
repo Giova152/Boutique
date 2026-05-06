@@ -1645,6 +1645,12 @@ input, textarea, select {
   font-size: 28px;
   font-weight: 700;
   color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.product-stock {
+  font-size: 14px;
+  color: var(--text-light);
   margin-bottom: 20px;
 }
 
@@ -2688,6 +2694,29 @@ input, textarea, select {
   font-size: 20px;
   font-weight: 700;
   color: var(--primary);
+}
+
+.stock-count {
+  display: block;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+.stock-low {
+  display: block;
+  font-size: 12px;
+  color: #e67e22;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.stock-out {
+  display: block;
+  font-size: 12px;
+  color: var(--error);
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 @media (max-width: 1200px) {

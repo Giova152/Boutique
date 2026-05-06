@@ -27,17 +27,38 @@ export function CartProvider({ children }) {
   }, [promoCode]);
 
   const addToCart = (product, quantity = 1) => {
+    if (product.inStock === 0) {
+      return { success: false, message: 'Produit en rupture de stock' };
+    }
+    const availableStock = product.inStock || 999;
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
+      let newQuantity = quantity;
+      if (existing) {
+        newQuantity = existing.quantity + quantity;
+        if (newQuantity > 20) {
+          newQuantity = 20;
+        }
+        if (newQuantity > availableStock) {
+          newQuantity = availableStock;
+        }
+      }
+      if (newQuantity > 20) {
+        newQuantity = 20;
+      }
+      if (newQuantity > availableStock) {
+        newQuantity = availableStock;
+      }
       if (existing) {
         return prev.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      return [...prev, { ...product, quantity: newQuantity }];
     });
+    return { success: true };
   };
 
   const removeFromCart = (productId) => {

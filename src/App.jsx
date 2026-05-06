@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { CartDrawerProvider, useCartDrawer } from './contexts/CartDrawerContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { AdminProvider } from './contexts/AdminContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
@@ -19,7 +20,9 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CGVPage from './pages/CGVPage';
 import PrivacyPage from './pages/PrivacyPage';
+import AdminPage from './pages/AdminPage';
 import './components/payment/LegalStyles.css';
+import './components/admin/AdminStyles.css';
 import './App.css';
 
 function AppContent() {
@@ -40,6 +43,7 @@ function AppContent() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/cgv" element={<CGVPage />} />
         <Route path="/confidentialite" element={<PrivacyPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <Footer />
       <CartDrawer isOpen={isOpen} onClose={closeCart} />
@@ -52,15 +56,17 @@ function App() {
     <Router>
       <LanguageProvider>
         <ToastProvider>
-          <AuthProvider>
-            <CartProvider>
-              <CartDrawerProvider>
-                <WishlistProvider>
-                  <AppContent />
-                </WishlistProvider>
-              </CartDrawerProvider>
-            </CartProvider>
-          </AuthProvider>
+          <AdminProvider>
+            <AuthProvider>
+              <CartProvider>
+                <CartDrawerProvider>
+                  <WishlistProvider>
+                    <AppContent />
+                  </WishlistProvider>
+                </CartDrawerProvider>
+              </CartProvider>
+            </AuthProvider>
+          </AdminProvider>
         </ToastProvider>
       </LanguageProvider>
     </Router>

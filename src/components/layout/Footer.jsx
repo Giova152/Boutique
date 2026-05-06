@@ -71,6 +71,7 @@ export default function Footer() {
               <ul>
                 <li><Link to="/cgv">CGV</Link></li>
                 <li><Link to="/confidentialite">Confidentialité</Link></li>
+                <li><Link to="/admin">Admin</Link></li>
               </ul>
             </div>
           </div>

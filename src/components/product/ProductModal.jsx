@@ -41,6 +41,9 @@ export default function ProductModal({ product, onClose }) {
             </div>
             
             <p className="product-price-lg">{product.price.toFixed(2)} $</p>
+            <p className="product-stock">
+              {product.inStock > 0 ? `${product.inStock} en stock` : 'Rupture de stock'}
+            </p>
             
             <p className="product-desc">{product.description}</p>
             
@@ -63,9 +66,9 @@ export default function ProductModal({ product, onClose }) {
             
             <div className="product-actions-modal">
               <div className="quantity-selector">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}><Minus size={16} /></button>
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={product.inStock === 0}><Minus size={16} /></button>
                 <span>{quantity}</span>
-                <button onClick={() => setQuantity(q => q + 1)}><Plus size={16} /></button>
+                <button onClick={() => setQuantity(q => Math.min(20, q + 1))} disabled={product.inStock === 0 || quantity >= 20 || quantity >= product.inStock}><Plus size={16} /></button>
               </div>
               <button className="btn-primary" onClick={() => { addToCart(product, quantity); onClose(); }}>
                 Ajouter au panier

@@ -48,6 +48,9 @@ export default function ProductCard({ product, onQuickView }) {
           <span>({product.reviews})</span>
         </div>
         <p className="product-price">{product.price.toFixed(2)} $</p>
+        <span className="stock-count">
+          {product.inStock > 0 ? `${product.inStock} en stock` : 'Rupture de stock'}
+        </span>
       </div>
     </div>
   );

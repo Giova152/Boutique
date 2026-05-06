@@ -4,6 +4,7 @@ import { Check, Truck, Package, CreditCard } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAdmin } from '../contexts/AdminContext';
 import { getTranslation } from '../data/translations';
 import { sendOrderEmail } from '../services/emailService';
 import PaymentMethods from '../components/payment/PaymentMethods';
@@ -15,6 +16,7 @@ export default function CheckoutPage() {
   const { cart, subtotal, discount, shipping, total, clearCart } = useCart();
   const { addOrder, user } = useAuth();
   const { language } = useLanguage();
+  const { orders, updateStock } = useAdmin();
   const t = (key) => getTranslation(language, key);
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -51,6 +53,11 @@ export default function CheckoutPage() {
       total
     };
     addOrder(orderData);
+    
+    cart.forEach(item => {
+      updateStock(item.id, item.inStock - item.quantity);
+    });
+    
     sendOrderEmail(orderData);
     setOrderComplete(true);
     setIsProcessing(false);
