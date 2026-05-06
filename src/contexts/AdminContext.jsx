@@ -31,8 +31,8 @@ export function AdminProvider({ children }) {
         if (o.status === 'expéditée' && o.shippedAt) {
           const shippedDate = new Date(o.shippedAt);
           const now = new Date();
-          const daysSinceShipped = Math.floor((now - shippedDate) / (1000 * 60 * 60 * 24));
-          if (daysSinceShipped >= 7) {
+          const hoursSinceShipped = Math.floor((now - shippedDate) / (1000 * 60 * 60));
+          if (hoursSinceShipped >= 24) {
             return { ...o, status: 'livrée' };
           }
         }
