@@ -1,19 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "framework": null,
+  "framework": "create-react-app",
   "installCommand": "npm install",
-  "outputDirectory": "dist",
-  "routes": [
-    {
-      "src": "/api/checkout",
-      "dest": "/api/checkout.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ]
+  "outputDirectory": "dist"
 }
