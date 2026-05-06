@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-export function fetch(request) {
+export default async function handler(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
@@ -10,19 +10,15 @@ export function fetch(request) {
     });
   }
 
-  if (request.method === 'GET') {
-    return new Response('Stripe API is running', { status: 200 });
-  }
-
-  if (request.method === 'POST') {
-    return handlePost(request);
-  }
-
-  return new Response('Method not allowed', { status: 405 });
-}
-
-async function handlePost(request) {
   try {
+    if (request.method === 'GET') {
+      return new Response('Stripe API is running', { status: 200 });
+    }
+
+    if (request.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    }
+
     const body = await request.json();
     const { amount, email } = body;
 
