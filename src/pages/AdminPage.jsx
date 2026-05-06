@@ -15,7 +15,7 @@ export default function AdminPage() {
   const {
     products, promoCodes, orders, getStats,
     addProduct, updateProduct, deleteProduct, updateStock,
-    addPromoCode, deletePromoCode, updateOrderStatus
+    addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
 
   const [activeTab, setActiveTab] = useState('products');
@@ -422,6 +422,12 @@ export default function AdminPage() {
                 Validées ({orders.filter(o => o.status === 'validée').length})
               </button>
               <button 
+                className={`filter-btn ${orderFilter === 'expéditée' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('expéditée')}
+              >
+                Expéditées ({orders.filter(o => o.status === 'expéditée').length})
+              </button>
+              <button 
                 className={`filter-btn ${orderFilter === 'livrée' ? 'active' : ''}`}
                 onClick={() => setOrderFilter('livrée')}
               >
@@ -470,9 +476,9 @@ export default function AdminPage() {
                             {order.status === 'validée' && (
                               <button
                                 className="btn-primary btn-sm btn-success"
-                                onClick={() => updateOrderStatus(order.id, 'livrée')}
+                                onClick={() => updateOrderStatus(order.id, 'expéditée')}
                               >
-                                <Truck size={16} /> Livrer
+                                <Truck size={16} /> Expédier
                               </button>
                             )}
                           </div>

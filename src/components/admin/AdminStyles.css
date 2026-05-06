@@ -384,9 +384,14 @@
   color: #155724;
 }
 
-.status-badge.livrée {
+.status-badge.expéditée {
   background: #cce5ff;
   color: #004085;
+}
+
+.status-badge.livrée {
+  background: #28a745;
+  color: white;
 }
 
 .order-actions {

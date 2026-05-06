@@ -26,6 +26,23 @@ export function AdminProvider({ children }) {
   });
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setOrders(prev => prev.map(o => {
+        if (o.status === 'expéditée' && o.shippedAt) {
+          const shippedDate = new Date(o.shippedAt);
+          const now = new Date();
+          const daysSinceShipped = Math.floor((now - shippedDate) / (1000 * 60 * 60 * 24));
+          if (daysSinceShipped >= 7) {
+            return { ...o, status: 'livrée' };
+          }
+        }
+        return o;
+      }));
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('vegederm_products', JSON.stringify(products));
   }, [products]);
 
@@ -73,11 +90,27 @@ export function AdminProvider({ children }) {
       delete newCodes[code];
       return newCodes;
     });
+};
+
+  const updateOrderStatus = (orderId, status) => {
+    setOrders(prev => prev.map(o => {
+      if (o.id === orderId) {
+        const updated = { ...o, status };
+        if (status === 'expéditée') {
+          updated.shippedAt = new Date().toISOString();
+        }
+        if (status === 'livrée') {
+          updated.deliveredAt = new Date().toISOString();
+        }
+        return updated;
+      }
+      return o;
+    }));
   };
 
-const updateOrderStatus = (orderId, status) => {
+  const confirmDelivery = (orderId) => {
     setOrders(prev => prev.map(o => 
-      o.id === orderId ? { ...o, status } : o
+      o.id === orderId ? { ...o, status: 'livrée', deliveredAt: new Date().toISOString() } : o
     ));
   };
 
@@ -136,6 +169,7 @@ const updateOrderStatus = (orderId, status) => {
       addPromoCode,
       deletePromoCode,
       updateOrderStatus,
+      confirmDelivery,
       addOrder,
       recordVisit,
       getStats
