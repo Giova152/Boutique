@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -48,6 +48,7 @@ function AdminContent() {
   });
   
   const [orderFilter, setOrderFilter] = useState('all');
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   const handleLogout = async () => {
     localStorage.removeItem('adminLoginTime');
@@ -489,6 +490,7 @@ function AdminContent() {
                 <table>
                   <thead>
                     <tr>
+                      <th></th>
                       <th>Date</th>
                       <th>Commande</th>
                       <th>Client</th>
@@ -500,28 +502,37 @@ function AdminContent() {
                   </thead>
                   <tbody>
                     {orders.filter(o => orderFilter === 'all' || o.status === orderFilter).map(order => (
-                      <tr key={order.id}>
-                        <td>{order.date ? new Date(order.date).toLocaleDateString('fr-CA') : '-'}</td>
-                        <td>{order.id}</td>
-                        <td>{order.customer?.firstName} {order.customer?.lastName}<br/><small>{order.customer?.email}</small></td>
-                        <td>{order.items?.length || 0} produit(s)</td>
-                        <td>{parseFloat(order.total).toFixed(2)} $</td>
-                        <td>
-                          <span className={`status-badge ${order.status}`}>
-                            {order.status}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="order-actions">
-                            {order.status === 'en cours' && (
-                              <button
-                                className="btn-primary btn-sm"
-                                onClick={() => updateOrderStatus(order.id, 'validée')}
-                              >
-                                <Check size={16} /> Valider
-                              </button>
-                            )}
-                            {order.status === 'validée' && (
+                      <React.Fragment key={order.id}>
+                        <tr>
+                          <td>
+                            <button 
+                              className="btn-expand"
+                              onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                            >
+                              {expandedOrder === order.id ? '−' : '+'}
+                            </button>
+                          </td>
+                          <td>{order.date ? new Date(order.date).toLocaleDateString('fr-CA') : '-'}</td>
+                          <td>{order.id}</td>
+                          <td>{order.customer?.firstName} {order.customer?.lastName}<br/><small>{order.customer?.email}</small></td>
+                          <td>{order.items?.length || 0} produit(s)</td>
+                          <td>{parseFloat(order.total).toFixed(2)} $</td>
+                          <td>
+                            <span className={`status-badge ${order.status}`}>
+                              {order.status}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="order-actions">
+                              {order.status === 'en cours' && (
+                                <button
+                                  className="btn-primary btn-sm"
+                                  onClick={() => updateOrderStatus(order.id, 'validée')}
+                                >
+                                  <Check size={16} /> Valider
+                                </button>
+                              )}
+                              {order.status === 'validée' && (
                               <button
                                 className="btn-primary btn-sm btn-success"
                                 onClick={() => updateOrderStatus(order.id, 'expéditée')}
@@ -531,7 +542,39 @@ function AdminContent() {
                             )}
                           </div>
                         </td>
-                      </tr>
+                        </tr>
+                        {expandedOrder === order.id && (
+                          <tr className="order-details">
+                            <td colSpan="8">
+                              <div className="order-details-content">
+                                <h4>Détails de la commande</h4>
+                                <div className="order-products">
+                                  {order.items?.map((item, idx) => (
+                                    <div key={idx} className="order-product-item">
+                                      <img src={item.image || 'https://via.placeholder.com/50'} alt={item.name} />
+                                      <div>
+                                        <strong>{item.name}</strong>
+                                        <span>Qté: {item.quantity} × {parseFloat(item.price).toFixed(2)} $</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="order-summary">
+                                  <p>Sous-total: {parseFloat(order.subtotal || 0).toFixed(2)} $</p>
+                                  {order.discount > 0 && <p>Réduction: -{parseFloat(order.discount).toFixed(2)} $</p>}
+                                  <p>Livraison: {parseFloat(order.shipping || 0).toFixed(2)} $</p>
+                                  <p><strong>Total: {parseFloat(order.total).toFixed(2)} $</strong></p>
+                                </div>
+                                <div className="order-delivery-info">
+                                  <p><strong>Adresse de livraison:</strong></p>
+                                  <p>{order.customer?.address}, {order.customer?.city}, {order.customer?.province} {order.customer?.postalCode}</p>
+                                  <p>Téléphone: {order.customer?.phone || 'N/A'}</p>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
