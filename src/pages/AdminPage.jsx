@@ -13,24 +13,43 @@ const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const fileInputRef = useRef(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-        setIsAdmin(true);
-      } else if (!session?.user) {
-        navigate('/admin-login');
-      }
-    });
-  }, [navigate]);
+    if (loading) return;
+    
+    if (!user) {
+      navigate('/admin-login');
+      return;
+    }
+    
+    if (ADMIN_EMAILS.includes(user?.email?.toLowerCase())) {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user, loading, navigate]);
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
+
+  if (loading || isAdmin === null) {
+    return (
+      <main className="login-page">
+        <div className="container">
+          <div className="login-container">
+            <div className="login-header-section">
+              <h1>Chargement...</h1>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!isAdmin) {
     return (
