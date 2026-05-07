@@ -18,27 +18,7 @@ export function AuthProvider({ children }) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { user: supabaseUser } = session;
-        setUser({ id: supabaseUser.id, email: supabaseUser.email });
-        
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', supabaseUser.id)
-          .single();
-        
-        if (profileData) {
-          setProfile(profileData);
-          setUser(prev => ({ ...prev, name: profileData.full_name }));
-        }
-        
-        const { data: userOrders } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('customer->>email', supabaseUser.email)
-          .order('date', { ascending: false });
-        
-        if (userOrders) setOrders(userOrders);
+        setUser({ id: session.user.id, email: session.user.email });
       }
     } catch (err) {
       console.error('Erreur:', err);

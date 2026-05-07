@@ -6,38 +6,31 @@ import {
   Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
-import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
   const fileInputRef = useRef(null);
-  const [isAdmin, setIsAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (loading) return;
-    
-    if (!user) {
-      navigate('/admin-login');
-      return;
-    }
-    
-    if (ADMIN_EMAILS.includes(user?.email?.toLowerCase())) {
-      setIsAdmin(true);
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user, loading, navigate]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user || !ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+        navigate('/admin-login');
+      } else {
+        setLoading(false);
+      }
+    });
+  }, [navigate]);
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
 
-  if (loading || isAdmin === null) {
+  if (loading) {
     return (
       <main className="login-page">
         <div className="container">
@@ -50,6 +43,9 @@ export default function AdminPage() {
       </main>
     );
   }
+
+  const user = { email: 'admin@vegederm.com' };
+  const isAdmin = true;
 
   if (!isAdmin) {
     return (
