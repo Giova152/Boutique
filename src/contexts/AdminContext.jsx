@@ -12,6 +12,8 @@ export function AdminProvider({ children }) {
   const [settings, setSettings] = useState({
     stripePublishableKey: '',
     paypalClientId: '',
+    exitPopupCode: 'VEGEDERM10',
+    exitPopupDiscount: 10,
   });
   const [loading, setLoading] = useState(true);
 
@@ -111,6 +113,8 @@ export function AdminProvider({ children }) {
         setSettings({
           stripePublishableKey: data.stripe_publishable_key || '',
           paypalClientId: data.paypal_client_id || '',
+          exitPopupCode: data.exit_popup_code || 'VEGEDERM10',
+          exitPopupDiscount: data.exit_popup_discount || 10,
         });
       }
     } catch (err) {

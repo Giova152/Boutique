@@ -205,6 +205,14 @@ DO $$ BEGIN
   ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_mode TEXT DEFAULT 'sandbox';
 EXCEPTION WHEN others THEN NULL;
 END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS exit_popup_code TEXT DEFAULT 'VEGEDERM10';
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS exit_popup_discount INTEGER DEFAULT 10;
+EXCEPTION WHEN others THEN NULL;
+END $$;
 CREATE POLICY "Tout le monde peut lire clés API" ON admin_settings FOR SELECT USING (true);
 CREATE POLICY "Admins peuvent modifier paramètres" ON admin_settings FOR UPDATE USING (true);
 CREATE POLICY "Admins peuvent insérer paramètres" ON admin_settings FOR INSERT WITH CHECK (true);

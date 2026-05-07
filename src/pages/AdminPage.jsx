@@ -354,6 +354,35 @@ function SettingsPanel({ settings, onSave, addToast }) {
         </button>
       )}
 
+      <h2 style={{ marginTop: 32, marginBottom: 24 }}>Popup de sortie</h2>
+      <p style={{ color: 'var(--text-light)', marginBottom: 32, fontSize: 15 }}>
+        Configurez le code promo affiché aux visiteurs qui quitteront votre site.
+      </p>
+      <div className="gateway-card">
+        <div style={{ padding: 24 }}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Code promo</label>
+            <input
+              type="text"
+              value={settings.exitPopupCode || ''}
+              onChange={(e) => onSave({ exit_popup_code: e.target.value.toUpperCase(), exit_popup_discount: settings.exitPopupDiscount })}
+              placeholder="VEGEDERM10"
+              className="form-input"
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Réduction (%)</label>
+            <input
+              type="number"
+              value={settings.exitPopupDiscount || 10}
+              onChange={(e) => onSave({ exit_popup_code: settings.exitPopupCode, exit_popup_discount: parseInt(e.target.value) || 10 })}
+              className="form-input"
+              style={{ width: 100 }}
+            />
+          </div>
+        </div>
+      </div>
+
       <style>{`
         .settings-panel { max-width: 800px; }
         .gateway-cards { display: flex; flex-direction: column; gap: 24px; }

@@ -4,13 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X, CheckCircle } from 'lucide-react';
 import { categories } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
-import { EXIT_POPUP } from '../config/adminConfig';
-import { useCart } from '../contexts/CartContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { supabase } from '../lib/supabase';
-import SEO from '../components/layout/SEO';
-import { translations } from '../data/translations';
-import ProductModal from '../components/product/ProductModal';
 
 const categoryImages = {
   'beurre-karite': 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
@@ -45,7 +38,9 @@ export default function HomePage() {
   const [exitPopupOpen, setExitPopupOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
-  const { products } = useAdmin();
+  const { products, settings } = useAdmin();
+  const exitPopupCode = settings?.exitPopupCode || 'VEGEDERM10';
+  const exitPopupDiscount = settings?.exitPopupDiscount || 10;
   
   useEffect(() => {
     const handleMouseLeave = (e) => {
@@ -100,8 +95,8 @@ export default function HomePage() {
                 <h3>{language === 'fr' ? 'Attendez!' : 'Wait!'}</h3>
                 <p>{language === 'fr' ? 'Ne partez pas sans votre code promo!' : "Don't leave without your promo code!"}</p>
                 <div className="popup-code">
-                  <span>{EXIT_POPUP.code}</span>
-                  <span className="popup-discount">-{EXIT_POPUP.discount}%</span>
+                  <span>{exitPopupCode}</span>
+                  <span className="popup-discount">-{exitPopupDiscount}%</span>
                 </div>
                 <Link to="/boutique" className="btn-primary" onClick={() => setExitPopupOpen(false)}>
                   {language === 'fr' ? 'Découvrir la boutique' : 'Discover the shop'}
