@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X, CheckCircle } from 'lucide-react';
 import { categories } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
+import { EXIT_POPUP } from '../config/adminConfig';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../lib/supabase';
@@ -99,8 +100,8 @@ export default function HomePage() {
                 <h3>{language === 'fr' ? 'Attendez!' : 'Wait!'}</h3>
                 <p>{language === 'fr' ? 'Ne partez pas sans votre code promo!' : "Don't leave without your promo code!"}</p>
                 <div className="popup-code">
-                  <span>VEGEDERM10</span>
-                  <span className="popup-discount">-10%</span>
+                  <span>{EXIT_POPUP.code}</span>
+                  <span className="popup-discount">-{EXIT_POPUP.discount}%</span>
                 </div>
                 <Link to="/boutique" className="btn-primary" onClick={() => setExitPopupOpen(false)}>
                   {language === 'fr' ? 'Découvrir la boutique' : 'Discover the shop'}
