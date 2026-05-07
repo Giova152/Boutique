@@ -84,23 +84,16 @@ export function AdminProvider({ children }) {
       if (statsRes.data) setStats(statsRes.data);
     } catch (err) {
       console.error('Erreur chargement:', err);
-    } finally {
-      // Always ensure products are loaded
-      if (productsRes.data && productsRes.data.length > 0) {
-        const productsWithImages = productsRes.data.map(p => ({
-          ...p,
-          images: p.image ? [p.image] : [],
-          isBestseller: p.is_bestseller,
-          isNew: p.is_new,
-          inStock: p.in_stock,
-          promoPrice: p.promo_price
-        }));
-        setProducts(productsWithImages);
-      } else {
-        // No products, seed them
-        console.log('No products in DB, seeding...');
-        await seedProducts();
+      // Try seeding on error
+      try {
+        const { data: checkProducts } = await supabase.from('products').select('*');
+        if (!checkProducts || checkProducts.length === 0) {
+          await seedProducts();
+        }
+      } catch (e) {
+        console.error('Seed failed:', e);
       }
+    } finally {
       setLoading(false);
     }
   }
