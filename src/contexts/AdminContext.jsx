@@ -83,13 +83,30 @@ export function AdminProvider({ children }) {
       if (statsRes.data) setStats(statsRes.data);
     } catch (err) {
       console.error('Erreur chargement:', err);
-      await seedProducts();
     } finally {
+      // Always ensure products are loaded
+      if (productsRes.data && productsRes.data.length > 0) {
+        const productsWithImages = productsRes.data.map(p => ({
+          ...p,
+          images: p.image ? [p.image] : [],
+          isBestseller: p.is_bestseller,
+          isNew: p.is_new,
+          inStock: p.in_stock,
+          promoPrice: p.promo_price
+        }));
+        setProducts(productsWithImages);
+      } else {
+        // No products, seed them
+        console.log('No products in DB, seeding...');
+        await seedProducts();
+      }
       setLoading(false);
     }
   }
 
   async function seedProducts() {
+    console.log('Seeding products...');
+    const defaultProducts = [
     const defaultProducts = [
       {
         name: 'Beurre de Karité Pur',
@@ -256,14 +273,36 @@ export function AdminProvider({ children }) {
     ];
 
     for (const product of defaultProducts) {
-      await supabase.from('products').insert([product]);
+      const { error } = await supabase.from('products').insert([product]);
+      if (error) {
+        console.error('Error inserting product:', error);
+      }
     }
     console.log('Default products seeded');
     
+    // Wait a moment and reload
+    await new Promise(r => setTimeout(r, 500));
+    
     // Reload products after seeding
     const { data: newProducts } = await supabase.from('products').select('*');
-    if (newProducts) {
+    console.log('Reloaded products:', newProducts?.length);
+    if (newProducts && newProducts.length > 0) {
       const productsWithImages = newProducts.map(p => ({
+        ...p,
+        images: p.image ? [p.image] : [],
+        isBestseller: p.is_bestseller,
+        isNew: p.is_new,
+        inStock: p.in_stock,
+        promoPrice: p.promo_price
+      }));
+      setProducts(productsWithImages);
+    }
+  }
+
+  const reloadProducts = async () => {
+    const { data } = await supabase.from('products').select('*');
+    if (data) {
+      const productsWithImages = data.map(p => ({
         ...p,
         images: p.image ? [p.image] : [],
         isBestseller: p.is_bestseller,
@@ -580,7 +619,8 @@ export function AdminProvider({ children }) {
       updateOrderStatus,
       recordVisit,
       getStats,
-      seedProducts
+      seedProducts,
+      reloadProducts
     }}>
       {children}
     </AdminContext.Provider>
