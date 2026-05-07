@@ -19,10 +19,21 @@ function AdminContent() {
   const [customerSort, setCustomerSort] = useState('spent');
   const [customerSortDir, setCustomerSortDir] = useState('desc');
 
-  const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
-    addProduct, updateProduct, deleteProduct, updateStock,
-    addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
-  } = useAdmin();
+  const adminCtx = useAdmin();
+  const products = adminCtx?.products || [];
+  const orders = adminCtx?.orders || [];
+  const promoCodes = adminCtx?.promoCodes || {};
+  const getStats = adminCtx?.getStats || (() => ({}));
+  const getCustomers = adminCtx?.getCustomers || (() => []);
+  const updateStock = adminCtx?.updateStock || (() => {});
+  const deleteProduct = adminCtx?.deleteProduct || (() => {});
+  const deletePromoCode = adminCtx?.deletePromoCode || (() => {});
+  const updateOrderStatus = adminCtx?.updateOrderStatus || (() => {});
+  const downloadPDF = adminCtx?.downloadPDF || (() => {});
+  const downloadInvoice = adminCtx?.downloadInvoice || (() => {});
+  const addProduct = adminCtx?.addProduct || (() => {});
+  const updateProduct = adminCtx?.updateProduct || (() => {});
+  const addPromoCode = adminCtx?.addPromoCode || (() => {});
 
   const [activeTab, setActiveTab] = useState('products');
 
