@@ -2,6 +2,30 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { sendStatusUpdateEmail, sendStockRestockEmail } from '../services/emailService';
 
+const RESEND_API_KEY = 're_ZGjw8er8_4GEUJkSKd6JfiCG32DnX7zYp';
+
+async function sendEmailViaResend(to, subject, html) {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`
+      },
+      body: JSON.stringify({
+        from: 'VEGE DERM <onboarding@resend.dev>',
+        to: [to],
+        subject: subject,
+        html: html
+      })
+    });
+    return response.ok;
+  } catch (e) {
+    console.error('Email error:', e);
+    return false;
+  }
+}
+
 const AdminContext = createContext();
 
 export function AdminProvider({ children }) {
@@ -407,6 +431,19 @@ export function AdminProvider({ children }) {
         }
 
         await supabase.from('stock_alerts').update({ active: false }).eq('product_id', id.toString());
+      }
+    }
+
+    if (newStock > 0 && newStock <= 10 && oldStock > 10) {
+      const product = products.find(p => p.id === id);
+      if (product) {
+        const html = `
+          <h2>⚠️ Alerte stock bas</h2>
+          <p>Le produit <strong>${product.name}</strong> est en stock limite!</p>
+          <p><strong>Stock actuel:</strong> ${newStock} unites</p>
+          <p><a href="https://vegederm229.vercel.app/admin">Reapprovisionner</a></p>
+        `;
+        await sendEmailViaResend('zoumcosmo@gmail.com', `⚠️ Stock bas: ${product.name}`, html);
       }
     }
   };
