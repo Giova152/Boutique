@@ -14,22 +14,26 @@
 }
 
 :root {
-  --primary: #1d4e38;
-  --primary-light: #2a6b4f;
-  --primary-dark: #153d2d;
-  --secondary: #f8f5f0;
-  --accent: #c9a86c;
+  --primary: #1a5c3a;
+  --primary-light: #2a7d52;
+  --primary-dark: #0f3d26;
+  --secondary: #f5f0e8;
+  --accent: #d4a853;
   --accent-light: #e8d4a8;
   --text-primary: #1a1a1a;
-  --text-secondary: #5a5a5a;
-  --text-light: #8a8a8a;
-  --bg: #ffffff;
-  --card-bg: #fafafa;
+  --text-secondary: #4a4a4a;
+  --text-light: #7a7a7a;
+  --bg: #fdfcf9;
+  --card-bg: #ffffff;
   --error: #c45c5c;
   --success: #4a9d6b;
-  --shadow: 0 4px 20px rgba(0,0,0,0.06);
-  --shadow-hover: 0 12px 40px rgba(0,0,0,0.12);
+  --shadow: 0 4px 20px rgba(26, 92, 58, 0.08);
+  --shadow-hover: 0 20px 50px rgba(26, 92, 58, 0.15);
   --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
 }
 
 * {
@@ -86,7 +90,7 @@ input, textarea, select {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: white;
   padding: 16px 32px;
   border: none;
@@ -96,6 +100,12 @@ input, textarea, select {
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(26, 92, 58, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(26, 92, 58, 0.4);
 }
 
 .btn-primary:hover {
@@ -149,14 +159,17 @@ input, textarea, select {
 }
 
 .section-header h2 {
-  font-size: 42px;
+  font-size: 44px;
   color: var(--primary);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
 }
 
 .section-header p {
   font-size: 18px;
   color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .section-title-group {
@@ -689,11 +702,11 @@ input, textarea, select {
 .hero-section {
   position: relative;
   z-index: 1;
-  padding: 40px 0 60px;
+  padding: 60px 0 80px;
   overflow: hidden;
-  min-height: 600px;
+  min-height: 650px;
   margin-top: 125px;
-  background: linear-gradient(135deg, #4a7c59 0%, #5a8c69 50%, #3d6b4a 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #2a7d52 100%);
 }
 
 @media (max-width: 768px) {
@@ -805,14 +818,16 @@ input, textarea, select {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
   padding: 10px 20px;
   border-radius: 50px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 24px;
-  color: var(--primary);
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero-content h1 {
@@ -2759,32 +2774,35 @@ input, textarea, select {
 }
 
 .product-card {
-  background: white;
-  border-radius: 20px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   transition: var(--transition);
+  border: 1px solid rgba(26, 92, 58, 0.08);
 }
 
 .product-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-10px);
   box-shadow: var(--shadow-hover);
+  border-color: rgba(26, 92, 58, 0.15);
 }
 
 .product-image {
   position: relative;
   height: 280px;
   overflow: hidden;
+  background: var(--secondary);
 }
 
 .product-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition);
+  transition: transform 0.6s ease;
 }
 
 .product-card:hover .product-image img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .product-image .badge {
