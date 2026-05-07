@@ -66,6 +66,7 @@ export function AdminProvider({ children }) {
           images: p.image ? [p.image] : [],
           isBestseller: p.is_bestseller,
           isNew: p.is_new,
+          isPromo: p.is_promo,
           inStock: p.in_stock,
           promoPrice: p.promo_price
         }));

@@ -19,7 +19,7 @@ export default function BoutiquePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   
-  const { products } = useAdmin();
+  const { products, loading } = useAdmin();
   
   useEffect(() => {
     console.log('Boutique - Products loaded:', products.length, products);
@@ -115,6 +115,27 @@ export default function BoutiquePage() {
     ...filters.need
   ].filter(Boolean).length;
 
+  if (loading) {
+    return (
+      <main className="boutique-page">
+        <div className="container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="loading-spinner"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <main className="boutique-page">
+        <div className="container" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '20px' }}>
+          <h2>Aucun produit disponible</h2>
+          <p>Les produits seront bientôt disponibles</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="boutique-page">
       <div className="container">
@@ -128,11 +149,20 @@ export default function BoutiquePage() {
           <p className="header-subtitle">
             {products.length} produits naturels pour prendre soin de votre peau
           </p>
-          <div className="header-stats">
+<div className="header-stats">
             <div className="stat-item">
               <span className="stat-number">{products.filter(p => p.isBestseller).length}</span>
               <span className="stat-label">Bestsellers</span>
             </div>
+            <div className="stat-item">
+              <span className="stat-number">{products.filter(p => p.isNew).length}</span>
+              <span className="stat-label">Nouveautés</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{products.filter(p => p.isPromo).length}</span>
+              <span className="stat-label">Promotions</span>
+            </div>
+          </div>
             <div className="stat-item">
               <span className="stat-number">{products.filter(p => p.isNew).length</span>
               <span className="stat-label">Nouveautés</span>
