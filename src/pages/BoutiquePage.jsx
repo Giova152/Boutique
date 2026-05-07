@@ -43,10 +43,10 @@ export default function BoutiquePage() {
   const t = (key) => getTranslation(language, key);
   
   const [filters, setFilters] = useState({
-    category: searchParams.get('category') || '',
+    category: '',
     skinType: [],
     need: [],
-    promo: searchParams.get('promo') === 'true'
+    promo: false
   });
 
   const filteredProducts = useMemo(() => {
@@ -75,7 +75,7 @@ export default function BoutiquePage() {
     }
 
     if (filters.promo) {
-      result = result.filter(product => product.isBestseller || product.isNew);
+      result = result.filter(product => product.isPromo || product.is_promo);
     }
 
     if (sortBy === 'price-asc') {
