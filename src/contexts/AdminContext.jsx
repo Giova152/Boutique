@@ -23,7 +23,14 @@ export function AdminProvider({ children }) {
         supabase.from('stats').select('*').eq('id', 1).single()
       ]);
 
-      if (productsRes.data) setProducts(productsRes.data);
+      if (productsRes.data) {
+        // Convert image to images array for compatibility
+        const productsWithImages = productsRes.data.map(p => ({
+          ...p,
+          images: p.image ? [p.image] : []
+        }));
+        setProducts(productsWithImages);
+      }
       if (ordersRes.data) setOrders(ordersRes.data);
       if (promoRes.data) {
         const codes = {};

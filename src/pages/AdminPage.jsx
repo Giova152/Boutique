@@ -104,7 +104,7 @@ function AdminContent() {
       is_bestseller: productForm.isBestseller || false,
       is_promo: productForm.isPromo || false,
       promo_price: productForm.promoPrice ? parseFloat(productForm.promoPrice) : null,
-      images: imagePreview || productForm.image ? [imagePreview || productForm.image] : ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'],
+      image: imagePreview || productForm.image || 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
     };
     
     try {
