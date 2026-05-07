@@ -509,15 +509,6 @@ input, textarea, select {
   color: var(--primary);
 }
 
-.admin-link {
-  opacity: 0.5;
-}
-
-.admin-link:hover {
-  opacity: 1;
-  color: var(--primary);
-}
-
 .language-toggle {
   display: flex;
   align-items: center;
