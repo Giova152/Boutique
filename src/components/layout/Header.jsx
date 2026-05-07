@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, User, Menu } from 'lucide-react';
+import { ShoppingBag, User, Menu, Heart } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
+import { useWishlist } from '../../contexts/WishlistContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCartDrawer } from '../../contexts/CartDrawerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -24,6 +25,7 @@ export default function Header() {
   };
   
   const { cart } = useCart();
+  const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { openCart } = useCartDrawer();
   const { language } = useLanguage();
@@ -89,6 +91,14 @@ export default function Header() {
               aria-label="Compte"
             >
               <User size={20} />
+            </Link>
+            <Link 
+              to="/wishlist" 
+              className="account-btn"
+              aria-label="Favoris"
+            >
+              <Heart size={20} />
+              {wishlistCount > 0 && <span className="wishlist-badge">{wishlistCount}</span>}
             </Link>
             <button 
               type="button" 
