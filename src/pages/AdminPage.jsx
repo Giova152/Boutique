@@ -16,6 +16,8 @@ function AdminContent() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
+  const [customerSort, setCustomerSort] = useState('spent');
+  const [customerSortDir, setCustomerSortDir] = useState('desc');
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
@@ -35,8 +37,6 @@ function AdminContent() {
   });
   
   const [orderFilter, setOrderFilter] = useState('all');
-  const [customerSort, setCustomerSort] = useState('spent');
-  const [customerSortDir, setCustomerSortDir] = useState('desc');
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
