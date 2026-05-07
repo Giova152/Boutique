@@ -219,9 +219,19 @@ function AdminContent() {
             </div>
 
             {showProductForm && (
-              <div className="product-form-modal">
-                <div className="form-modal-content">
-                  <h3>{editingProduct ? 'Modifier' : 'Ajouter'} produit</h3>
+              <div className="product-form-modal" onClick={() => setShowProductForm(false)}>
+                <div className="form-modal-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <h3>{editingProduct ? 'Modifier' : 'Ajouter'} produit</h3>
+                    <button className="modal-close" onClick={() => {
+                      setShowProductForm(false);
+                      setEditingProduct(null);
+                      setImagePreview('');
+                      setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false, isPromo: false, promoPrice: '' });
+                    }}>
+                      <X size={24} />
+                    </button>
+                  </div>
                   <div className="form-grid">
                     <div className="form-group">
                       <label>Nom du produit</label>

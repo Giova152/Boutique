@@ -413,6 +413,37 @@
   color: white;
 }
 
+/* Modal Header */
+.admin-page .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-page .modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #1d4e38;
+}
+
+.admin-page .modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.admin-page .modal-close:hover {
+  background: #f0f0f0;
+  color: #dc2626;
+}
+
 /* Responsive Admin */
 @media (max-width: 768px) {
   .admin-page {
