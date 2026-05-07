@@ -10,66 +10,19 @@ import { supabase } from '../lib/supabase';
 
 const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
 
-export default function AdminPage() {
-  const navigate = useNavigate();
+function AdminContent() {
   const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user || !ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-        navigate('/admin-login');
-      } else {
-        setLoading(false);
-      }
-    });
-  }, [navigate]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
 
-  if (loading) {
-    return (
-      <main className="login-page">
-        <div className="container">
-          <div className="login-container">
-            <div className="login-header-section">
-              <h1>Chargement...</h1>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  const user = { email: 'admin@vegederm.com' };
-  const isAdmin = true;
-
-  if (!isAdmin) {
-    return (
-      <main className="login-page">
-        <div className="container">
-          <div className="login-container">
-            <div className="login-header-section">
-              <h1>Accès refusé</h1>
-              <p className="login-subtitle">
-                Vous devez être connecté en tant qu'administrateur pour accéder à cette page.
-              </p>
-              <Link to="/admin-login" className="btn-primary">Connexion Admin</Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   const [activeTab, setActiveTab] = useState('products');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [showProductForm, setShowProductForm] = useState(false);
-  const [imagePreview, setImagePreview] = useState('');
 
   const [productForm, setProductForm] = useState({
     name: '', price: '', description: '', inStock: 25,
@@ -688,4 +641,55 @@ export default function AdminPage() {
       </div>
     </main>
   );
+}
+
+export default function AdminPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+        setIsAdmin(true);
+      } else {
+        navigate('/admin-login', { replace: true });
+      }
+      setLoading(false);
+    });
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <main className="login-page">
+        <div className="container">
+          <div className="login-container">
+            <div className="login-header-section">
+              <h1>Chargement...</h1>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <main className="login-page">
+        <div className="container">
+          <div className="login-container">
+            <div className="login-header-section">
+              <h1>Accès refusé</h1>
+              <p className="login-subtitle">
+                Vous devez être connecté en tant qu'administrateur.
+              </p>
+              <Link to="/admin-login" className="btn-primary">Connexion Admin</Link>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return <AdminContent />;
 }
