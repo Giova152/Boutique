@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X } from 'lucide-react';
-import { products, categories } from '../data/products';
+import { categories } from '../data/products';
+import { useAdmin } from '../contexts/AdminContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../data/translations';
@@ -39,6 +40,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState(null);
   const { language } = useLanguage();
   const [exitPopupOpen, setExitPopupOpen] = useState(false);
+  const { products } = useAdmin();
   
   useEffect(() => {
     const handleMouseLeave = (e) => {

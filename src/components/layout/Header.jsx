@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useCartDrawer } from '../../contexts/CartDrawerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getTranslation } from '../../data/translations';
-import { products } from '../../data/products';
+import { useAdmin } from '../../contexts/AdminContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,6 +31,7 @@ export default function Header() {
   const { language, toggleLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
+  const { products } = useAdmin();
 
   const t = (key) => getTranslation(language, key);
 

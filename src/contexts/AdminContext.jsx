@@ -12,6 +12,42 @@ export function AdminProvider({ children }) {
 
   useEffect(() => {
     loadData();
+
+    // Subscribe to real-time product changes
+    const productsChannel = supabase
+      .channel('products-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        console.log('Product change detected:', payload);
+        if (payload.eventType === 'INSERT') {
+          setProducts(prev => [...prev, { 
+            ...payload.new, 
+            images: payload.new.image ? [payload.new.image] : [],
+            isBestseller: payload.new.is_bestseller,
+            isNew: payload.new.is_new,
+            inStock: payload.new.in_stock,
+            promoPrice: payload.new.promo_price
+          }]);
+        } else if (payload.eventType === 'UPDATE') {
+          setProducts(prev => prev.map(p => 
+            p.id === payload.new.id ? { 
+              ...p, 
+              ...payload.new,
+              images: payload.new.image ? [payload.new.image] : [],
+              isBestseller: payload.new.is_bestseller,
+              isNew: payload.new.is_new,
+              inStock: payload.new.in_stock,
+              promoPrice: payload.new.promo_price
+            } : p
+          ));
+        } else if (payload.eventType === 'DELETE') {
+          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(productsChannel);
+    };
   }, []);
 
   async function loadData() {
@@ -23,13 +59,20 @@ export function AdminProvider({ children }) {
         supabase.from('stats').select('*').eq('id', 1).single()
       ]);
 
-      if (productsRes.data) {
-        // Convert image to images array for compatibility
+      if (productsRes.data && productsRes.data.length > 0) {
+        console.log('Products loaded:', productsRes.data.length);
         const productsWithImages = productsRes.data.map(p => ({
           ...p,
-          images: p.image ? [p.image] : []
+          images: p.image ? [p.image] : [],
+          isBestseller: p.is_bestseller,
+          isNew: p.is_new,
+          inStock: p.in_stock,
+          promoPrice: p.promo_price
         }));
         setProducts(productsWithImages);
+      } else {
+        console.log('No products found, seeding default products...');
+        await seedProducts();
       }
       if (ordersRes.data) setOrders(ordersRes.data);
       if (promoRes.data) {
@@ -40,18 +83,218 @@ export function AdminProvider({ children }) {
       if (statsRes.data) setStats(statsRes.data);
     } catch (err) {
       console.error('Erreur chargement:', err);
+      await seedProducts();
     } finally {
       setLoading(false);
     }
   }
 
-  const addProduct = async (product) => {
-    const newProduct = { ...product, created_at: new Date().toISOString() };
-    const { data, error } = await supabase.from('products').insert([newProduct]).select();
-    if (!error && data) {
-      setProducts(prev => [...prev, data[0]]);
+  async function seedProducts() {
+    const defaultProducts = [
+      {
+        name: 'Beurre de Karité Pur',
+        category: 'beurre-karite',
+        price: 18.99,
+        description: 'Beurre de karité 100% naturel, riche en vitamines et acids gras essentiels. Parfait pour hydrater et nourrir la peau.',
+        in_stock: 50,
+        image: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
+        is_new: true,
+        is_bestseller: true,
+        is_promo: false,
+        rating: 4.8,
+        reviews: 124,
+        benefits: ['Hydratation intense', 'Réparateur cutané', 'Anti-âge naturel'],
+        ingredients: 'Beurre de karité brut 100%',
+        usage: 'Appliquer sur le corps après la douche'
+      },
+      {
+        name: 'Crème Hydratante Éclat',
+        category: 'cremes',
+        price: 24.99,
+        description: 'Crème hydratante légère et non grasse pour tous types de peau. Elle pénètre rapidement et procure une hydratation durable.',
+        in_stock: 35,
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400',
+        is_new: false,
+        is_bestseller: true,
+        is_promo: false,
+        rating: 4.6,
+        reviews: 89,
+        benefits: ['Hydratation 24h', 'Texture légère', 'Non comédogène'],
+        ingredients: 'Eau de rose, glycérine végétale, beurre de karité',
+        usage: 'Appliquer matin et soir sur visage et cou'
+      },
+      {
+        name: 'Savon Artisanal au Karité',
+        category: 'savons',
+        price: 8.99,
+        description: 'Savon artisanal enrichi au beurre de karité et aux huiles essentielles. Idéal pour les peaux sensibles.',
+        in_stock: 100,
+        image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+        is_new: false,
+        is_bestseller: false,
+        is_promo: true,
+        promo_price: 6.99,
+        rating: 4.5,
+        reviews: 156,
+        benefits: 'Doux pour la peau, Sans sulfate, Parfum naturel',
+        ingredients: 'Beurre de karité, huile d\'olive, huile de coco',
+        usage: 'Pour le corps et le visage'
+      },
+      {
+        name: 'Lotion Corps Nutrition',
+        category: 'corps',
+        price: 22.99,
+        description: 'Lotion corporelle ultra-nourrissante pour les peaux très sèches. Texture riche qui laisse la peau douce et silky.',
+        in_stock: 28,
+        image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?w=400',
+        is_new: true,
+        is_bestseller: false,
+        is_promo: false,
+        rating: 4.7,
+        reviews: 67,
+        benefits: ['Nutrition profonde', 'Texture onctueuse', 'Absorption rapide'],
+        ingredients: 'Beurre de karité, huile d\'amande douce, vitamine E',
+        usage: 'Masser sur tout le corps matin et soir'
+      },
+      {
+        name: 'Crème Réparatrice Éczéma',
+        category: 'eczema',
+        price: 29.99,
+        description: 'Crème apaisante специально conçue pour les peaux atopiques, psoriasis et eczéma. Soulage les démangeaisons.',
+        in_stock: 20,
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400',
+        is_new: false,
+        is_bestseller: true,
+        is_promo: false,
+        rating: 4.9,
+        reviews: 203,
+        benefits: ['Apaise les irritations', 'Répare la barrière cutanée', 'Soulage les démangeaisons'],
+        ingredients: 'Beurre de karité, avoine colloïdale, allantoïne',
+        usage: 'Appliquer 2-3 fois par jour sur les zones affectées'
+      },
+      {
+        name: 'Shampooing Réparateur',
+        category: 'capillaires',
+        price: 16.99,
+        description: 'Shampooing doux sans sulfate qui répare et renforce les cheveux secs et cassants.',
+        in_stock: 45,
+        image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400',
+        is_new: false,
+        is_bestseller: false,
+        is_promo: false,
+        rating: 4.4,
+        reviews: 78,
+        benefits: ['Sans sulfate', 'Réparateur', 'Cheveux brillants'],
+        ingredients: 'Beurre de karité, protéines de soja, miel',
+        usage: 'Masser le cuir chevelu, rincer, répéter'
+      },
+      {
+        name: 'Crème Pieds Ultra-Nourrissante',
+        category: 'pieds',
+        price: 14.99,
+        description: 'Crème spécifique pour les pieds secs et fendillés. Texture riche mais non collante.',
+        in_stock: 40,
+        image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b07?w=400',
+        is_new: false,
+        is_bestseller: true,
+        is_promo: false,
+        rating: 4.7,
+        reviews: 112,
+        benefits: ['Élimine les-callosités', 'Hydrate en profondeur', 'Sensation immédiate'],
+        ingredients: 'Beurre de karité, urée 10%, huile de ricin',
+        usage: 'Appliquer sur pieds propres, masser jusqu\'à absorption'
+      },
+      {
+        name: 'Gommage Corporel Douceur',
+        category: 'exfoliants',
+        price: 19.99,
+        description: 'Gommage naturel aux粒 de sucre et huile de karité. Élimine les cellules mortes en douceur.',
+        in_stock: 32,
+        image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400',
+        is_new: true,
+        is_bestseller: false,
+        is_promo: true,
+        promo_price: 15.99,
+        rating: 4.5,
+        reviews: 54,
+        benefits: ['Exfoliation douce', 'Peau douce et brillante', '100% naturel'],
+        ingredients: 'Sucre glace, beurre de karité, huile d\'amande',
+        usage: 'Masser sur peau humide, rincer'
+      },
+      {
+        name: 'Crème Solaire SPF 50',
+        category: 'cremes',
+        price: 24.99,
+        description: 'Écran solaire mineral SPF 50, water-resistant, pour protéger la peau des UVA/UVB.',
+        in_stock: 25,
+        image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+        is_new: false,
+        is_bestseller: false,
+        is_promo: false,
+        rating: 4.6,
+        reviews: 45,
+        benefits: ['Mineral', 'Water-resistant', 'Sans nanoparticles'],
+        ingredients: 'Oxyde de zinc, beurre de karité, vitamine E',
+        usage: 'Appliquer 15 min avant exposition, renouveler toutes les 2h'
+      },
+      {
+        name: 'Gel Douche Crémeux',
+        category: 'savons',
+        price: 12.99,
+        description: 'Gel douche crémeux sans savon, respecte le film hydrolipidique de la peau.',
+        in_stock: 60,
+        image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+        is_new: false,
+        is_bestseller: false,
+        is_promo: false,
+        rating: 4.3,
+        reviews: 92,
+        benefits: ['Sans savons', 'pH neutre', 'Familial'],
+        ingredients: 'Basis surfactants doux, beurre de karité, glycérine',
+        usage: 'Sous la douche, faire mousser sur le corps'
+      }
+    ];
+
+    for (const product of defaultProducts) {
+      await supabase.from('products').insert([product]);
     }
-    return { success: !error };
+    console.log('Default products seeded');
+    
+    // Reload products after seeding
+    const { data: newProducts } = await supabase.from('products').select('*');
+    if (newProducts) {
+      const productsWithImages = newProducts.map(p => ({
+        ...p,
+        images: p.image ? [p.image] : [],
+        isBestseller: p.is_bestseller,
+        isNew: p.is_new,
+        inStock: p.in_stock,
+        promoPrice: p.promo_price
+      }));
+      setProducts(productsWithImages);
+    }
+  }
+
+  const addProduct = async (product) => {
+    // Remove fields that shouldn't be sent
+    const cleanProduct = { ...product };
+    delete cleanProduct.id;
+    delete cleanProduct.created_at;
+    delete cleanProduct.updated_at;
+    
+    console.log('Adding product:', cleanProduct);
+    const { data, error } = await supabase.from('products').insert([cleanProduct]).select();
+    console.log('Add result - data:', data, 'error:', error);
+    if (error) {
+      console.error('Error adding product:', error);
+      return { success: false, error: error.message };
+    }
+    if (data && data[0]) {
+      const newProduct = { ...data[0], images: data[0].image ? [data[0].image] : [] };
+      console.log('New product added:', newProduct);
+      setProducts(prev => [...prev, newProduct]);
+    }
+    return { success: true };
   };
 
   const updateProduct = async (id, updates) => {
@@ -336,7 +579,8 @@ export function AdminProvider({ children }) {
       addOrder,
       updateOrderStatus,
       recordVisit,
-      getStats
+      getStats,
+      seedProducts
     }}>
       {children}
     </AdminContext.Provider>

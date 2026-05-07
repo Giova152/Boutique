@@ -36,6 +36,7 @@ function AdminContent() {
   const addProduct = adminCtx?.addProduct || (() => {});
   const updateProduct = adminCtx?.updateProduct || (() => {});
   const addPromoCode = adminCtx?.addPromoCode || (() => {});
+  const seedProducts = adminCtx?.seedProducts || (() => {});
 
   const [activeTab, setActiveTab] = useState('products');
 
@@ -94,6 +95,25 @@ function AdminContent() {
       return;
     }
 
+    if (!productForm.name.trim()) {
+      addToast('Le nom du produit est requis', 'error');
+      return;
+    }
+    if (!productForm.price || parseFloat(productForm.price) <= 0) {
+      addToast('Le prix du produit est requis', 'error');
+      return;
+    }
+    if (!productForm.description.trim()) {
+      addToast('La description du produit est requise', 'error');
+      return;
+    }
+
+    const finalImage = imagePreview || productForm.image;
+    if (!finalImage) {
+      addToast('Veuillez ajouter une image pour le produit', 'error');
+      return;
+    }
+
     const productData = {
       name: productForm.name,
       description: productForm.description,
@@ -104,7 +124,7 @@ function AdminContent() {
       is_bestseller: productForm.isBestseller || false,
       is_promo: productForm.isPromo || false,
       promo_price: productForm.promoPrice ? parseFloat(productForm.promoPrice) : null,
-      image: imagePreview || productForm.image || 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
+      image: finalImage,
     };
     
     try {
@@ -120,10 +140,11 @@ function AdminContent() {
           ingredients: '',
           usage: ''
         });
+        console.log('Add product result:', result);
         if (result.success) {
           addToast('Produit ajouté avec succès', 'success');
         } else {
-          addToast('Erreur lors de l\'ajout du produit', 'error');
+          addToast('Erreur: ' + (result.error || 'inconnue'), 'error');
         }
       }
       setShowProductForm(false);
@@ -216,6 +237,11 @@ function AdminContent() {
               <button className="btn-primary" onClick={() => { setEditingProduct(null); setShowProductForm(true); }}>
                 <Plus size={18} /> Ajouter produit
               </button>
+              {products.length === 0 && (
+                <button className="btn-secondary" onClick={async () => { await seedProducts(); addToast('Produits initialisés!', 'success'); }}>
+                  <PackageIcon size={18} /> Initialiser produits
+                </button>
+              )}
             </div>
 
             {showProductForm && (

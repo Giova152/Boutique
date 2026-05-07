@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Search, Heart, ShoppingBag } from 'lucide-react';
@@ -20,6 +20,11 @@ export default function BoutiquePage() {
   const [sortBy, setSortBy] = useState('default');
   
   const { products } = useAdmin();
+  
+  useEffect(() => {
+    console.log('Boutique - Products loaded:', products.length, products);
+  }, [products]);
+  
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
@@ -118,8 +123,25 @@ export default function BoutiquePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
+          <div className="header-badge">🌿 100% Naturel</div>
           <h1>Notre Boutique</h1>
-          <p>Découvrez notre collection de {products.length} produits naturels</p>
+          <p className="header-subtitle">
+            {products.length} produits naturels pour prendre soin de votre peau
+          </p>
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-number">{products.filter(p => p.isBestseller).length}</span>
+              <span className="stat-label">Bestsellers</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{products.filter(p => p.isNew).length</span>
+              <span className="stat-label">Nouveautés</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">{products.filter(p => p.is_promo).length</span>
+              <span className="stat-label">Promotions</span>
+            </div>
+          </div>
         </motion.div>
 
         <div className="boutique-toolbar">
