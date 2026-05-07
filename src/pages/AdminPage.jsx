@@ -364,7 +364,7 @@ function SettingsPanel({ settings, onSave, addToast }) {
             <label style={{ display: 'block', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Code promo</label>
             <input
               type="text"
-              value={settings.exitPopupCode || ''}
+              value={settings.exitPopupCode || 'VEGEDERM10'}
               onChange={(e) => onSave({ exit_popup_code: e.target.value.toUpperCase(), exit_popup_discount: settings.exitPopupDiscount })}
               placeholder="VEGEDERM10"
               className="form-input"
@@ -380,6 +380,9 @@ function SettingsPanel({ settings, onSave, addToast }) {
               style={{ width: 100 }}
             />
           </div>
+          <p style={{ marginTop: 16, fontSize: 12, color: 'var(--text-light)' }}>
+            ⟳ Les changements sont saves automatiquement
+          </p>
         </div>
       </div>
 
