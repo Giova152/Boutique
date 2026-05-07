@@ -19,16 +19,16 @@ export default function BoutiquePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   
-  const { products: dbProducts, loading } = useAdmin();
-  
-  // Fallback to local products if DB is empty
-  const products = dbProducts.length > 0 ? dbProducts : localProducts.map(p => ({
+  // Use local products directly for now
+  const products = localProducts.map(p => ({
     ...p,
     isBestseller: p.isBestseller,
     isNew: p.isNew,
     isPromo: p.isPromo || false,
     inStock: p.inStock
   }));
+  
+  const loading = false;
   
   useEffect(() => {
     console.log('Boutique - Products loaded:', products.length, products);
