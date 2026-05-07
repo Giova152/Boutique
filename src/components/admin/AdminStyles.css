@@ -118,20 +118,82 @@
   font-weight: 600;
 }
 
+/* Responsive Login */
+@media (max-width: 480px) {
+  .admin-login-box {
+    padding: 24px 20px;
+  }
+  
+  .admin-logo {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  .admin-login-header h1 {
+    font-size: 22px;
+  }
+  
+  .admin-login-form .btn-primary {
+    padding: 14px;
+  }
+}
+
 .admin-page .admin-header {
   background: white;
   border-radius: 16px;
-  padding: 24px 32px;
+  padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .admin-page .admin-header h1 {
-  font-size: 28px;
+  font-size: 24px;
   color: var(--primary);
   margin: 0;
+}
+
+.admin-page .admin-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-page .admin-header-actions .btn-secondary,
+.admin-page .admin-header-actions .btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-page .admin-header-actions .btn-secondary {
+  background: white;
+  border: 2px solid #1d4e38;
+  color: #1d4e38;
+}
+
+.admin-page .admin-header-actions .btn-secondary:hover {
+  background: #1d4e38;
+  color: white;
+}
+
+.admin-page .admin-header-actions .btn-logout {
+  background: #dc2626;
+  border: none;
+  color: white;
+}
+
+.admin-page .admin-header-actions .btn-logout:hover {
+  background: #b91c1c;
 }
 
 .admin-page .admin-tabs {
@@ -146,6 +208,79 @@
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Responsive Admin */
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 20px 0;
+  }
+  
+  .admin-page .container {
+    padding: 0 16px;
+  }
+  
+  .admin-page .admin-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .admin-page .admin-header h1 {
+    font-size: 20px;
+  }
+  
+  .admin-page .admin-header-actions {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .admin-page .admin-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .admin-page .admin-tab {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .admin-page .admin-content {
+    padding: 16px;
+  }
+  
+  .admin-page .admin-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .admin-page .search-box {
+    width: 100%;
+  }
+  
+  .admin-page .products-table table,
+  .admin-page .promos-list table,
+  .admin-page .orders-list table,
+  .admin-page .customers-list table {
+    font-size: 12px;
+  }
+  
+  .admin-page .products-table th,
+  .admin-page .products-table td {
+    padding: 8px 4px;
+  }
+  
+  .admin-page .stat-card {
+    padding: 16px;
+  }
+  
+  .admin-page .stat-value {
+    font-size: 24px;
+  }
 }
 
 .admin-header {

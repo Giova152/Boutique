@@ -153,11 +153,11 @@ function AdminContent() {
       <div className="container">
         <div className="admin-header">
           <h1>Admin Panel - VEGEDERM</h1>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Link to="/" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="admin-header-actions">
+            <Link to="/" className="btn-secondary">
               Voir boutique
             </Link>
-            <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={handleLogout} className="btn-logout">
               <LogOut size={18} />
               Déconnexion
             </button>
