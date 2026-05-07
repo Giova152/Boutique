@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ShoppingBag, User, Menu } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { useWishlist } from '../../contexts/WishlistContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCartDrawer } from '../../contexts/CartDrawerContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -11,9 +10,6 @@ import { useAdmin } from '../../contexts/AdminContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
   const { settings } = useAdmin();
   const promoCode = settings?.exitPopupCode || 'VEGEDERM10';
   const promoDiscount = settings?.exitPopupDiscount || 10;
@@ -28,13 +24,10 @@ export default function Header() {
   };
   
   const { cart } = useCart();
-  const { wishlistCount } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { openCart } = useCartDrawer();
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const location = useLocation();
-  const navigate = useNavigate();
-  const { products } = useAdmin();
 
   const t = (key) => getTranslation(language, key);
 
@@ -44,19 +37,6 @@ export default function Header() {
     { path: '/programme', label: 'Programme' },
     { path: '/contact', label: t('contact') }
   ];
-
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    if (query.length > 2) {
-      const results = products.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.description.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 5);
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
-  };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -70,7 +50,7 @@ export default function Header() {
             <Link to="/boutique?promo=true" className="promo-link">{t('seePromos')}</Link>
           </div>
           <button className="promo-banner-close" onClick={handleClosePromo} title="Fermer">
-            <X size={16} />
+            <span style={{ fontSize: '16px' }}>×</span>
           </button>
         </div>
       )}
@@ -78,18 +58,18 @@ export default function Header() {
         <div className="navbar">
           <button 
             type="button" 
-            className="menu-btn md:hidden text-primary" 
+            className="menu-btn" 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Ouvrir le menu"
           >
-            <Menu className="h-6 w-6" />
+            <Menu size={24} />
           </button>
           
-          <Link to="/" className="logo-link absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:translate-x-0 md:translate-y-0">
+          <Link to="/" className="logo-link">
             <span className="logo-text">Bio Detox Minceur</span>
           </Link>
           
-          <nav className="nav-pills hidden md:flex">
+          <nav className="nav-pills">
             {navLinks.map(link => (
               <Link
                 key={link.path}
@@ -97,7 +77,7 @@ export default function Header() {
                 className={`nav-link-pill ${location.pathname === link.path ? 'active' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <span className="relative z-10">{link.label}</span>
+                <span className="nav-link-inner">{link.label}</span>
               </Link>
             ))}
           </nav>
@@ -105,18 +85,18 @@ export default function Header() {
           <div className="header-actions">
             <Link 
               to={isAuthenticated ? '/profile' : '/login'} 
-              className="hidden md:inline-flex h-10 w-10 items-center justify-center transition-opacity text-primary hover:opacity-60"
+              className="account-btn"
               aria-label="Compte"
             >
-              <User className="h-5 w-5" />
+              <User size={20} />
             </Link>
             <button 
               type="button" 
-              className="relative inline-flex h-10 w-10 items-center justify-center transition-opacity text-primary hover:opacity-60"
+              className="cart-btn"
               onClick={openCart}
               aria-label="Panier"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag size={20} />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </button>
           </div>
