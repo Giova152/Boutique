@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3, 
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { supabase } from '../lib/supabase';
@@ -658,26 +658,54 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
         setIsAdmin(true);
-      } else {
-        navigate('/admin-login', { replace: true });
       }
       setLoading(false);
     });
-  }, [navigate]);
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError('');
+
+    if (!ADMIN_EMAILS.includes(loginEmail.toLowerCase())) {
+      setLoginError('Email non autorisé pour l\'accès administrateur');
+      setIsLoggingIn(false);
+      return;
+    }
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email: loginEmail.toLowerCase(),
+      password: loginPassword
+    });
+
+    if (authError) {
+      setLoginError(authError.message);
+      setIsLoggingIn(false);
+      return;
+    }
+
+    if (data.user) {
+      setIsAdmin(true);
+      setIsLoggingIn(false);
+    }
+  };
 
   if (loading) {
     return (
-      <main className="login-page">
-        <div className="container">
-          <div className="login-container">
-            <div className="login-header-section">
-              <h1>Chargement...</h1>
-            </div>
+      <main className="admin-login-page">
+        <div className="admin-login-container">
+          <div className="admin-login-box">
+            <h1>Chargement...</h1>
           </div>
         </div>
       </main>
@@ -686,17 +714,48 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <main className="login-page">
-        <div className="container">
-          <div className="login-container">
-            <div className="login-header-section">
-              <h1>Accès refusé</h1>
-              <p className="login-subtitle">
-                Vous devez être connecté en tant qu'administrateur.
-              </p>
-              <Link to="/admin-login" className="btn-primary">Connexion Admin</Link>
+      <main className="admin-login-page">
+        <div className="admin-login-container">
+          <motion.div 
+            className="admin-login-box"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="admin-login-header">
+              <div className="admin-logo">
+                <Shield size={32} />
+                <span>Admin</span>
+              </div>
+              <h1>Connexion Administrateur</h1>
+              <p>Accès restreint au panel VEGEDERM</p>
             </div>
-          </div>
+            <form onSubmit={handleLogin} className="admin-login-form">
+              {loginError && <div className="error-message">{loginError}</div>}
+              <div className="form-group">
+                <label>Email administrateur</label>
+                <input
+                  type="email"
+                  placeholder="admin@vegederm.com"
+                  value={loginEmail}
+                  onChange={(e) => { setLoginEmail(e.target.value); setLoginError(''); }}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Mot de passe</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className="btn-primary" disabled={isLoggingIn}>
+                {isLoggingIn ? 'Connexion...' : 'Se connecter'}
+              </button>
+            </form>
+          </motion.div>
         </div>
       </main>
     );
