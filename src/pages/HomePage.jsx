@@ -37,6 +37,7 @@ const testimonials = {
 
 export default function HomePage() {
   const { addToCart } = useCart();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
