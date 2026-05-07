@@ -462,100 +462,159 @@ input, textarea, select {
 /* Header */
 .header {
   position: relative;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(150%);
   z-index: 1000;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 18px 44px -18px rgba(13, 35, 27, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  margin: 8px auto;
+  max-width: 1200px;
 }
 
-.header-inner {
+.navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
+  padding: 10px 16px;
+  transition: all 0.5s ease-out;
 }
 
-.logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--primary);
+@media (min-width: 768px) {
+  .navbar {
+    padding: 10px 24px;
+  }
 }
 
-.nav {
-  display: flex;
+.menu-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 40px;
-}
-
-.nav-link {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-  position: relative;
-  transition: var(--transition);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--primary);
-  transition: var(--transition);
-}
-
-.nav-link:hover, .nav-link.active {
-  color: var(--primary);
-}
-
-.nav-link:hover::after, .nav-link.active::after {
-  width: 100%;
-}
-
-.header-icons {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.icon-btn {
-  position: relative;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-primary);
-  transition: var(--transition);
-  padding: 8px;
 }
 
-.icon-btn:hover {
+.logo-link {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--primary);
 }
 
-.language-toggle {
+@media (min-width: 768px) {
+  .logo-link {
+    font-size: 28px;
+  }
+}
+
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--secondary);
-  border: none;
-  border-radius: 20px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: var(--transition);
-  color: var(--primary);
+  gap: 8px;
 }
 
-.language-toggle:hover {
+@media (min-width: 768px) {
+  .header-actions {
+    gap: 16px;
+  }
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
   background: var(--primary);
   color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.lang-code {
+.nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 9999px;
+  padding: 4px;
+}
+
+.nav-link-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 8px 20px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  opacity: 0.6;
+}
+
+.nav-link-pill:hover {
+  opacity: 0.9;
+}
+
+.nav-link-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: -1;
+}
+
+.nav-link-pill.active {
+  opacity: 1;
+}
+
+.nav-link-pill.active::after {
+  opacity: 1;
+}
+
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.mobile-nav-link {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--primary);
 }
 
 .badge-count {

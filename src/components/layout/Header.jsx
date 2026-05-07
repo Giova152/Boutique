@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, User, Menu, X, Globe } from 'lucide-react';
+import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { useWishlist } from '../../contexts/WishlistContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -41,7 +41,7 @@ export default function Header() {
   const navLinks = [
     { path: '/', label: t('home') },
     { path: '/boutique', label: t('boutique') },
-    { path: '/a-propos', label: t('about') },
+    { path: '/programme', label: 'Programme' },
     { path: '/contact', label: t('contact') }
   ];
 
@@ -75,141 +75,65 @@ export default function Header() {
         </div>
       )}
       <header className="header">
-        <div className="container header-inner">
-          <Link to="/" className="logo">VEGEDERM</Link>
-
-          <nav className={`nav ${mobileMenuOpen ? 'nav-open' : ''}`}>
+        <div className="navbar">
+          <button 
+            type="button" 
+            className="menu-btn md:hidden text-primary" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Ouvrir le menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          
+          <Link to="/" className="logo-link absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:static md:translate-x-0 md:translate-y-0">
+            <span className="logo-text">Bio Detox Minceur</span>
+          </Link>
+          
+          <nav className="nav-pills hidden md:flex">
             {navLinks.map(link => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+                className={`nav-link-pill ${location.pathname === link.path ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="relative z-10">{link.label}</span>
+              </Link>
+            ))}
+          </nav>
+          
+          <div className="header-actions">
+            <Link 
+              to={isAuthenticated ? '/profile' : '/login'} 
+              className="hidden md:inline-flex h-10 w-10 items-center justify-center transition-opacity text-primary hover:opacity-60"
+              aria-label="Compte"
+            >
+              <User className="h-5 w-5" />
+            </Link>
+            <button 
+              type="button" 
+              className="relative inline-flex h-10 w-10 items-center justify-center transition-opacity text-primary hover:opacity-60"
+              onClick={openCart}
+              aria-label="Panier"
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </button>
+          </div>
+        </div>
+        
+        {mobileMenuOpen && (
+          <div className="mobile-menu">
+            {navLinks.map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-          </nav>
-
-          <div className="header-icons">
-            {location.pathname === '/' && (
-              <button className="language-toggle" onClick={toggleLanguage} title={language === 'fr' ? 'Switch to English' : 'Passer en français'}>
-                <Globe size={20} />
-                <span className="lang-code">{language.toUpperCase()}</span>
-              </button>
-            )}
-            <button className="icon-btn" onClick={() => setSearchOpen(!searchOpen)}>
-              <Search size={20} />
-            </button>
-            <Link to="/wishlist" className="icon-btn">
-              <Heart size={20} />
-              {wishlistCount > 0 && <span className="badge-count">{wishlistCount}</span>}
-            </Link>
-            <button className="icon-btn" onClick={openCart}>
-              <ShoppingBag size={20} />
-              {cartCount > 0 && <span className="badge-count">{cartCount}</span>}
-            </button>
-            <Link to={isAuthenticated ? '/profile' : '/login'} className="icon-btn">
-              <User size={20} />
-            </Link>
-            <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {searchOpen && (
-          <div className="search-bar">
-            <div className="container">
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  placeholder={t('search')}
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  autoFocus
-                  style={{ paddingRight: searchResults.length > 0 ? '120px' : '20px' }}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => { setSearchQuery(''); setSearchResults([]); }}
-                    style={{
-                      position: 'absolute',
-                      right: searchResults.length > 0 ? '90px' : '20px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <X size={18} />
-                  </button>
-                )}
-                {searchResults.length > 0 && (
-                  <button
-                    onClick={() => navigate('/boutique')}
-                    style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'var(--primary)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      cursor: 'pointer',
-                      fontSize: '13px'
-                    }}
-                  >
-                    Voir tout
-                  </button>
-                )}
-                {searchResults.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    background: 'white',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                    marginTop: '8px',
-                    overflow: 'hidden',
-                    zIndex: 100
-                  }}>
-                    {searchResults.map(product => (
-                      <Link
-                        key={product.id}
-                        to="/boutique"
-                        onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          padding: '12px 16px',
-                          borderBottom: '1px solid #eee',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                      >
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: '14px' }}>{product.name}</div>
-                          <div style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 600 }}>{product.price.toFixed(2)} $</div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         )}
       </header>
