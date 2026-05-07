@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Search, Heart, ShoppingBag } from 'lucide-react';
-import { categories, skinTypes, needs } from '../data/products';
+import { categories, skinTypes, needs, products as localProducts } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
 import ProductModal from '../components/product/ProductModal';
 import { useCart } from '../contexts/CartContext';
@@ -19,7 +19,16 @@ export default function BoutiquePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   
-  const { products, loading } = useAdmin();
+  const { products: dbProducts, loading } = useAdmin();
+  
+  // Fallback to local products if DB is empty
+  const products = dbProducts.length > 0 ? dbProducts : localProducts.map(p => ({
+    ...p,
+    isBestseller: p.isBestseller,
+    isNew: p.isNew,
+    isPromo: p.isPromo || false,
+    inStock: p.inStock
+  }));
   
   useEffect(() => {
     console.log('Boutique - Products loaded:', products.length, products);
