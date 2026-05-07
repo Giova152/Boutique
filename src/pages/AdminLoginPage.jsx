@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
@@ -16,6 +16,14 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+        navigate('/admin');
+      }
+    });
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +49,7 @@ export default function AdminLoginPage() {
 
     if (data.user) {
       addToast('Connexion admin réussie !', 'success');
-      navigate('/admin');
+      window.location.href = '/admin';
     }
   };
 

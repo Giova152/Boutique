@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -7,21 +7,32 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+
+const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
-  const isAdmin = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+        setIsAdmin(true);
+      } else if (!session?.user) {
+        navigate('/admin-login');
+      }
+    });
+  }, [navigate]);
 
   const { products, promoCodes, orders, getStats, getCustomers, downloadInvoice, downloadPDF,
     addProduct, updateProduct, deleteProduct, updateStock,
     addPromoCode, deletePromoCode, updateOrderStatus, confirmDelivery
   } = useAdmin();
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAdmin) {
     return (
       <main className="login-page">
         <div className="container">
