@@ -220,16 +220,6 @@ export default function HomePage() {
                 <p>{t('carbonNeutral')}</p>
               </div>
             </motion.div>
-            <motion.div 
-              className="trust-badge"
-              whileHover={{ scale: 1.05 }}
-            >
-              <CheckCircle size={28} />
-              <div>
-                <h4>30 jours</h4>
-                <p>Garantie satisfait ou remboursé</p>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
