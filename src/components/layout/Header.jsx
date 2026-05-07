@@ -68,7 +68,7 @@ export default function Header() {
           </button>
           
           <Link to="/" className="logo-link">
-            <span className="logo-text">Bio Detox Minceur</span>
+            <span className="logo-text">VEGEDERM</span>
           </Link>
           
           <nav className="nav-pills">
