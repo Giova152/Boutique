@@ -17,6 +17,20 @@ export function AuthProvider({ children }) {
   async function checkUser() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check 24h session expiry for users
+      const loginTime = localStorage.getItem('userLoginTime');
+      if (loginTime) {
+        const expiryTime = 24 * 60 * 60 * 1000; // 24h
+        if (Date.now() - parseInt(loginTime) > expiryTime) {
+          // Session expired
+          localStorage.removeItem('userLoginTime');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+      }
+      
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email });
       }
@@ -36,6 +50,9 @@ export function AuthProvider({ children }) {
     if (error) return { success: false, message: error.message };
     
     if (data.user) {
+      // Store login time for 24h session
+      localStorage.setItem('userLoginTime', Date.now().toString());
+      
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -69,12 +86,15 @@ export function AuthProvider({ children }) {
     if (error) return { success: false, message: error.message };
     
     if (data.user) {
+      // Store login time for 24h session
+      localStorage.setItem('userLoginTime', Date.now().toString());
       setUser({ id: data.user.id, email, name });
       return { success: true };
     }
   };
 
   const logout = async () => {
+    localStorage.removeItem('userLoginTime');
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
