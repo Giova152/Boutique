@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3, 
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { supabase } from '../lib/supabase';
@@ -48,6 +48,11 @@ function AdminContent() {
   });
   
   const [orderFilter, setOrderFilter] = useState('all');
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/admin';
+  };
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -147,7 +152,15 @@ function AdminContent() {
       <div className="container">
         <div className="admin-header">
           <h1>Admin Panel - VEGEDERM</h1>
-          <Link to="/" className="btn-secondary">Voir boutique</Link>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Link to="/" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Voir boutique
+            </Link>
+            <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <LogOut size={18} />
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="admin-tabs">
