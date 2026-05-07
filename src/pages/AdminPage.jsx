@@ -363,36 +363,40 @@ function AdminContent() {
                         )}
                       </div>
                     </div>
-                    <div className="form-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={productForm.isNew}
-                          onChange={(e) => setProductForm({...productForm, isNew: e.target.checked})}
-                        />
-                        Nouveau
-                      </label>
+                    <div className="form-group full">
+                      <div className="toggle-group">
+                        <label className={`toggle-label ${productForm.isNew ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={productForm.isNew}
+                            onChange={(e) => setProductForm({...productForm, isNew: e.target.checked})}
+                          />
+                          <span className="toggle-switch"></span>
+                          <span className="toggle-text">Nouveau</span>
+                        </label>
+                        
+                        <label className={`toggle-label ${productForm.isBestseller ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={productForm.isBestseller}
+                            onChange={(e) => setProductForm({...productForm, isBestseller: e.target.checked})}
+                          />
+                          <span className="toggle-switch"></span>
+                          <span className="toggle-text">Best-seller</span>
+                        </label>
+                        
+                        <label className={`toggle-label ${productForm.isPromo ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={productForm.isPromo}
+                            onChange={(e) => setProductForm({...productForm, isPromo: e.target.checked, promoPrice: e.target.checked ? productForm.promoPrice : ''})}
+                          />
+                          <span className="toggle-switch"></span>
+                          <span className="toggle-text">En promo</span>
+                        </label>
+                      </div>
                     </div>
-                    <div className="form-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={productForm.isBestseller}
-                          onChange={(e) => setProductForm({...productForm, isBestseller: e.target.checked})}
-                        />
-                        Best-seller
-                      </label>
-                    </div>
-                    <div className="form-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={productForm.isPromo}
-                          onChange={(e) => setProductForm({...productForm, isPromo: e.target.checked, promoPrice: e.target.checked ? productForm.promoPrice : ''})}
-                        />
-                        En promo
-                      </label>
-                    </div>
+                    
                     {productForm.isPromo && (
                       <div className="form-group">
                         <label>Prix promo ($)</label>
@@ -402,13 +406,33 @@ function AdminContent() {
                           value={productForm.promoPrice}
                           onChange={(e) => setProductForm({...productForm, promoPrice: e.target.value})}
                           placeholder="Prix réduit"
+                          style={{ 
+                            padding: '12px 16px',
+                            border: '2px solid #1d4e38',
+                            borderRadius: '10px',
+                            fontSize: '15px',
+                            width: '100%'
+                          }}
                         />
                       </div>
                     )}
                   </div>
                   <div className="form-actions">
-                    <button className="btn-secondary" onClick={() => { setShowProductForm(false); setEditingProduct(null); }}>Annuler</button>
-                    <button className="btn-primary" onClick={handleSaveProduct}>Enregistrer</button>
+                    <button 
+                      type="button"
+                      className="btn-cancel" 
+                      onClick={() => { 
+                        setShowProductForm(false); 
+                        setEditingProduct(null);
+                        setImagePreview('');
+                        setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false, isPromo: false, promoPrice: '' });
+                      }}
+                    >
+                      Annuler
+                    </button>
+                    <button className="btn-primary" onClick={handleSaveProduct}>
+                      {editingProduct ? 'Modifier le produit' : 'Ajouter le produit'}
+                    </button>
                   </div>
                 </div>
               </div>

@@ -313,6 +313,106 @@
   color: #333;
 }
 
+/* Toggle Switches */
+.admin-page .toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.admin-page .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  transition: all 0.2s;
+}
+
+.admin-page .toggle-label input {
+  display: none;
+}
+
+.admin-page .toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.admin-page .toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.admin-page .toggle-label.active {
+  border-color: #1d4e38;
+  background: #f0f7f4;
+}
+
+.admin-page .toggle-label.active .toggle-switch {
+  background: #1d4e38;
+}
+
+.admin-page .toggle-label.active .toggle-switch::after {
+  transform: translateX(20px);
+}
+
+.admin-page .toggle-text {
+  font-weight: 500;
+  color: #666;
+}
+
+.admin-page .toggle-label.active .toggle-text {
+  color: #1d4e38;
+}
+
+/* Form Actions */
+.admin-page .form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.admin-page .form-actions .btn-primary {
+  flex: 1;
+  padding: 14px 24px;
+  font-size: 16px;
+}
+
+.admin-page .btn-cancel {
+  padding: 14px 24px;
+  background: white;
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-page .btn-cancel:hover {
+  background: #dc2626;
+  color: white;
+}
+
 /* Responsive Admin */
 @media (max-width: 768px) {
   .admin-page {
