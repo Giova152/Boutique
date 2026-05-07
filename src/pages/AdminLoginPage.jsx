@@ -54,30 +54,24 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="login-page">
-      <div className="login-background">
-        <div className="login-pattern"></div>
-      </div>
-      
-      <div className="container">
+    <main className="admin-login-page">
+      <div className="admin-login-container">
         <motion.div 
-          className="login-container"
+          className="admin-login-box"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="login-header-section">
-            <div className="admin-badge">
-              <Shield size={24} />
-              <span>Administration</span>
+          <div className="admin-login-header">
+            <div className="admin-logo">
+              <Shield size={32} />
+              <span>Admin</span>
             </div>
-            <h1>Connexion Admin</h1>
-            <p className="login-subtitle">
-              Accédez au panel d'administration de {storeConfig.name}
-            </p>
+            <h1>Connexion Administrateur</h1>
+            <p>Accès restreint au panel VEGEDERM</p>
           </div>
 
-          <div className="login-form-card admin-login-card">
+          <div className="admin-login-form">
             <form onSubmit={handleSubmit}>
               {error && (
                 <div className="error-message">
@@ -87,37 +81,24 @@ export default function AdminLoginPage() {
 
               <div className="form-group">
                 <label>Email administrateur</label>
-                <div className="input-with-icon">
-                  <Lock size={18} />
-                  <input
-                    type="email"
-                    placeholder="zoumcosmo@gmail.com"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                    required
-                  />
-                </div>
+                <input
+                  type="email"
+                  placeholder="admin@vegederm.com"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                  required
+                />
               </div>
 
               <div className="form-group">
                 <label>Mot de passe</label>
-                <div className="input-with-icon">
-                  <Lock size={18} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="toggle-password"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
 
               <button 

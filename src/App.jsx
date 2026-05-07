@@ -47,12 +47,19 @@ function AppContent() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/cgv" element={<CGVPage />} />
         <Route path="/confidentialite" element={<PrivacyPage />} />
-        <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <Footer />
       <CartDrawer isOpen={isOpen} onClose={closeCart} />
     </div>
+  );
+}
+
+function AdminLayout() {
+  return (
+    <Routes>
+      <Route path="/admin-login" element={<AdminLoginPage />} />
+      <Route path="/admin" element={<AdminPage />} />
+    </Routes>
   );
 }
 
@@ -66,7 +73,11 @@ function App() {
               <CartProvider>
                 <CartDrawerProvider>
                   <WishlistProvider>
-                    <AppContent />
+                    <Routes>
+                      <Route path="/admin-login" element={<AdminLoginPage />} />
+                      <Route path="/admin/*" element={<AdminPage />} />
+                      <Route path="/*" element={<AppContent />} />
+                    </Routes>
                   </WishlistProvider>
                 </CartDrawerProvider>
               </CartProvider>
