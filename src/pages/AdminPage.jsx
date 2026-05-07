@@ -122,7 +122,7 @@ function AdminContent() {
       description: product.description,
       inStock: product.inStock,
       category: product.category,
-      image: '',
+      image: product.images?.[0] || '',
       isNew: product.isNew || false,
       isBestseller: product.isBestseller || false,
       isPromo: product.isPromo || false,
@@ -257,31 +257,89 @@ function AdminContent() {
                       />
                     </div>
                     <div className="form-group full">
-                      <label>Image</label>
-                      <div className="image-upload">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          ref={fileInputRef}
-                          onChange={handleImageChange}
-                          style={{ display: 'none' }}
-                        />
-                        <button type="button" className="btn-secondary" onClick={() => fileInputRef.current?.click()}>
-                          <Upload size={16} /> Choisir fichier
-                        </button>
-                        <span>ou</span>
-                        <input
-                          type="text"
-                          value={productForm.image}
-                          onChange={(e) => setProductForm({...productForm, image: e.target.value})}
-                          placeholder="Coller URL image..."
-                        />
+                      <label>Image du produit</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        style={{ display: 'none' }}
+                        id="product-image-input"
+                      />
+                      <div 
+                        className="image-upload-area"
+                        onClick={() => document.getElementById('product-image-input').click()}
+                        style={{
+                          border: '2px dashed #ddd',
+                          borderRadius: '12px',
+                          padding: '24px',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          background: imagePreview ? 'none' : '#fafafa',
+                          minHeight: '120px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '12px'
+                        }}
+                      >
+                        {imagePreview ? (
+                          <div style={{ position: 'relative', width: '100%', maxWidth: '200px' }}>
+                            <img 
+                              src={imagePreview} 
+                              alt="Aperçu" 
+                              style={{ 
+                                width: '100%', 
+                                height: '120px', 
+                                objectFit: 'cover', 
+                                borderRadius: '8px' 
+                              }} 
+                            />
+                            <button 
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setImagePreview('');
+                                setProductForm({...productForm, image: ''});
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: '-8px',
+                                right: '-8px',
+                                background: '#dc2626',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '24px',
+                                height: '24px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <Upload size={32} style={{ color: '#999' }} />
+                            <span style={{ color: '#666' }}>Cliquez pour télécharger une image</span>
+                            <span style={{ color: '#999', fontSize: '12px' }}>ou</span>
+                            <input
+                              type="text"
+                              value={productForm.image}
+                              onChange={(e) => setProductForm({...productForm, image: e.target.value})}
+                              placeholder="Coller URL image..."
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px'
+                              }}
+                            />
+                          </>
+                        )}
                       </div>
-                      {(imagePreview || productForm.image) && (
-                        <div className="image-preview">
-                          <img src={imagePreview || productForm.image} alt="Aperçu" />
-                        </div>
-                      )}
                     </div>
                     <div className="form-group">
                       <label>
