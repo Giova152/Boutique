@@ -4,6 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X, CheckCircle } from 'lucide-react';
 import { categories } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
+import { useCart } from '../contexts/CartContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../data/translations';
+import SEO from '../components/layout/SEO';
+import ProductModal from '../components/product/ProductModal';
 
 const categoryImages = {
   'beurre-karite': 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
@@ -62,9 +67,13 @@ export default function HomePage() {
     return value || key;
   };
 
-  const bestsellers = products.filter(p => p.isBestseller).slice(0, 4);
-  const newProducts = products.filter(p => p.isNew).slice(0, 4);
+  const bestsellers = (products || []).filter(p => p.isBestseller).slice(0, 4);
+  const newProducts = (products || []).filter(p => p.isNew).slice(0, 4);
   const currentTestimonials = testimonials[language] || testimonials.fr;
+
+  if (!products || products.length === 0) {
+    return <div className="loading-page">Chargement...</div>;
+  }
 
   return (
     <main className="home-page">
