@@ -50,6 +50,7 @@ function AdminContent() {
   const [orderFilter, setOrderFilter] = useState('all');
 
   const handleLogout = async () => {
+    localStorage.removeItem('adminLoginTime');
     await supabase.auth.signOut();
     window.location.href = '/admin';
   };
@@ -676,8 +677,16 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Always show login first, require explicit login
+  // Check session expiry (48 hours)
   useEffect(() => {
+    const loginTime = localStorage.getItem('adminLoginTime');
+    if (loginTime) {
+      const expiryTime = 48 * 60 * 60 * 1000; // 48 hours in ms
+      if (Date.now() - parseInt(loginTime) > expiryTime) {
+        localStorage.removeItem('adminLoginTime');
+        setIsAdmin(false);
+      }
+    }
     setLoading(false);
   }, []);
 
@@ -704,6 +713,8 @@ export default function AdminPage() {
     }
 
     if (data.user) {
+      // Stocker le temps de connexion (48h d'expiration)
+      localStorage.setItem('adminLoginTime', Date.now().toString());
       setIsAdmin(true);
       setIsLoggingIn(false);
     }
