@@ -1200,3 +1200,59 @@
     overflow-x: auto;
   }
 }
+
+/* Charts section */
+.charts-section {
+  margin-top: 32px;
+}
+
+.charts-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.chart-card h4 {
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.chart-card.chart-full {
+  grid-column: 1 / -1;
+}
+
+.chart-container {
+  width: 100%;
+}
+
+/* Recharts tooltip styling */
+.recharts-tooltip-wrapper {
+  z-index: 100;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-card.chart-full {
+    grid-column: 1;
+  }
+}

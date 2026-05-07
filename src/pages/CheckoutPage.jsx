@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Truck, Package, CreditCard } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAdmin } from '../contexts/AdminContext';
+import { supabase } from '../lib/supabase';
 import { getTranslation } from '../data/translations';
-import { sendOrderEmail } from '../services/emailService';
+import { sendOrderEmail, sendConfirmationEmail } from '../services/emailService';
 import { validateCheckoutForm, sanitizeInput } from '../utils/validation';
 import PaymentMethods from '../components/payment/PaymentMethods';
 import '../components/payment/PaymentMethods.css';
@@ -15,7 +16,7 @@ import '../components/payment/CheckoutStyles.css';
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, subtotal, discount, shipping, total, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { language } = useLanguage();
   const { addOrder, updateStock, products } = useAdmin();
   const t = (key) => getTranslation(language, key);
@@ -25,15 +26,30 @@ export default function CheckoutPage() {
   const [formErrors, setFormErrors] = useState({});
 
   const [shippingInfo, setShippingInfo] = useState({
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ')[1] || '',
+    firstName: user?.name?.split(' ')[0] || profile?.full_name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ')[1] || profile?.full_name?.split(' ').slice(1).join(' ') || '',
     email: user?.email || '',
-    address: '',
-    city: '',
-    province: 'Québec',
-    postalCode: '',
-    phone: ''
+    address: profile?.address || '',
+    city: profile?.city || '',
+    province: profile?.province || 'Québec',
+    postalCode: profile?.postal_code || '',
+    phone: profile?.phone || ''
   });
+
+  useEffect(() => {
+    if (profile && !shippingInfo.address) {
+      setShippingInfo(prev => ({
+        ...prev,
+        firstName: profile.full_name?.split(' ')[0] || prev.firstName,
+        lastName: profile.full_name?.split(' ').slice(1).join(' ') || prev.lastName,
+        address: profile.address || prev.address,
+        city: profile.city || prev.city,
+        province: profile.province || prev.province,
+        postalCode: profile.postal_code || prev.postalCode,
+        phone: profile.phone || prev.phone
+      }));
+    }
+  }, [profile]);
 
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [paymentMethod, setPaymentMethod] = useState('stripe');
@@ -53,31 +69,63 @@ export default function CheckoutPage() {
     return validation.isValid;
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
     setIsProcessing(true);
-    const orderData = {
-      items: cart,
-      customer: shippingInfo,
-      shippingMethod,
-      paymentMethod,
-      subtotal,
-      discount,
-      shipping: shippingMethod === 'express' ? 19.99 : 9.99,
-      total
-    };
-    addOrder(orderData);
-    
-    cart.forEach(item => {
-      const product = products.find(p => p.id === item.id);
-      if (product) {
-        updateStock(item.id, product.inStock - item.quantity);
+    try {
+      const orderData = {
+        items: cart,
+        customer: shippingInfo,
+        shippingMethod,
+        paymentMethod,
+        subtotal,
+        discount,
+        shipping: shippingMethod === 'express' ? 19.99 : 9.99,
+        total
+      };
+
+      const orderResult = await addOrder(orderData);
+      if (!orderResult?.success) {
+        throw new Error('Erreur lors de la création de la commande');
       }
+
+      if (user) {
+        await updateProfile({
+          full_name: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+          phone: shippingInfo.phone,
+          city: shippingInfo.city,
+          address: shippingInfo.address,
+          province: shippingInfo.province,
+          postal_code: shippingInfo.postalCode
+        });
+      }
+
+      await Promise.all(cart.map(async item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+          await updateStock(item.id, product.inStock - item.quantity);
+        }
+      }));
+
+      sendOrderEmail(orderData);
+      sendConfirmationEmail(shippingInfo.email, orderData);
+
+      clearCart();
+      setOrderComplete(true);
+    } catch (error) {
+      console.error('Checkout error:', error);
+      addToast(error.message || 'Erreur lors de la commande', 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const updateProfile = async (updates) => {
+    if (!user?.id) return;
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      ...updates,
+      updated_at: new Date().toISOString()
     });
-    
-    sendOrderEmail(orderData);
-    setOrderComplete(true);
-    setIsProcessing(false);
-    clearCart();
   };
 
   if (cart.length === 0 && !orderComplete) {
@@ -132,7 +180,7 @@ export default function CheckoutPage() {
               <div className="form-step">
                 <h2>{t('shippingInfo')}</h2>
                 <div className="form-grid">
-<div className="form-group">
+                  <div className="form-group">
                     <label>Prénom</label>
                     <input type="text" name="firstName" value={shippingInfo.firstName} onChange={handleShippingChange} className={formErrors.firstName ? 'error' : ''} />
                     {formErrors.firstName && <span className="error-text">{formErrors.firstName}</span>}
@@ -147,19 +195,12 @@ export default function CheckoutPage() {
                     <input type="email" name="email" value={shippingInfo.email} onChange={handleShippingChange} className={formErrors.email ? 'error' : ''} />
                     {formErrors.email && <span className="error-text">{formErrors.email}</span>}
                   </div>
-                  <div className="form-group">
-                    <label>Nom</label>
-                    <input type="text" name="lastName" value={shippingInfo.lastName} onChange={handleShippingChange} />
+                  <div className="form-group full">
+                    <label>Téléphone</label>
+                    <input type="tel" name="phone" value={shippingInfo.phone} onChange={handleShippingChange} className={formErrors.phone ? 'error' : ''} placeholder="514-123-4567" />
+                    {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                   </div>
                   <div className="form-group full">
-                    <label>Email</label>
-                    <input type="email" name="email" value={shippingInfo.email} onChange={handleShippingChange} />
-                  </div>
-                  <div className="form-group full">
-                    <label>Adresse</label>
-                    <input type="text" name="address" value={shippingInfo.address} onChange={handleShippingChange} />
-                  </div>
-<div className="form-group">
                     <label>Adresse</label>
                     <input type="text" name="address" value={shippingInfo.address} onChange={handleShippingChange} className={formErrors.address ? 'error' : ''} />
                     {formErrors.address && <span className="error-text">{formErrors.address}</span>}
@@ -182,11 +223,6 @@ export default function CheckoutPage() {
                     <label>Code postal</label>
                     <input type="text" name="postalCode" value={shippingInfo.postalCode} onChange={handleShippingChange} className={formErrors.postalCode ? 'error' : ''} placeholder="H1H 1H1" />
                     {formErrors.postalCode && <span className="error-text">{formErrors.postalCode}</span>}
-                  </div>
-                  <div className="form-group">
-                    <label>Téléphone</label>
-                    <input type="tel" name="phone" value={shippingInfo.phone} onChange={handleShippingChange} className={formErrors.phone ? 'error' : ''} placeholder="514-123-4567" />
-                    {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                   </div>
                 </div>
                 <button className="btn-primary" onClick={() => validateStep1() && setStep(2)}>Continuer</button>

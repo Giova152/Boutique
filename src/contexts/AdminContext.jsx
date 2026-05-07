@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { sendStatusUpdateEmail } from '../services/emailService';
 
 const AdminContext = createContext();
 
@@ -146,7 +147,7 @@ export function AdminProvider({ children }) {
         promo_price: 6.99,
         rating: 4.5,
         reviews: 156,
-        benefits: 'Doux pour la peau, Sans sulfate, Parfum naturel',
+        benefits: ['Doux pour la peau', 'Sans sulfate', 'Parfum naturel'],
         ingredients: 'Beurre de karité, huile d\'olive, huile de coco',
         usage: 'Pour le corps et le visage'
       },
@@ -377,13 +378,30 @@ export function AdminProvider({ children }) {
   };
 
   const updateOrderStatus = async (orderId, status) => {
+    const order = orders.find(o => o.id === orderId);
     const updates = { status };
-    if (status === 'expéditée') updates.shipped_at = new Date().toISOString();
-    if (status === 'livrée') updates.delivered_at = new Date().toISOString();
+    const now = new Date().toISOString();
+    
+    if (status === 'expéditée') updates.shipped_at = now;
+    if (status === 'livrée') updates.delivered_at = now;
+    
+    // Add to status history
+    const statusHistory = order?.status_history || [];
+    statusHistory.push({
+      status,
+      timestamp: now,
+      adminNote: ''
+    });
+    updates.status_history = statusHistory;
     
     const { error } = await supabase.from('orders').update(updates).eq('id', orderId);
     if (!error) {
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
+      
+      // Send email notification to customer
+      if (order?.customer?.email) {
+        sendStatusUpdateEmail(order.customer.email, order, status);
+      }
     }
   };
 
@@ -406,7 +424,8 @@ export function AdminProvider({ children }) {
 
   const getStats = () => {
     const today = new Date().toISOString().split('T')[0];
-    const thisMonth = new Date().toISOString().slice(0, 7);
+    const thisMonth = new Date().toISOString().split('0,7');
+    const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7);
     
     const visits = stats.visits || [];
     const dailyVisits = stats.daily_visits || {};
@@ -422,7 +441,53 @@ export function AdminProvider({ children }) {
       .filter(o => o.status !== 'en cours')
       .reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
     
-    return { todayVisits, monthVisits, totalVisits, totalOrders, totalRevenue };
+    // Monthly orders data
+    const monthlyOrdersMap = {};
+    const monthlyRevenueMap = {};
+    orders.forEach(order => {
+      const month = new Date(order.date).toISOString().slice(0, 7);
+      const monthName = new Date(order.date).toLocaleDateString('fr-CA', { month: 'short', year: '2-digit' });
+      monthlyOrdersMap[month] = monthlyOrdersMap[month] || { month: monthName, orders: 0 };
+      monthlyOrdersMap[month].orders++;
+      monthlyRevenueMap[month] = monthlyRevenueMap[month] || { month: monthName, revenue: 0 };
+      monthlyRevenueMap[month].revenue += parseFloat(order.total) || 0;
+    });
+    const monthlyOrders = Object.values(monthlyOrdersMap).slice(-6);
+    const monthlyRevenue = Object.values(monthlyRevenueMap).slice(-6);
+    
+    // Top products
+    const productSales = {};
+    orders.forEach(order => {
+      order.items?.forEach(item => {
+        productSales[item.name] = (productSales[item.name] || 0) + item.quantity;
+      });
+    });
+    const topProducts = Object.entries(productSales)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, sales]) => ({ name, sales }));
+    
+    // Daily chart (last 30 days)
+    const dailyChart = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dateLabel = date.toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' });
+      dailyChart.push({ date: dateLabel, visits: dailyVisits[dateStr] || 0 });
+    }
+    
+    return { 
+      todayVisits, 
+      monthVisits, 
+      totalVisits, 
+      totalOrders, 
+      totalRevenue,
+      monthlyOrders,
+      monthlyRevenue,
+      topProducts,
+      dailyChart
+    };
   };
 
   const getCustomers = () => {

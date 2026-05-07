@@ -6,6 +6,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { CartDrawerProvider, useCartDrawer } from './contexts/CartDrawerContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AdminProvider } from './contexts/AdminContext';
+import { ProductsProvider } from './contexts/ProductsContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
@@ -59,21 +60,23 @@ function App() {
     <Router>
       <LanguageProvider>
         <ToastProvider>
-          <AdminProvider>
-            <AuthProvider>
-              <CartProvider>
-                <CartDrawerProvider>
-                  <WishlistProvider>
-                    <Routes>
-                      <Route path="/admin-login" element={<AdminLoginPage />} />
-                      <Route path="/admin/*" element={<AdminPage />} />
-                      <Route path="/*" element={<AppContent />} />
-                    </Routes>
-                  </WishlistProvider>
-                </CartDrawerProvider>
-              </CartProvider>
-            </AuthProvider>
-          </AdminProvider>
+          <ProductsProvider>
+            <AdminProvider>
+              <AuthProvider>
+                <CartProvider>
+                  <CartDrawerProvider>
+                    <WishlistProvider>
+                      <Routes>
+                        <Route path="/admin-login" element={<AdminLoginPage />} />
+                        <Route path="/admin/*" element={<AdminPage />} />
+                        <Route path="/*" element={<AppContent />} />
+                      </Routes>
+                    </WishlistProvider>
+                  </CartDrawerProvider>
+                </CartProvider>
+              </AuthProvider>
+            </AdminProvider>
+          </ProductsProvider>
         </ToastProvider>
       </LanguageProvider>
     </Router>

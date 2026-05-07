@@ -1,12 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { promoCodes } from '../data/config';
+import { supabase } from '../lib/supabase';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('natura_cart');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('natura_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
   const [promoCode, setPromoCode] = useState(() => {
     return localStorage.getItem('natura_promo') || '';
@@ -25,6 +30,41 @@ export function CartProvider({ children }) {
     }
     localStorage.setItem('natura_promo', promoCode);
   }, [promoCode]);
+
+  useEffect(() => {
+    if (cart.length > 0) {
+      validateCartStock();
+    }
+  }, []);
+
+  const validateCartStock = async () => {
+    try {
+      const productIds = cart.map(item => item.id);
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, in_stock, name')
+        .in('id', productIds);
+
+      if (products) {
+        setCart(prev => prev.map(item => {
+          const serverProduct = products.find(p => p.id === item.id);
+          if (serverProduct) {
+            const availableStock = serverProduct.in_stock || 0;
+            if (availableStock === 0) {
+              console.warn(`Produit "${item.name}" n'est plus disponible`);
+            } else if (item.quantity > availableStock) {
+              console.warn(`Quantité de "${item.name}" ajustée (stock: ${availableStock})`);
+              return { ...item, quantity: Math.min(item.quantity, availableStock) };
+            }
+            return { ...item, inStock: availableStock };
+          }
+          return item;
+        }));
+      }
+    } catch (err) {
+      console.error('Erreur validation stock:', err);
+    }
+  };
 
   const addToCart = (product, quantity = 1) => {
     if (product.inStock === 0) {

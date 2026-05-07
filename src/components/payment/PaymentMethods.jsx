@@ -1,86 +1,88 @@
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { paymentConfig } from '../../data/paymentConfig';
 
-const stripePromise = loadStripe(paymentConfig.stripe.publishableKey);
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = STRIPE_KEY ? loadStripe(STRIPE_KEY) : null;
 
-export default function PaymentMethods({ 
-  total, 
-  paymentMethod, 
-  onPaymentMethodChange, 
+export default function PaymentMethods({
+  total,
+  paymentMethod,
+  onPaymentMethodChange,
   onPaymentSuccess,
   isProcessing,
   setIsProcessing,
   cartItems = [],
-  customerEmail = ''
+  customerEmail = '',
+  orderId = ''
 }) {
   const [error, setError] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [stripe, setStripe] = useState(null);
   const [elements, setElements] = useState(null);
 
-  const isStripeConfigured = paymentConfig.stripe.publishableKey?.startsWith('pk_live');
+  const isStripeConfigured = STRIPE_KEY && (STRIPE_KEY.startsWith('pk_live') || STRIPE_KEY.startsWith('pk_test'));
 
   useEffect(() => {
-    if (!total || total <= 0 || !isStripeConfigured) return;
-    
+    if (!total || total <= 0) return;
+
     const initStripe = async () => {
+      if (!isStripeConfigured || !stripePromise) {
+        return;
+      }
+
       try {
         const stripeInstance = await stripePromise;
         if (!stripeInstance) return;
         setStripe(stripeInstance);
 
-        const response = await fetch('/api/checkout', {
+        const response = await fetch('/api/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             amount: total,
-            email: customerEmail
+            currency: 'cad',
+            customerEmail,
+            orderId
           })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.clientSecret) {
           setClientSecret(data.clientSecret);
-          
+
           const elementsInstance = stripeInstance.elements({
             clientSecret: data.clientSecret,
             appearance: {
               theme: 'stripe',
-              variables: { colorPrimary: '#2d5a27' },
+              variables: { colorPrimary: '#1d4e38' },
             },
           });
-          
+
           setElements(elementsInstance);
-          
+
           const paymentEl = elementsInstance.create('payment');
           paymentEl.mount('#payment-element');
+        } else if (data.error) {
+          console.error('API Error:', data.error);
         }
       } catch (err) {
         console.error('Init error:', err);
       }
     };
-    
+
     initStripe();
-  }, [total, customerEmail, isStripeConfigured]);
+  }, [total, customerEmail, orderId, isStripeConfigured]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!stripe || !clientSecret) {
       onPaymentSuccess();
       return;
     }
 
-    const orderData = {
-      items: cartItems,
-      customer: { email: customerEmail },
-      timestamp: Date.now()
-    };
-    localStorage.setItem('pendingOrder', JSON.stringify(orderData));
-    
     setIsProcessing(true);
     setError('');
 
@@ -105,8 +107,6 @@ export default function PaymentMethods({
     } catch (err) {
       console.error('Payment error:', err);
       onPaymentSuccess();
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -117,8 +117,8 @@ export default function PaymentMethods({
         <p className="payment-note payment-note-demo">
           <AlertCircle size={14} /> PayPal non configuré. Utilisez Stripe.
         </p>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="btn-primary"
           onClick={() => onPaymentMethodChange('stripe')}
         >
@@ -131,7 +131,7 @@ export default function PaymentMethods({
   return (
     <div className="payment-methods">
       <h2>Moyen de paiement</h2>
-      
+
       <div className="payment-options">
         <label className="payment-option selected">
           <img src="https://img.icons8.com/?size=30&id=aMTIdm5CdddP&format=png&color=000000" alt="Carte" className="payment-icon-img" />
@@ -150,31 +150,37 @@ export default function PaymentMethods({
           ) : (
             <>
               <AlertCircle size={18} className="text-warning" />
-              <span>Mode démo</span>
+              <span>Mode démo - Configurez Stripe pour accepter les paiements</span>
             </>
           )}
         </div>
-        
+
         <div id="payment-element" className="payment-element-container">
           {!clientSecret && isStripeConfigured && (
-            <p className="payment-note">Chargement du formulaire...</p>
+            <div className="loading-payment">
+              <Loader2 className="spin" size={24} />
+              <p>Chargement du formulaire de paiement...</p>
+            </div>
           )}
         </div>
-        
+
         {error && (
           <p className="payment-error">
             <AlertCircle size={14} /> {error}
           </p>
         )}
-        
-        <button 
-          type="submit" 
+
+        <button
+          type="submit"
           className="btn-primary btn-stripe-pay"
           onClick={handleSubmit}
-          disabled={isProcessing || !clientSecret}
+          disabled={isProcessing || (isStripeConfigured && !clientSecret)}
         >
-          {isProcessing ? <Loader2 className="spin" size={18} /> : null}
-          Payer {total.toFixed(2)} CAD$
+          {isProcessing ? (
+            <><Loader2 className="spin" size={18} /> Traitement...</>
+          ) : (
+            <>Payer {total.toFixed(2)} CAD$</>
+          )}
         </button>
       </div>
     </div>

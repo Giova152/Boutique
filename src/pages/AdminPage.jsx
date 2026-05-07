@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3, 
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut
+import {
+  Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3,
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut, Download, Printer, Calendar, TrendingDown
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
-
-const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
+import { downloadInvoice, printInvoice } from '../utils/invoice';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
+import { ADMIN_EMAILS, isAdminEmail } from '../config/adminConfig';
 
 function AdminContent() {
   const fileInputRef = useRef(null);
@@ -601,10 +602,10 @@ function AdminContent() {
                 En attente ({orders.filter(o => o.status === 'en cours').length})
               </button>
               <button 
-                className={`filter-btn ${orderFilter === 'validée' ? 'active' : ''}`}
-                onClick={() => setOrderFilter('validée')}
+                className={`filter-btn ${orderFilter === 'confirmée' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('confirmée')}
               >
-                Validées ({orders.filter(o => o.status === 'validée').length})
+                Confirmées ({orders.filter(o => o.status === 'confirmée').length})
               </button>
               <button 
                 className={`filter-btn ${orderFilter === 'expéditée' ? 'active' : ''}`}
@@ -667,21 +668,45 @@ function AdminContent() {
                               {order.status === 'en cours' && (
                                 <button
                                   className="btn-primary btn-sm"
-                                  onClick={() => updateOrderStatus(order.id, 'validée')}
+                                  onClick={() => updateOrderStatus(order.id, 'confirmée')}
                                 >
-                                  <Check size={16} /> Valider
+                                  <Check size={16} /> Confirmer
                                 </button>
                               )}
-                              {order.status === 'validée' && (
-                              <button
-                                className="btn-primary btn-sm btn-success"
-                                onClick={() => updateOrderStatus(order.id, 'expéditée')}
-                              >
-                                <Truck size={16} /> Expédier
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                              {order.status === 'confirmée' && (
+                                <button
+                                  className="btn-primary btn-sm"
+                                  onClick={() => updateOrderStatus(order.id, 'expéditée')}
+                                >
+                                  <Truck size={16} /> Expédier
+                                </button>
+                              )}
+                              {order.status === 'expéditée' && (
+                                <button
+                                  className="btn-primary btn-sm btn-success"
+                                  onClick={() => updateOrderStatus(order.id, 'livrée')}
+                                >
+                                  <Check size={16} /> Livrée
+                                </button>
+                              )}
+                              <div className="invoice-actions" style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                                <button
+                                  className="btn-secondary btn-sm"
+                                  onClick={() => downloadInvoice(order)}
+                                  title="Télécharger PDF"
+                                >
+                                  <Download size={14} />
+                                </button>
+                                <button
+                                  className="btn-secondary btn-sm"
+                                  onClick={() => printInvoice(order)}
+                                  title="Imprimer"
+                                >
+                                  <Printer size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          </td>
                         </tr>
                         {expandedOrder === order.id && (
                           <tr className="order-details">
@@ -841,6 +866,123 @@ function AdminContent() {
                 <div className="stat-info">
                   <span className="stat-label">Produits</span>
                   <span className="stat-value">{products.length}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="charts-section">
+              <h3><Calendar size={20} /> Analytiques détaillées</h3>
+              
+              <div className="charts-grid">
+                {/* Commandes par mois */}
+                <div className="chart-card">
+                  <h4>Commandes par mois</h4>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={stats.monthlyOrders || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                        <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#666" />
+                        <YAxis tick={{ fontSize: 12 }} stroke="#666" />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: 8, border: '1px solid #eee' }}
+                          formatter={(value) => [`${value} commandes`, 'Total']}
+                        />
+                        <Bar dataKey="orders" fill="#1d4e38" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Revenus par mois */}
+                <div className="chart-card">
+                  <h4>Revenus mensuels ($)</h4>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <AreaChart data={stats.monthlyRevenue || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                        <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#666" />
+                        <YAxis tick={{ fontSize: 12 }} stroke="#666" tickFormatter={(v) => `${v}$`} />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: 8, border: '1px solid #eee' }}
+                          formatter={(value) => [`${value.toFixed(2)} $`, 'Revenus']}
+                        />
+                        <Area type="monotone" dataKey="revenue" stroke="#c9a86c" fill="#c9a86c" fillOpacity={0.3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Statut des commandes */}
+                <div className="chart-card">
+                  <h4>Statut des commandes</h4>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'En cours', value: orders.filter(o => o.status === 'en cours').length, color: '#f39c12' },
+                            { name: 'Confirmées', value: orders.filter(o => o.status === 'confirmée').length, color: '#3498db' },
+                            { name: 'Expédiées', value: orders.filter(o => o.status === 'expéditée').length, color: '#9b59b6' },
+                            { name: 'Livrées', value: orders.filter(o => o.status === 'livrée').length, color: '#27ae60' }
+                          ]}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {[
+                            { name: 'En cours', value: orders.filter(o => o.status === 'en cours').length, color: '#f39c12' },
+                            { name: 'Confirmées', value: orders.filter(o => o.status === 'confirmée').length, color: '#3498db' },
+                            { name: 'Expédiées', value: orders.filter(o => o.status === 'expéditée').length, color: '#9b59b6' },
+                            { name: 'Livrées', value: orders.filter(o => o.status === 'livrée').length, color: '#27ae60' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Top 5 produits */}
+                <div className="chart-card">
+                  <h4>Top 5 Bestsellers</h4>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={stats.topProducts || []} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                        <XAxis type="number" tick={{ fontSize: 12 }} stroke="#666" />
+                        <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={120} stroke="#666" />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: 8, border: '1px solid #eee' }}
+                          formatter={(value) => [`${value} ventes`, 'Ventes']}
+                        />
+                        <Bar dataKey="sales" fill="#1d4e38" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Visites quotidiennes */}
+                <div className="chart-card chart-full">
+                  <h4>Visites quotidiennes (30 derniers jours)</h4>
+                  <div className="chart-container">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={stats.dailyChart || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                        <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#666" />
+                        <YAxis tick={{ fontSize: 12 }} stroke="#666" />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: 8, border: '1px solid #eee' }}
+                          formatter={(value) => [`${value} visites`, 'Total']}
+                        />
+                        <Line type="monotone" dataKey="visits" stroke="#1d4e38" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </div>

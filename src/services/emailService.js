@@ -104,3 +104,53 @@ zoumcosmo@gmail.com
     return false;
   }
 }
+
+export async function sendStatusUpdateEmail(customerEmail, orderData, newStatus) {
+  const statusMessages = {
+    'confirmée': {
+      title: 'Votre commande est confirmée! ✅',
+      message: 'Nous avons bien reçu votre paiement. Votre commande est en cours de préparation.'
+    },
+    'expéditée': {
+      title: 'Votre commande a été expédiée! 📦',
+      message: 'Votre colis est en route! Vous recevrez bientôt votre commande.'
+    },
+    'livrée': {
+      title: 'Votre commande est livrée! 🎉',
+      message: 'Votre commande a été livrée. Nous espérons que vous l\'aimez!'
+    }
+  };
+
+  const statusInfo = statusMessages[newStatus] || { title: 'Mise à jour de commande', message: 'Le statut de votre commande a été mis à jour.' };
+
+  const emailContent = `
+${statusInfo.title}
+
+Bonjour ${orderData.customer?.firstName || 'Client'},
+
+${statusInfo.message}
+
+Numéro de commande: ${orderData.id}
+Total: ${parseFloat(orderData.total).toFixed(2)}$
+
+Merci pour votre confiance!
+L'équipe VEGEDERM 🌿
+  `.trim();
+
+  const formData = new FormData();
+  formData.append('email', customerEmail);
+  formData.append('subject', `Commande ${orderData.id} - ${statusInfo.title}`);
+  formData.append('message', emailContent);
+
+  try {
+    await fetch('https://formspree.io/f/mrejlbaa', {
+      method: 'POST',
+      body: formData,
+      mode: 'no-cors'
+    });
+    return true;
+  } catch (error) {
+    console.error('Erreur envoi notification statut:', error);
+    return false;
+  }
+}
