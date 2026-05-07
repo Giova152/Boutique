@@ -663,13 +663,9 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+  // Always show login first, require explicit login
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-        setIsAdmin(true);
-      }
-      setLoading(false);
-    });
+    setLoading(false);
   }, []);
 
   const handleLogin = async (e) => {
