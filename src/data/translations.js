@@ -142,7 +142,7 @@ export const translations = {
     newsletterSuccess: 'Merci pour votre inscription!',
 
     useCode: 'Utilisez le code',
-    forDiscount: 'pour 10% de réduction!',
+    forDiscount: 'pour',
 
     checkoutTitle: 'Passer la commande',
     information: 'Information',
@@ -324,7 +324,7 @@ export const translations = {
     newsletterSuccess: 'Thank you for subscribing!',
 
     useCode: 'Use the code',
-    forDiscount: 'for 10% off!',
+    forDiscount: 'for',
 
     checkoutTitle: 'Checkout',
     information: 'Information',

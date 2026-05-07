@@ -14,6 +14,9 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const { settings } = useAdmin();
+  const promoCode = settings?.exitPopupCode || 'VEGEDERM10';
+  const promoDiscount = settings?.exitPopupDiscount || 10;
   const [promoBannerOpen, setPromoBannerOpen] = useState(() => {
     const saved = localStorage.getItem('promoBannerClosed');
     return saved !== 'true';
@@ -63,7 +66,7 @@ export default function Header() {
         <div className="promo-banner">
           <div className="promo-banner-content">
             <span>🎉</span>
-            <span>{t('useCode')} <strong>VEGEDERM10</strong> {t('forDiscount')}</span>
+            <span>{t('useCode')} <strong>{promoCode}</strong> {t('forDiscount')} -{promoDiscount}%</span>
             <Link to="/boutique?promo=true" className="promo-link">{t('seePromos')}</Link>
           </div>
           <button className="promo-banner-close" onClick={handleClosePromo} title="Fermer">
