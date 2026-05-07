@@ -462,7 +462,7 @@ function AdminContent() {
                   {filteredProducts.map(product => (
                     <tr key={product.id}>
                       <td className="product-cell">
-                        <img src={product.images[0]} alt={product.name} />
+                        <img src={product.image || (product.images && product.images[0]) || 'https://via.placeholder.com/100'} alt={product.name} />
                         <span>{product.name}</span>
                       </td>
                       <td>{product.price.toFixed(2)} $</td>
@@ -475,7 +475,7 @@ function AdminContent() {
                       </td>
                       <td>
                         <div className="action-buttons">
-                          <button className="btn-icon" onClick={() => { setEditingProduct(product); setProductForm({ name: product.name, price: product.price, description: product.description, inStock: product.inStock, category: product.category, image: product.images[0], isNew: product.isNew, isBestseller: product.isBestseller }); setShowProductForm(true); }}>
+                          <button className="btn-icon" onClick={() => { setEditingProduct(product); setProductForm({ name: product.name, price: product.price, description: product.description, inStock: product.inStock, category: product.category, image: product.image || (product.images && product.images[0]) || '', isNew: product.is_new, isBestseller: product.is_bestseller, isPromo: product.is_promo, promoPrice: product.promo_price || '' }); setShowProductForm(true); }}>
                             <Edit3 size={16} />
                           </button>
                           <button className="btn-icon delete" onClick={() => deleteProduct(product.id)}>
