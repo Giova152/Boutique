@@ -6,12 +6,14 @@ import {
   Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
+import { useToast } from '../contexts/ToastContext';
 import { supabase } from '../lib/supabase';
 
 const ADMIN_EMAILS = ['zoumcosmo@gmail.com', 'midogiova@gmail.com'];
 
 function AdminContent() {
   const fileInputRef = useRef(null);
+  const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingProduct, setEditingProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
@@ -86,31 +88,51 @@ function AdminContent() {
     }
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
+    if (!productForm.name || !productForm.price) {
+      addToast('Veuillez remplir le nom et le prix', 'error');
+      return;
+    }
+
     const productData = {
-      ...productForm,
+      name: productForm.name,
+      description: productForm.description,
       price: parseFloat(productForm.price),
-      inStock: parseInt(productForm.inStock),
-      promoPrice: productForm.promoPrice ? parseFloat(productForm.promoPrice) : null,
-      images: imagePreview || productForm.image || products.find(p => p.id === editingProduct?.id)?.images || ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'],
+      in_stock: parseInt(productForm.inStock) || 0,
+      category: productForm.category,
+      is_new: productForm.isNew || false,
+      is_bestseller: productForm.isBestseller || false,
+      is_promo: productForm.isPromo || false,
+      promo_price: productForm.promoPrice ? parseFloat(productForm.promoPrice) : null,
+      images: imagePreview || productForm.image ? [imagePreview || productForm.image] : ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'],
     };
     
-    if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
-    } else {
-      addProduct({
-        ...productData,
-        rating: 4.5,
-        reviews: 0,
-        benefits: [],
-        ingredients: '',
-        usage: ''
-      });
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, productData);
+        addToast('Produit modifié avec succès', 'success');
+      } else {
+        const result = await addProduct({
+          ...productData,
+          rating: 4.5,
+          reviews: 0,
+          benefits: [],
+          ingredients: '',
+          usage: ''
+        });
+        if (result.success) {
+          addToast('Produit ajouté avec succès', 'success');
+        } else {
+          addToast('Erreur lors de l\'ajout du produit', 'error');
+        }
+      }
+      setShowProductForm(false);
+      setEditingProduct(null);
+      setImagePreview('');
+      setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false, isPromo: false, promoPrice: '' });
+    } catch (err) {
+      addToast('Erreur: ' + err.message, 'error');
     }
-    setShowProductForm(false);
-    setEditingProduct(null);
-    setImagePreview('');
-    setProductForm({ name: '', price: '', description: '', inStock: 25, category: 'cremes', image: '', isNew: false, isBestseller: false, isPromo: false, promoPrice: '' });
   };
 
   const handleEditProduct = (product) => {

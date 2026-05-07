@@ -51,7 +51,9 @@ export function AdminProvider({ children }) {
     const { error } = await supabase.from('products').update(updates).eq('id', id);
     if (!error) {
       setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+      return { success: true };
     }
+    return { success: false, error };
   };
 
   const deleteProduct = async (id) => {
