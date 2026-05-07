@@ -1,66 +1,66 @@
-const FORMSPREE_ADMIN = 'mrejlbaa';
-const FORMSPREE_CUSTOMER = 'xaqvdewp';
+const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || 're_ZGjw8er8_4GEUJkSKd6JfiCG32DnX7zYp';
+
+async function sendEmailViaResend(to, subject, html) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${RESEND_API_KEY}`
+    },
+    body: JSON.stringify({
+      from: 'VEGE DERM <onboarding@resend.dev>',
+      to: [to],
+      subject: subject,
+      html: html
+    })
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message);
+  }
+  
+  return response.json();
+}
 
 export async function sendInvoiceEmail(customerEmail, order) {
   const itemsList = order.items?.map(item =>
     `${item.name} x${item.quantity} — ${(parseFloat(item.price) * item.quantity).toFixed(2)}$`
-  ).join('\n') || '';
+  ).join('<br>') || '';
 
-  const emailContent = `
-VEGE DERM - FACTURE #${order.id}
-
-Date: ${new Date(order.date || Date.now()).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-===================================
-INFORMATIONS CLIENT
-===================================
-${order.customer?.firstName || ''} ${order.customer?.lastName || ''}
-${order.customer?.email || ''}
-${order.customer?.phone || ''}
-
-===================================
-ADRESSE DE LIVRAISON
-===================================
-${order.customer?.address || ''}
-${order.customer?.city || ''}, ${order.customer?.province || ''}
-${order.customer?.postalCode || ''}
-
-===================================
-ARTICLES COMMANDÉS
-===================================
-${itemsList}
-
-===================================
-RÉCAPITULATIF
-===================================
-Sous-total: ${parseFloat(order.subtotal || 0).toFixed(2)}$
-${order.promoCode ? `Code promo utilisé: ${order.promoCode}
-` : ''}${order.discount > 0 ? `Réduction: -${parseFloat(order.discount).toFixed(2)}$
-
-` : ''}Livraison: ${parseFloat(order.shipping || 0).toFixed(2)}$
-------------------------------------
-TOTAL: ${parseFloat(order.total || 0).toFixed(2)}$
-
-===================================
-
-Merci pour votre confiance!
-VEGE DERM - Cosmétiques Naturels & Bio
-www.vegederm.ca
-
-Pour toute question, contactez-nous a zoumcosmo@gmail.com
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', customerEmail);
-  formData.append('subject', `VEGE DERM - Facture #${order.id}`);
-  formData.append('message', emailContent);
+  const html = `
+    <h2>VEGE DERM - FACTURE #${order.id}</h2>
+    <p><strong>Date:</strong> ${new Date(order.date || Date.now()).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+    
+    <h3>INFORMATIONS CLIENT</h3>
+    <p>${order.customer?.firstName || ''} ${order.customer?.lastName || ''}<br>
+    ${order.customer?.email || ''}<br>
+    ${order.customer?.phone || ''}</p>
+    
+    <h3>ADRESSE DE LIVRAISON</h3>
+    <p>${order.customer?.address || ''}<br>
+    ${order.customer?.city || ''}, ${order.customer?.province || ''}<br>
+    ${order.customer?.postalCode || ''}</p>
+    
+    <h3>ARTICLES COMMANDÉS</h3>
+    <p>${itemsList}</p>
+    
+    <h3>RÉCAPITULATIF</h3>
+    <p><strong>Sous-total:</strong> ${parseFloat(order.subtotal || 0).toFixed(2)}$</p>
+    ${order.promoCode ? `<p><strong>Code promo utilisé:</strong> ${order.promoCode}</p>` : ''}
+    ${order.discount > 0 ? `<p><strong>Réduction:</strong> -${parseFloat(order.discount).toFixed(2)}$</p>` : ''}
+    <p><strong>Livraison:</strong> ${parseFloat(order.shipping || 0).toFixed(2)}$</p>
+    <hr>
+    <p><strong>TOTAL: ${parseFloat(order.total || 0).toFixed(2)}$</strong></p>
+    
+    <p style="margin-top: 30px;">Merci pour votre confiance!<br>
+    <strong>VEGE DERM</strong> - Cosmétiques Naturels & Bio<br>
+    www.vegederm.ca<br>
+    Contact: zoumcosmo@gmail.com</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_CUSTOMER}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend(customerEmail, `VEGE DERM - Facture #${order.id}`, html);
     return true;
   } catch (error) {
     console.error('Erreur envoi facture:', error);
@@ -69,28 +69,16 @@ Pour toute question, contactez-nous a zoumcosmo@gmail.com
 }
 
 export async function sendStockRestockEmail(customerEmail, product) {
-  const emailContent = `
-Bonjour!
-
-Bonne nouvelle! Le produit "${product.name}" est de retour en stock!
-
-Ne tardez pas - les stocks sont limites!
-Commandez maintenant: ${typeof window !== 'undefined' ? window.location.origin : ''}/boutique
-
-L'equipe VEGE DERM
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', customerEmail);
-  formData.append('subject', `Notification - "${product.name}" est de retour en stock!`);
-  formData.append('message', emailContent);
+  const html = `
+    <h2>Bonne nouvelle!</h2>
+    <p>Le produit "${product.name}" est de retour en stock!</p>
+    <p>Ne tardez pas - les stocks sont limits!</p>
+    <p><a href="${typeof window !== 'undefined' ? window.location.origin : ''}/boutique">Commandez maintenant</a></p>
+    <p>L'equipe VEGE DERM</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_CUSTOMER}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend(customerEmail, `Notification - "${product.name}" est de retour en stock!`, html);
     return true;
   } catch (error) {
     console.error('Erreur envoi alerte stock:', error);
@@ -101,38 +89,19 @@ L'equipe VEGE DERM
 export async function sendAbandonedCartEmail(customerEmail, cartItems, cartUrl) {
   const itemsList = cartItems?.map(item =>
     `- ${item.name} x${item.quantity} (${parseFloat(item.price).toFixed(2)}$)`
-  ).join('\n') || '';
+  ).join('<br>') || '';
 
-  const emailContent = `
-Bonjour,
-
-Vous avez laisse des articles dans votre panier!
-
-====================================
-VOTRE PANIER
-====================================
-${itemsList}
-
-====================================
-
-Recuperez votre panier: ${cartUrl}
-
-Offre speciale: Utilisez le code BIENVENUE15 pour obtenir 15% de reduction sur votre premiere commande!
-
-L'equipe VEGE DERM
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', customerEmail);
-  formData.append('subject', 'Votre panier VEGE DERM vous attend!');
-  formData.append('message', emailContent);
+  const html = `
+    <h2>Vous avez laisse des articles dans votre panier!</h2>
+    <h3>VOTRE PANIER</h3>
+    <p>${itemsList}</p>
+    <p><a href="${cartUrl}">Recuperez votre panier</a></p>
+    <p><strong>Offre speciale:</strong> Utilisez le code BIENVENUE15 pour obtenir 15% de reduction sur votre premiere commande!</p>
+    <p>L'equipe VEGE DERM</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_CUSTOMER}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend(customerEmail, 'Votre panier VEGE DERM vous attend!', html);
     return true;
   } catch (error) {
     console.error('Erreur envoi panier abandonne:', error);
@@ -145,51 +114,38 @@ export async function sendOrderEmail(orderData) {
 
   const itemsList = items.map(item =>
     `${item.name} x${item.quantity} -- ${(item.price * item.quantity).toFixed(2)}$`
-  ).join('\n');
+  ).join('<br>');
 
-  const emailContent = `
-NOUVELLE COMMANDE - VEGEDERM
-
-INFORMATIONS CLIENT:
------------------
-Nom: ${customer.firstName} ${customer.lastName}
-Email: ${customer.email}
-Telephone: ${customer.phone}
-
-ADRESSE DE LIVRAISON:
--------------------
-${customer.address}
-${customer.city}, ${customer.province}
-${customer.postalCode}
-
-METHODE DE LIVRAISON: ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}
-METHODE DE PAIEMENT: ${paymentMethod === 'stripe' ? 'Stripe (Carte)' : 'PayPal'}
-
-COMMANDES:
----------
-${itemsList}
-
-SOUS-TOTAL: ${subtotal.toFixed(2)}$
-REDUCTION: -${discount.toFixed(2)}$
-LIVRAISON: ${shipping.toFixed(2)}$
-TOTAL: ${total.toFixed(2)}$
-
----
-VEGEDERM - Cosmetiques Naturels & Bio
-zoumcosmo@gmail.com
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', 'zoumcosmo@gmail.com');
-  formData.append('subject', `Nouvelle commande de ${customer.firstName} ${customer.lastName} - ${total.toFixed(2)}$`);
-  formData.append('message', emailContent);
+  const html = `
+    <h2>Nouvelle commande - VEGEDERM</h2>
+    <h3>INFORMATIONS CLIENT</h3>
+    <p><strong>Nom:</strong> ${customer.firstName} ${customer.lastName}<br>
+    <strong>Email:</strong> ${customer.email}<br>
+    <strong>Telephone:</strong> ${customer.phone}</p>
+    
+    <h3>ADRESSE DE LIVRAISON</h3>
+    <p>${customer.address}<br>
+    ${customer.city}, ${customer.province}<br>
+    ${customer.postalCode}</p>
+    
+    <p><strong>Methode de livraison:</strong> ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}<br>
+    <strong>Methode de paiement:</strong> ${paymentMethod === 'stripe' ? 'Stripe (Carte)' : 'PayPal'}</p>
+    
+    <h3>COMMANDES</h3>
+    <p>${itemsList}</p>
+    
+    <p><strong>Sous-total:</strong> ${subtotal.toFixed(2)}$<br>
+    <strong>Reduction:</strong> -${discount.toFixed(2)}$<br>
+    <strong>Livraison:</strong> ${shipping.toFixed(2)}$<br>
+    <strong>TOTAL:</strong> ${total.toFixed(2)}$</p>
+    
+    <p>---<br>
+    VEGEDERM - Cosmetiques Naturels & Bio<br>
+    zoumcosmo@gmail.com</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_ADMIN}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend('zoumcosmo@gmail.com', `Nouvelle commande de ${customer.firstName} ${customer.lastName} - ${total.toFixed(2)}$`, html);
     return true;
   } catch (error) {
     console.error('Erreur envoi email:', error);
@@ -202,44 +158,29 @@ export async function sendConfirmationEmail(customerEmail, orderData) {
 
   const itemsList = items.map(item =>
     `- ${item.name} x${item.quantity}`
-  ).join('\n');
+  ).join('<br>');
 
-  const emailContent = `
-Merci pour votre commande!
-
-Bonjour ${orderData.customer.firstName},
-
-Votre commande a ete confirmee!
-
-COMMANDES:
----------
-${itemsList}
-
-SOUS-TOTAL: ${subtotal.toFixed(2)}$
-REDUCTION: -${discount.toFixed(2)}$
-LIVRAISON: ${shipping.toFixed(2)}$
-TOTAL: ${total.toFixed(2)}$
-
-Mode de livraison: ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}
-
-Nous vous remercions de votre confiance!
-L'equipe VEGEDERM
-
----
-zoumcosmo@gmail.com
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', customerEmail);
-  formData.append('subject', 'Confirmation de commande - VEGEDERM');
-  formData.append('message', emailContent);
+  const html = `
+    <h2>Merci pour votre commande!</h2>
+    <p>Bonjour ${orderData.customer.firstName},</p>
+    <p>Votre commande a ete confirmee!</p>
+    
+    <h3>COMMANDES</h3>
+    <p>${itemsList}</p>
+    
+    <p><strong>Sous-total:</strong> ${subtotal.toFixed(2)}$<br>
+    <strong>Reduction:</strong> -${discount.toFixed(2)}$<br>
+    <strong>Livraison:</strong> ${shipping.toFixed(2)}$<br>
+    <strong>TOTAL:</strong> ${total.toFixed(2)}$</p>
+    
+    <p>Mode de livraison: ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}</p>
+    
+    <p>Nous vous remercions de votre confiance!<br>
+    L'equipe VEGEDERM</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_CUSTOMER}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend(customerEmail, 'Confirmation de commande - VEGEDERM', html);
     return true;
   } catch (error) {
     console.error('Erreur envoi confirmation:', error);
@@ -265,31 +206,18 @@ export async function sendStatusUpdateEmail(customerEmail, orderData, newStatus)
 
   const statusInfo = statusMessages[newStatus] || { title: 'Mise a jour de commande', message: 'Le statut de votre commande a ete mis a jour.' };
 
-  const emailContent = `
-${statusInfo.title}
-
-Bonjour ${orderData.customer?.firstName || 'Client'},
-
-${statusInfo.message}
-
-Numero de commande: ${orderData.id}
-Total: ${parseFloat(orderData.total).toFixed(2)}$
-
-Merci pour votre confiance!
-L'equipe VEGEDERM
-  `.trim();
-
-  const formData = new FormData();
-  formData.append('email', customerEmail);
-  formData.append('subject', `Commande ${orderData.id} - ${statusInfo.title}`);
-  formData.append('message', emailContent);
+  const html = `
+    <h2>${statusInfo.title}</h2>
+    <p>Bonjour ${orderData.customer?.firstName || 'Client'},</p>
+    <p>${statusInfo.message}</p>
+    <p><strong>Numero de commande:</strong> ${orderData.id}<br>
+    <strong>Total:</strong> ${parseFloat(orderData.total).toFixed(2)}$</p>
+    <p>Merci pour votre confiance!<br>
+    L'equipe VEGEDERM</p>
+  `;
 
   try {
-    await fetch(`https://formspree.io/f/${FORMSPREE_CUSTOMER}`, {
-      method: 'POST',
-      body: formData,
-      mode: 'no-cors'
-    });
+    await sendEmailViaResend(customerEmail, `Commande ${orderData.id} - ${statusInfo.title}`, html);
     return true;
   } catch (error) {
     console.error('Erreur envoi notification statut:', error);
