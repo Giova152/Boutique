@@ -108,7 +108,6 @@ export function AdminProvider({ children }) {
   async function seedProducts() {
     console.log('Seeding products...');
     const defaultProducts = [
-    const defaultProducts = [
       {
         name: 'Beurre de Karité Pur',
         category: 'beurre-karite',
@@ -293,6 +292,7 @@ export function AdminProvider({ children }) {
         images: p.image ? [p.image] : [],
         isBestseller: p.is_bestseller,
         isNew: p.is_new,
+        isPromo: p.is_promo,
         inStock: p.in_stock,
         promoPrice: p.promo_price
       }));
@@ -308,6 +308,7 @@ export function AdminProvider({ children }) {
         images: p.image ? [p.image] : [],
         isBestseller: p.is_bestseller,
         isNew: p.is_new,
+        isPromo: p.is_promo,
         inStock: p.in_stock,
         promoPrice: p.promo_price
       }));
