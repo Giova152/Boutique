@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { products as localProducts } from '../data/products';
 
 const ReviewsContext = createContext();
 
@@ -47,21 +46,16 @@ export function ReviewsProvider({ children }) {
     if (data) {
       setReviews(prev => [data, ...prev]);
       
-      const product = localProducts.find(p => p.id === parseInt(productId));
-      if (product) {
-        const productReviews = reviews.filter(r => r.product_id === productId);
-        const avgRating = productReviews.length > 0 
-          ? productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length 
-          : rating;
-        
-        await supabase
-          .from('products')
-          .update({
-            rating: avgRating.toFixed(1),
-            reviews: productReviews.length + 1
-          })
-          .eq('id', productId);
-      }
+      const allReviews = [...reviews, data].filter(r => r.product_id === productId);
+      const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+      
+      await supabase
+        .from('products')
+        .update({
+          rating: parseFloat(avgRating.toFixed(1)),
+          reviews: allReviews.length
+        })
+        .eq('id', productId);
       
       return { success: true };
     }

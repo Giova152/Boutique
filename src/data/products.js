@@ -385,9 +385,3 @@ export const products = [
     needs: ['nutrition', 'hydration']
   }
 ];
-
-export const promoCodes = {
-  'NATURA10': { type: 'percentage', value: 10, description: '10% de réduction' },
-  'FREESHIP': { type: 'shipping', value: 0, description: 'Livraison gratuite' },
-  'BIENVENUE15': { type: 'percentage', value: 15, description: '15% pour les nouveaux clients' }
-};

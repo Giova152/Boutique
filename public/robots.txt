@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vegederm229.vercel.app/sitemap.xml

@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
+import SEO from '../components/layout/SEO';
 
 export default function PrivacyPage() {
   return (
     <main className="legal-page">
+      <SEO
+        title="Politique de confidentialité"
+        description="Politique de confidentialité VEGEDERM. Comment nous protégeons vos données personnelles."
+        path="/confidentialite"
+      />
       <div className="container">
         <Link to="/" className="back-link">
           <ArrowLeft size={20} />

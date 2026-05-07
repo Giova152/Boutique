@@ -13,14 +13,14 @@ export function AbandonedCartProvider({ children }) {
   }, []);
 
   function loadCart() {
-    const saved = localStorage.getItem('vegederm_cart');
+    const saved = localStorage.getItem('natura_cart');
     if (saved) {
       setCurrentCart(JSON.parse(saved));
     }
   }
 
   function saveCart(items) {
-    localStorage.setItem('vegederm_cart', JSON.stringify(items));
+    localStorage.setItem('natura_cart', JSON.stringify(items));
     localStorage.setItem('cart_abandoned_at', Date.now().toString());
     setCurrentCart(items);
   }
@@ -29,7 +29,7 @@ export function AbandonedCartProvider({ children }) {
     const abandonedAt = localStorage.getItem('cart_abandoned_at');
     if (!abandonedAt) return;
 
-    const cart = JSON.parse(localStorage.getItem('vegederm_cart') || '[]');
+    const cart = JSON.parse(localStorage.getItem('natura_cart') || '[]');
     if (cart.length === 0) {
       const timeDiff = Date.now() - parseInt(abandonedAt);
       const oneHour = 60 * 60 * 1000;
@@ -68,11 +68,11 @@ L'équipe VEGEDERM 🌿
 
     const formData = new FormData();
     formData.append('email', email);
-    formData.append('subject', 'Votre panier vous attend! 🛒');
+    formData.append('subject', 'Votre panier VEGEDERM vous attend!');
     formData.append('message', emailContent);
 
     try {
-      await fetch('https://formspree.io/f/mrejlbaa', {
+      await fetch('https://formspree.io/f/xqvdewp', {
         method: 'POST',
         body: formData,
         mode: 'no-cors'

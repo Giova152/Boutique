@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X } from 'lucide-react';
+import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X, CheckCircle } from 'lucide-react';
 import { categories } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { supabase } from '../lib/supabase';
+import SEO from '../components/layout/SEO';
 import { translations } from '../data/translations';
 import ProductModal from '../components/product/ProductModal';
 
@@ -38,8 +40,9 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
-  const { language } = useLanguage();
   const [exitPopupOpen, setExitPopupOpen] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const { products } = useAdmin();
   
   useEffect(() => {
@@ -68,6 +71,7 @@ export default function HomePage() {
 
   return (
     <main className="home-page">
+      <SEO path="/" />
       <AnimatePresence>
         {exitPopupOpen && (
           <motion.div 
@@ -201,8 +205,8 @@ export default function HomePage() {
             >
               <Truck size={28} />
               <div>
-                <h4>{t('free')}</h4>
-                <p>$75+</p>
+                <h4>Livraison gratuite</h4>
+                <p>Commandes de 75$ et plus</p>
               </div>
             </motion.div>
             <motion.div 
@@ -213,6 +217,16 @@ export default function HomePage() {
               <div>
                 <h4>Canada</h4>
                 <p>{t('carbonNeutral')}</p>
+              </div>
+            </motion.div>
+            <motion.div 
+              className="trust-badge"
+              whileHover={{ scale: 1.05 }}
+            >
+              <CheckCircle size={28} />
+              <div>
+                <h4>30 jours</h4>
+                <p>Garantie satisfait ou remboursé</p>
               </div>
             </motion.div>
           </div>
@@ -435,14 +449,35 @@ export default function HomePage() {
           >
             <h2>{t('newsletter')}</h2>
             <p>{t('newsletterSub')}</p>
-            <form onSubmit={(e) => { e.preventDefault(); alert(language === 'fr' ? 'Merci pour votre inscription!' : 'Thanks for subscribing!'); }} className="newsletter-form">
-              <input 
-                type="email" 
-                placeholder={t('emailPlaceholder')} 
-                required
-              />
-              <button type="submit" className="btn-primary">{t('subscribe')}</button>
-            </form>
+            {newsletterSubmitted ? (
+              <div className="newsletter-success">
+                <CheckCircle size={24} />
+                <p>{language === 'fr' ? 'Merci pour votre inscription!' : 'Thanks for subscribing!'}</p>
+              </div>
+            ) : (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newsletterEmail) return;
+                try {
+                  await supabase.from('newsletter_subscribers').upsert(
+                    { email: newsletterEmail, subscribed: true },
+                    { onConflict: 'email' }
+                  );
+                  setNewsletterSubmitted(true);
+                } catch (err) {
+                  console.error('Newsletter error:', err);
+                }
+              }} className="newsletter-form">
+                <input
+                  type="email"
+                  placeholder={t('emailPlaceholder')}
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  required
+                />
+                <button type="submit" className="btn-primary">{t('subscribe')}</button>
+              </form>
+            )}
             <p className="newsletter-note">{t('newsletterNote')}</p>
           </motion.div>
         </div>

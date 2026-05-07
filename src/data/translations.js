@@ -1,6 +1,5 @@
 export const translations = {
   fr: {
-    // Header
     home: 'Accueil',
     boutique: 'Boutique',
     about: 'À propos',
@@ -9,8 +8,7 @@ export const translations = {
     wishlist: 'Favoris',
     cart: 'Panier',
     account: 'Mon compte',
-    
-    // Hero
+
     heroTitle: "L'Excellence du Naturel",
     heroSubtitle: 'Cosmétiques biologiques conçus pour votre peau. Made in Canada.',
     discover: 'Découvrir la Collection',
@@ -18,13 +16,11 @@ export const translations = {
     products: 'Produits',
     natural: 'Naturel',
     rating: 'Note Client',
-    
-    // Categories
+
     categories: 'Nos Catégories',
     exploreCategories: 'Explorez Nos Catégories',
     discoverCategory: 'Découvrir',
-    
-    // Products
+
     bestsellers: 'Nos meilleures ventes',
     newArrivals: 'Nouveautés',
     popular: 'Populaire',
@@ -33,8 +29,7 @@ export const translations = {
     quickView: 'Voir détails',
     addToCart: 'Ajouter au panier',
     viewAll: 'Voir tous les produits',
-    
-    // Features
+
     featuresTitle: 'Ce qui nous anime',
     ingredientsPremium: 'Ingrédients Premium',
     ingredientsPremiumDesc: 'Nous sélectionnons les meilleurs ingrédients biologiques pour des résultats visibles.',
@@ -51,25 +46,20 @@ export const translations = {
     recyclable: 'Emballages recyclés',
     local: 'Ingrédients locaux',
     carbonNeutral: 'Production neutre en carbone',
-    
-    // Testimonials
+
     testimonials: 'Ce que disent nos clientes',
-    
-    // Newsletter
+
     newsletter: 'Rejoignez la communauté VEGEDERM',
     newsletterSub: 'Inscrivez-vous pour recevoir nos offres exclusives et conseils beauté',
     emailPlaceholder: 'Votre email',
     subscribe: "S'inscrire",
     newsletterNote: "En vous inscrivant, vous acceptez notre politique de confidentialité",
-    
-    // Footer
+
     footerDesc: 'Cosmétiques naturels biologiques conçus pour votre peau.',
     navigation: 'Navigation',
     contactInfo: 'Contact',
-    subscribe: "S'abonner",
     rights: 'Tous droits réservés.',
-    
-    // Shop
+
     ourBoutique: 'Notre Boutique',
     productsCount: 'produit(s)',
     filters: 'Filtres',
@@ -79,10 +69,9 @@ export const translations = {
     sortPriceDesc: 'Prix: décroissant',
     sortRating: 'Mieux notés',
     noResults: 'Aucun produit trouvé',
-    tryOther: 'Essayez avec d autres filtres ou termes de recherche',
+    tryOther: 'Essayez avec d\'autres filtres ou termes de recherche',
     resetFilters: 'Réinitialiser les filtres',
-    
-    // Product Types
+
     category: 'Type de produit',
     skinType: 'Type de peau',
     need: 'Besoin',
@@ -94,8 +83,7 @@ export const translations = {
     apaisement: 'Apaisement',
     nutrition: 'Nutrition',
     exfoliation: 'Exfoliation',
-    
-    // Cart
+
     myCart: 'Mon Panier',
     cartEmpty: 'Votre panier est vide',
     discoverShop: 'Découvrir la boutique',
@@ -107,32 +95,26 @@ export const translations = {
     promoCode: 'Code promo',
     apply: 'Appliquer',
     checkout: 'Passer à la caisse',
-    information: 'Information',
-    shippingInfo: 'Informations de livraison',
-    payment: 'Paiement',
-    checkoutTitle: 'Passer la commande',
-    
-    // Wishlist
+
     myWishlist: 'Ma Wishlist',
     wishlistEmpty: 'Votre wishlist est vide',
     wishlistAdd: 'Ajoutez vos produits préférés pour les retrouver facilement',
     removeFromWishlist: 'Retiré des favoris',
     continueShopping: 'Continuer mes achats',
-    
-    // Login
+
     login: 'Connexion',
     createAccount: 'Créer un compte',
-welcomeBack: 'Bienvenue chez VEGEDERM',
+    welcomeBack: 'Bienvenue chez VEGEDERM',
     joinUs: 'Rejoignez VEGEDERM pour une expérience personnalisée',
+
     aboutTitle: 'À propos de VEGEDERM',
     storyDesc: 'Fondée au Canada en 2018, VEGEDERM est née d\'une vision simple: proposer des cosmétiques efficaces qui respectent à la fois votre peau et l\'environnement.',
-    storyDesc2: 'Nous thérapeut rigoureusement des ingrédients biologiques provenant de producteurs locaux et engagés dans une démarche durable. Chaque formule est développée avec des dermatologues pour garantir une tolérance optimale sur tous types de peau.',
+    storyDesc2: 'Nous sélectionnons rigoureusement des ingrédients biologiques provenant de producteurs locaux et engagés dans une démarche durable. Chaque formule est développée avec des dermatologues pour garantir une tolérance optimale sur tous types de peau.',
     ourValues: 'Nos Valeurs',
     ctaTitle: 'Découvrez notre collection',
     ctaDesc: 'Parcourez nos produits naturels et trouvez celui qui convient à votre peau.',
     ctaBtn: 'Découvrir la boutique',
-    
-    // Contact
+
     contactTitle: 'Contactez-nous',
     contactSubtitle: 'Nous sommes là pour répondre à toutes vos questions',
     ourContact: 'Nos coordonnées',
@@ -143,13 +125,14 @@ welcomeBack: 'Bienvenue chez VEGEDERM',
     weekdays: 'Lun - Ven',
     saturday: 'Sam',
     sendMessage: 'Envoyez-nous un message',
+    yourName: 'Nom complet',
+    yourEmail: 'Email',
     yourMessage: 'Comment pouvons-nous vous aider?',
     sendBtn: 'Envoyer le message',
     messageSent: 'Message envoyé !',
     messageSentDesc: 'Merci de nous avoir contactés. Notre équipe vous répondra sous 24-48 heures.',
     sendAnother: 'Envoyer un autre message',
-    
-    // Toast
+
     addedToCart: 'ajouté au panier',
     removedFromWishlist: 'Retiré des favoris',
     addedToWishlist: 'ajouté aux favoris',
@@ -157,13 +140,193 @@ welcomeBack: 'Bienvenue chez VEGEDERM',
     promoApplied: 'Code appliqué',
     needLogin: 'Veuillez vous connecter pour ajouter aux favoris',
     newsletterSuccess: 'Merci pour votre inscription!',
-    
-    // Promo Banner
+
     useCode: 'Utilisez le code',
     forDiscount: 'pour 10% de réduction!',
-    
-    // Checkout
-    checkoutTitle: 'Place Order',
+
+    checkoutTitle: 'Passer la commande',
+    information: 'Information',
+    shippingInfo: 'Informations de livraison',
+    payment: 'Paiement',
+    shippingMethod: 'Mode de livraison',
+    standardDelivery: 'Standard',
+    standardDesc: '3-5 jours ouvrés',
+    expressDelivery: 'Express',
+    expressDesc: '1-2 jours ouvrés',
+    paymentMethod: 'Paiement',
+    orderSummary: 'Résumé de la commande',
+    confirmOrder: 'Confirmer la commande',
+    emptyCart: 'Votre panier est vide',
+    addProductsFirst: 'Ajoutez des produits avant de passer à la caisse',
+    orderComplete: 'Merci pour votre commande !',
+    orderSuccess: 'Votre commande a été enregistrée avec succès.',
+    confirmationEmail: 'Un email de confirmation vous a été envoyé',
+    backToHome: 'Retour à l\'accueil',
+    quantity: 'Qté',
+
+    welcome: 'Bienvenue',
+    logout: 'Déconnexion',
+    myOrders: 'Mes commandes',
+    myAddresses: 'Mes adresses',
+    myFidelity: 'Mon programme fidélité',
+    noOrders: 'Vous n\'avez pas encore passé de commande.',
+    noAddresses: 'Vous n\'avez pas d\'adresse enregistrée.',
+    orderStatus: 'en cours',
+
+    seeAll: 'Voir tout',
+    loading: 'Chargement...',
+
+    firstName: 'Prénom',
+    lastName: 'Nom',
+    fullName: 'Nom complet',
+  },
+
+  en: {
+    home: 'Home',
+    boutique: 'Shop',
+    about: 'About',
+    contact: 'Contact',
+    search: 'Search for a product...',
+    wishlist: 'Wishlist',
+    cart: 'Cart',
+    account: 'My account',
+
+    heroTitle: 'The Excellence of Natural',
+    heroSubtitle: 'Organic cosmetics designed for your skin. Made in Canada.',
+    discover: 'Discover the Collection',
+    seePromos: 'See Promos',
+    products: 'Products',
+    natural: 'Natural',
+    rating: 'Client Rating',
+
+    categories: 'Our Categories',
+    exploreCategories: 'Explore Our Categories',
+    discoverCategory: 'Discover',
+
+    bestsellers: 'Best Sellers',
+    newArrivals: 'New Products',
+    popular: 'Popular',
+    nouveau: 'New',
+    bestseller: 'Best Seller',
+    quickView: 'View Details',
+    addToCart: 'Add to Cart',
+    viewAll: 'View All Products',
+
+    featuresTitle: 'Our Commitment',
+    ingredientsPremium: 'Premium Ingredients',
+    ingredientsPremiumDesc: 'We select the best organic ingredients for visible results.',
+    dermatologue: 'Dermatology Expert',
+    dermatologueDesc: 'Formulated with dermatologists for optimal safety.',
+    environmental: 'Eco-Friendly',
+    environmentalDesc: 'We commit to sustainable beauty.',
+    noParabens: 'No parabens',
+    noSilicone: 'No silicones',
+    vegan: 'Vegan & Cruelty-free',
+    testedDermo: 'Dermatologist tested',
+    sensitive: 'For sensitive skin',
+    hypoallergenic: 'Hypoallergenic',
+    recyclable: 'Recyclable packaging',
+    local: 'Local ingredients',
+    carbonNeutral: 'Carbon neutral production',
+
+    testimonials: 'What Our Customers Say',
+
+    newsletter: 'Join the VEGEDERM Community',
+    newsletterSub: 'Sign up for exclusive offers and beauty tips',
+    emailPlaceholder: 'Your email',
+    subscribe: 'Subscribe',
+    newsletterNote: 'By subscribing, you agree to our privacy policy',
+
+    footerDesc: 'Natural organic cosmetics designed for your skin.',
+    navigation: 'Navigation',
+    contactInfo: 'Contact',
+    rights: 'All rights reserved.',
+
+    ourBoutique: 'Our Shop',
+    productsCount: 'product(s)',
+    filters: 'Filters',
+    clearFilters: 'Clear filters',
+    sortDefault: 'Sort',
+    sortPriceAsc: 'Price: low to high',
+    sortPriceDesc: 'Price: high to low',
+    sortRating: 'Best rated',
+    noResults: 'No products found',
+    tryOther: 'Try other filters or search terms',
+    resetFilters: 'Reset filters',
+
+    category: 'Product type',
+    skinType: 'Skin type',
+    need: 'Need',
+    normale: 'Normal',
+    seche: 'Dry',
+    mixte: 'Combination',
+    sensible: 'Sensitive',
+    hydratation: 'Hydration',
+    apaisement: 'Soothing',
+    nutrition: 'Nutrition',
+    exfoliation: 'Exfoliation',
+
+    myCart: 'My Cart',
+    cartEmpty: 'Your cart is empty',
+    discoverShop: 'Explore the shop',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    shipping: 'Shipping',
+    free: 'Free',
+    total: 'Total',
+    promoCode: 'Promo code',
+    apply: 'Apply',
+    checkout: 'Checkout',
+
+    myWishlist: 'My Wishlist',
+    wishlistEmpty: 'Your wishlist is empty',
+    wishlistAdd: 'Add your favorite products to find them easily',
+    removeFromWishlist: 'Removed from favorites',
+    continueShopping: 'Continue shopping',
+
+    login: 'Sign In',
+    createAccount: 'Create Account',
+    welcomeBack: 'Welcome to VEGEDERM',
+    joinUs: 'Join VEGEDERM for a personalized experience',
+
+    aboutTitle: 'About VEGEDERM',
+    storyDesc: 'Founded in Canada in 2018, VEGEDERM was born from a simple vision: to offer effective cosmetics that respect both your skin and the environment.',
+    storyDesc2: 'We rigorously select organic ingredients from local producers committed to sustainable practices. Every formula is developed with dermatologists to ensure optimal tolerance for all skin types.',
+    ourValues: 'Our Values',
+    ctaTitle: 'Discover our collection',
+    ctaDesc: 'Browse our natural products and find the one that suits your skin.',
+    ctaBtn: 'Discover the shop',
+
+    contactTitle: 'Contact Us',
+    contactSubtitle: 'We are here to answer all your questions',
+    ourContact: 'Contact Information',
+    contactIntro: 'Feel free to contact us for any questions about our products or orders.',
+    address: 'Address',
+    phone: 'Phone',
+    hours: 'Hours',
+    weekdays: 'Mon - Fri',
+    saturday: 'Sat',
+    sendMessage: 'Send us a message',
+    yourName: 'Full name',
+    yourEmail: 'Email',
+    yourMessage: 'How can we help you?',
+    sendBtn: 'Send message',
+    messageSent: 'Message sent!',
+    messageSentDesc: 'Thank you for contacting us. Our team will respond within 24-48 hours.',
+    sendAnother: 'Send another message',
+
+    addedToCart: 'added to cart',
+    removedFromWishlist: 'Removed from favorites',
+    addedToWishlist: 'added to favorites',
+    promoInvalid: 'Invalid promo code',
+    promoApplied: 'Code applied',
+    needLogin: 'Please sign in to add to favorites',
+    newsletterSuccess: 'Thank you for subscribing!',
+
+    useCode: 'Use the code',
+    forDiscount: 'for 10% off!',
+
+    checkoutTitle: 'Checkout',
     information: 'Information',
     shippingInfo: 'Shipping Information',
     payment: 'Payment',
@@ -178,119 +341,26 @@ welcomeBack: 'Bienvenue chez VEGEDERM',
     emptyCart: 'Your cart is empty',
     addProductsFirst: 'Add products before checkout',
     orderComplete: 'Thank you for your order!',
-    orderSuccess: 'Your order has been placed.',
+    orderSuccess: 'Your order has been placed successfully.',
     confirmationEmail: 'A confirmation email was sent to you',
     backToHome: 'Back to home',
     quantity: 'Qty',
-    
-    // Profile
-    welcome: 'Bienvenue',
-    logout: 'Déconnexion',
-    myOrders: 'Mes commandes',
-    myAddresses: 'Mes adresses',
-    noOrders: 'Vous n\'avez pas encore passé de commande.',
-    noAddresses: "Vous n'avez pas d'adresse enregistrée.",
-    orderStatus: 'en cours',
-    
-    // Misc
-    seeAll: 'Voir tout',
-    loading: 'Chargement...',
-  },
-  
-  en: {
-    // Header
-    home: 'Home',
-    boutique: 'Shop',
-    about: 'About',
-    contact: 'Contact',
-    search: 'Search for a product...',
-    wishlist: 'Wishlist',
-    cart: 'Cart',
-    account: 'My account',
-    
-    // Hero
-    heroTitle: 'The Excellence of Natural',
-    heroSubtitle: 'Organic cosmetics designed for your skin. Made in Canada.',
-    discover: 'Discover the Collection',
-    seePromos: 'See Promos',
-    products: 'Products',
-    natural: 'Natural',
-    rating: 'Client Rating',
-    
-    // Categories
-    categories: 'Our Categories',
-    exploreCategories: 'Explore Our Categories',
-    discoverCategory: 'Discover',
-    
-    // Products
-    bestsellers: 'Best Sellers',
-    newArrivals: 'New Products',
-    popular: 'Popular',
-    nouveau: 'New',
-    bestseller: 'Best Seller',
-    quickView: 'View Details',
-    addToCart: 'Add to Cart',
-    viewAll: 'View All',
-    
-    // Features
-    featuresTitle: 'Our Commitment',
-    ingredientsPremium: 'Premium Ingredients',
-    ingredientsPremiumDesc: 'We select the best organic ingredients.',
-    dermatologue: 'Dermatology Expert',
-    dermatologueDesc: 'Formulated with dermatologists.',
-    environmental: 'Eco-Friendly',
-    environmentalDesc: 'We commit to sustainable beauty.',
-    noParabens: 'No parabens',
-    noSilicone: 'No silicones',
-    vegan: 'Vegan',
-    testedDermo: 'Dermatologist tested',
-    sensitive: 'For sensitive skin',
-    hypoallergenic: 'Hypoallergenic',
-    recyclable: 'Recyclable',
-    local: 'Local products',
-    carbonNeutral: 'Carbon neutral',
-    
-    // Testimonials
-    testimonials: 'Customer Reviews',
-    
-    // Newsletter
-    newsletter: 'Join the VEGEDERM Community',
-    newsletterSub: 'Sign up for exclusive offers',
-emailPlaceholder: 'Votre email',
 
-    cartEmpty: 'Votre panier est vide',
-
-    free: 'Gratuit',
-
-    wishlistEmpty: 'Votre wishlist est vide',
-
-    messageSentDesc: 'Merci de nous avoir contactés. Notre équipe vous répondra sous 24-48 heures.',
-
-    needLogin: 'Veuillez vous connecter pour ajouter aux favoris',
-
-    newsletterSuccess: 'Merci pour votre inscription!',
-
-    emptyCart: 'Votre panier est vide',
-
-    orderComplete: 'Merci pour votre commande!',
-
-    orderSuccess: 'Votre commande a été enregistrée avec succès.',
-
-    backToHome: 'Retour à l\'accueil',
-    quantity: 'Qty',
-    
-    // Profile
     welcome: 'Welcome',
     logout: 'Logout',
     myOrders: 'My Orders',
     myAddresses: 'My Addresses',
+    myFidelity: 'Loyalty Program',
     noOrders: "You haven't placed any orders yet.",
     noAddresses: "You don't have any saved addresses.",
     orderStatus: 'in progress',
-    
-    // Misc
+
     seeAll: 'See all',
     loading: 'Loading...',
+
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    fullName: 'Full Name',
   }
 };
 
@@ -300,5 +370,5 @@ export const getTranslation = (lang, key) => {
   for (const k of keys) {
     value = value?.[k];
   }
-  return value || key;
+  return value || translations.fr[key] || key;
 };

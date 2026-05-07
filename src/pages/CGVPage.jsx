@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, FileText } from 'lucide-react';
+import SEO from '../components/layout/SEO';
 
 export default function CGVPage() {
   return (
     <main className="legal-page">
+      <SEO
+        title="Conditions Générales de Vente"
+        description="Conditions générales de vente VEGEDERM. Consultez nos conditions pour les achats en ligne au Canada."
+        path="/cgv"
+      />
       <div className="container">
         <Link to="/" className="back-link">
           <ArrowLeft size={20} />

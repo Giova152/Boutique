@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Package, MapPin, LogOut, Edit3, Save, X, ChevronRight, Clock, CheckCircle, Truck, Home, Eye, Download, Printer, AlertCircle, Mail, Loader2 } from 'lucide-react';
+import { User, Package, MapPin, LogOut, Edit3, Save, X, ChevronRight, Clock, CheckCircle, Truck, Home, Eye, Download, Printer, AlertCircle, Mail, Loader2, Star, Gift } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLoyalty } from '../contexts/LoyaltyContext';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../contexts/ToastContext';
 import { downloadInvoice, printInvoice } from '../utils/invoice';
+import SEO from '../components/layout/SEO';
 
 export default function ProfilePage() {
   const { user, profile, logout, updateProfile, emailConfirmed, confirmationMessage, clearConfirmationMessage } = useAuth();
+  const { userPoints, tier, totalEarned, totalRedeemed, transactions } = useLoyalty();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('orders');
@@ -140,6 +143,10 @@ export default function ProfilePage() {
 
   return (
     <main className="profile-page">
+      <SEO
+        title={language === 'fr' ? 'Mon Compte' : 'My Account'}
+        path="/profile"
+      />
       <div className="container">
         <motion.div
           className="profile-card"
@@ -199,6 +206,12 @@ export default function ProfilePage() {
               onClick={() => setActiveTab('info')}
             >
               <MapPin size={18} /> Livraison
+            </button>
+            <button 
+              className={`tab ${activeTab === 'loyalty' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('loyalty')}
+            >
+              <Star size={18} /> Fidélité
             </button>
           </div>
 
@@ -356,6 +369,12 @@ export default function ProfilePage() {
                                     <span>Sous-total</span>
                                     <span>{parseFloat(order.subtotal).toFixed(2)} $</span>
                                   </div>
+                                  {order.promo_code && (
+                                    <div className="total-row">
+                                      <span>Code promo</span>
+                                      <span>{order.promo_code}</span>
+                                    </div>
+                                  )}
                                   {order.discount > 0 && (
                                     <div className="total-row discount">
                                       <span>Réduction</span>
@@ -491,6 +510,75 @@ export default function ProfilePage() {
                     <p>{formData.city || 'Ville non définie'}, {formData.province || 'Province'} {formData.postal_code || 'XXX XXX'}</p>
                     <p>{formData.phone || 'Téléphone non défini'}</p>
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'loyalty' && (
+              <motion.div
+                key="loyalty"
+                className="tab-content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="loyalty-overview">
+                  <div className="loyalty-card">
+                    <div className="loyalty-points">
+                      <Gift size={32} />
+                      <div>
+                        <span className="points-number">{userPoints}</span>
+                        <span className="points-label">points disponibles</span>
+                      </div>
+                    </div>
+                    <div className={`loyalty-tier tier-${tier}`}>
+                      <Star size={16} /> Statut {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                    </div>
+                  </div>
+
+                  <div className="loyalty-stats">
+                    <div className="stat-item">
+                      <span className="stat-value">{totalEarned}</span>
+                      <span className="stat-label">Points gagnés</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-value">{totalRedeemed}</span>
+                      <span className="stat-label">Points échangés</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-value">{totalEarned - totalRedeemed}</span>
+                      <span className="stat-label">Solde</span>
+                    </div>
+                  </div>
+
+                  <div className="loyalty-benefits">
+                    <h4>Vos avantages {tier.charAt(0).toUpperCase() + tier.slice(1)}</h4>
+                    <ul>
+                      <li>1$ dépensé = 1 point fidélité</li>
+                      <li>500 points = 5$ de réduction</li>
+                      <li>Tier Bronze : accès au programme</li>
+                      <li>Tier Argent (500 pts) : -5% sur vos commandes</li>
+                      <li>Tier Or (2000 pts) : -10% + livraison gratuite</li>
+                      <li>Tier Platine (5000 pts) : -15% + cadeau d'anniversaire</li>
+                    </ul>
+                  </div>
+
+                  {transactions.length > 0 && (
+                    <div className="loyalty-transactions">
+                      <h4>Historique des points</h4>
+                      {transactions.slice(0, 5).map(txn => (
+                        <div key={txn.id} className="txn-row">
+                          <div>
+                            <span className="txn-desc">{txn.description}</span>
+                            <span className="txn-date">{new Date(txn.created_at).toLocaleDateString('fr-CA')}</span>
+                          </div>
+                          <span className={`txn-points ${txn.type === 'earn' ? 'positive' : 'negative'}`}>
+                            {txn.type === 'earn' ? '+' : '-'}{txn.points}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

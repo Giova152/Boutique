@@ -37,6 +37,10 @@ CREATE TABLE IF NOT EXISTS orders (
   discount DECIMAL(10,2) DEFAULT 0,
   shipping DECIMAL(10,2),
   total DECIMAL(10,2),
+  promo_code TEXT,
+  shipping_method TEXT,
+  payment_method TEXT,
+  payment_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -160,6 +164,69 @@ CREATE TABLE IF NOT EXISTS loyalty_transactions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Table paramètres admin (clés API)
+CREATE TABLE IF NOT EXISTS admin_settings (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  stripe_publishable_key TEXT,
+  paypal_client_id TEXT,
+  paypal_client_secret TEXT,
+  paypal_verified BOOLEAN DEFAULT false,
+  paypal_access_token TEXT,
+  paypal_token_expiry INTEGER,
+  paypal_token_issued TIMESTAMPTZ,
+  paypal_mode TEXT DEFAULT 'sandbox',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;
+
+-- Migration: add PayPal OAuth columns to existing admin_settings table
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_client_secret TEXT;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_verified BOOLEAN DEFAULT false;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_access_token TEXT;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_token_expiry INTEGER;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_token_issued TIMESTAMPTZ;
+EXCEPTION WHEN others THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS paypal_mode TEXT DEFAULT 'sandbox';
+EXCEPTION WHEN others THEN NULL;
+END $$;
+CREATE POLICY "Tout le monde peut lire clés API" ON admin_settings FOR SELECT USING (true);
+CREATE POLICY "Admins peuvent modifier paramètres" ON admin_settings FOR UPDATE USING (true);
+CREATE POLICY "Admins peuvent insérer paramètres" ON admin_settings FOR INSERT WITH CHECK (true);
+
+-- Table newsletter
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  subscribed BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Table messages support
+CREATE TABLE IF NOT EXISTS support_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Table comparaisons produits
 CREATE TABLE IF NOT EXISTS product_comparisons (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -174,6 +241,8 @@ ALTER TABLE stock_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loyalty_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loyalty_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_comparisons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY;
 
 -- Politiques d'accès
 CREATE POLICY "Tout le monde peut lire reviews" ON reviews FOR SELECT USING (true);
@@ -182,7 +251,7 @@ CREATE POLICY "Utilisateurs peuvent modifier leurs reviews" ON reviews FOR UPDAT
 
 CREATE POLICY "Tout le monde peut lire stock_alerts" ON stock_alerts FOR SELECT USING (true);
 CREATE POLICY "Tout le monde peut créer alertes" ON stock_alerts FOR INSERT WITH CHECK (true);
-CREATE POLICY "Utilisateurs peuvent voir leurs alertes" ON stock_alerts FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
+CREATE POLICY "Admins peuvent supprimer alertes" ON stock_alerts FOR DELETE USING (true);
 
 CREATE POLICY "Utilisateurs peuvent lire loyalty" ON loyalty_points FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Système peut créer loyalty" ON loyalty_points FOR INSERT WITH CHECK (true);
@@ -192,6 +261,13 @@ CREATE POLICY "Utilisateurs peuvent lire transactions" ON loyalty_transactions F
 CREATE POLICY "Système peut créer transactions" ON loyalty_transactions FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Tout le monde peut utiliser comparaisons" ON product_comparisons FOR ALL USING (true);
+
+CREATE POLICY "Tout le monde peut s'inscrire newsletter" ON newsletter_subscribers FOR INSERT WITH CHECK (true);
+CREATE POLICY "Tout le monde peut voir newsletter" ON newsletter_subscribers FOR SELECT USING (true);
+
+CREATE POLICY "Admins peuvent lire messages" ON support_messages FOR SELECT USING (true);
+CREATE POLICY "Tout le monde peut envoyer message" ON support_messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admins peuvent modifier messages" ON support_messages FOR UPDATE USING (true);
 
 -- Fonction pour calculer le statut fidelite
 CREATE OR REPLACE FUNCTION calculate_loyalty_tier(total_points INTEGER)

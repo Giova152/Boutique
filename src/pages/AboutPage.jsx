@@ -1,9 +1,15 @@
 import { motion } from 'framer-motion';
 import { Leaf, Heart, Globe, Award, Sparkles } from 'lucide-react';
+import SEO from '../components/layout/SEO';
 
 export default function AboutPage() {
   return (
     <main className="about-page">
+      <SEO
+        title="À propos"
+        description="Découvrez l'histoire de VEGEDERM, cosmétiques naturels biologiques made in Canada. Formulés avec des dermatologues, ingrédients certifiés biologiques."
+        path="/a-propos"
+      />
       <section className="about-hero">
         <div className="container">
           <motion.div

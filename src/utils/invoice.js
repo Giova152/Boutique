@@ -108,6 +108,12 @@ export function generateInvoiceHTML(order) {
             <td>Sous-total:</td>
             <td style="text-align: right;">${parseFloat(order.subtotal || 0).toFixed(2)} $</td>
           </tr>
+          ${order.promo_code ? `
+          <tr>
+            <td>Code promo:</td>
+            <td style="text-align: right;">${order.promo_code}</td>
+          </tr>
+          ` : ''}
           ${order.discount > 0 ? `
           <tr style="color: green;">
             <td>Réduction:</td>

@@ -7,6 +7,7 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useAdmin } from '../contexts/AdminContext';
 import { sendOrderEmail } from '../services/emailService';
+import SEO from '../components/layout/SEO';
 
 const stripePromise = loadStripe(paymentConfig.stripe.publishableKey);
 
@@ -59,7 +60,7 @@ export default function OrderConfirmationPage() {
         orderData.items.forEach(item => {
           const product = products.find(p => p.id === item.id);
           if (product) {
-            updateStock(item.id, product.inStock - item.quantity);
+            updateStock(item.id, product.inStock - item.quantity, product.inStock);
           }
         });
         
@@ -103,6 +104,11 @@ export default function OrderConfirmationPage() {
   
   return (
     <main className="checkout-page">
+      <SEO
+        title="Confirmation de commande"
+        description="Votre commande VEGEDERM a été confirmée. Merci pour votre confiance!"
+        path="/order-confirmation"
+      />
       <div className="container order-confirmation">
         <div className="confirmation-icon"><CheckCircle size={48} /></div>
         <Package size={48} />

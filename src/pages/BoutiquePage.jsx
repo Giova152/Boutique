@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, X, Search, Heart, ShoppingBag } from 'lucide-react';
-import { categories } from '../data/products';
 import ProductModal from '../components/product/ProductModal';
+import SEO from '../components/layout/SEO';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,8 @@ import { getTranslation } from '../data/translations';
 
 export default function BoutiquePage() {
   const [searchParams] = useSearchParams();
+  const { language } = useLanguage();
+  const t = (key) => getTranslation(language, key);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,13 +23,17 @@ export default function BoutiquePage() {
 
   const { products } = useProducts();
 
+  const dynamicCategories = useMemo(() => {
+    const cats = products.map(p => p.category).filter(Boolean);
+    const unique = [...new Set(cats)].sort();
+    return unique.map(cat => ({ id: cat, name: cat }));
+  }, [products]);
+
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = (key) => getTranslation(language, key);
 
   const [filters, setFilters] = useState({
     category: '',
@@ -71,6 +77,12 @@ export default function BoutiquePage() {
     });
   };
 
+  useEffect(() => {
+    if (searchParams.get('promo') === 'true') {
+      setFilters(prev => ({ ...prev, promo: true }));
+    }
+  }, [searchParams]);
+
   const clearFilters = () => setFilters({ category: '', skinType: [], need: [], promo: false });
 
   const handleAddToCart = (product) => {
@@ -92,36 +104,47 @@ export default function BoutiquePage() {
 
   return (
     <main className="boutique-page">
+      <SEO
+        title={language === 'fr' ? 'Boutique' : 'Shop'}
+        description={language === 'fr' ? 'Découvrez nos cosmétiques naturels et biologiques. Beurre de karité, soins pour enfants, exfoliants et plus.' : 'Discover our natural and organic cosmetics. Shea butter, kids care, exfoliants and more.'}
+        path="/boutique"
+      />
       <div className="container">
         <div className="boutique-simple-header">
           <div className="boutique-title-row">
-            <h1>Nos Produits</h1>
-            <span className="products-count">{filteredProducts.length} articles</span>
+            <h1>{t('ourBoutique')}</h1>
+            <span className="products-count">{filteredProducts.length} {t('productsCount')}</span>
           </div>
           <div className="boutique-filters-row">
             <div className="search-products">
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Rechercher un produit..."
+                placeholder={t('search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
-              <option value="default">Trier</option>
-              <option value="price-asc">Prix ↑</option>
-              <option value="price-desc">Prix ↓</option>
+              <option value="default">{t('sortDefault')}</option>
+              <option value="price-asc">{t('sortPriceAsc')}</option>
+              <option value="price-desc">{t('sortPriceDesc')}</option>
             </select>
+            <button
+              className={`cat-filter-btn promo-filter-btn ${filters.promo ? 'active' : ''}`}
+              onClick={() => handleFilterChange('promo', !filters.promo)}
+            >
+              🔥 {language === 'fr' ? 'En promo' : 'On Sale'}
+            </button>
           </div>
           <div className="category-filters">
             <button
               className={`cat-filter-btn ${filters.category === '' ? 'active' : ''}`}
               onClick={() => handleFilterChange('category', '')}
             >
-              Tous
+              {language === 'fr' ? 'Tous' : 'All'}
             </button>
-            {categories.map(cat => (
+            {dynamicCategories.map(cat => (
               <button
                 key={cat.id}
                 className={`cat-filter-btn ${filters.category === cat.id ? 'active' : ''}`}
@@ -153,7 +176,7 @@ export default function BoutiquePage() {
                 }}
               >
                 <div className="product-image">
-                  <img src={product.images[0]} alt={product.name} />
+                  <img src={product.images[0]} alt={product.name} loading="lazy" decoding="async" />
                   <button 
                     className={`wishlist-btn-product ${isInWishlist(product.id) ? 'active' : ''}`}
                     onClick={(e) => handleWishlist(product, e)}

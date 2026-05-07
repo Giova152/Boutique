@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -7,8 +8,14 @@ import { CartDrawerProvider, useCartDrawer } from './contexts/CartDrawerContext'
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { ProductsProvider } from './contexts/ProductsContext';
+import { ReviewsProvider } from './contexts/ReviewsContext';
+import { StockAlertProvider } from './contexts/StockAlertContext';
+import { LoyaltyProvider } from './contexts/LoyaltyContext';
+import { AbandonedCartProvider } from './contexts/AbandonedCartContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import ScrollToTop from './components/layout/ScrollToTop';
+import CookieConsent from './components/layout/CookieConsent';
 import CartDrawer from './components/cart/CartDrawer';
 import HomePage from './pages/HomePage';
 import BoutiquePage from './pages/BoutiquePage';
@@ -22,6 +29,9 @@ import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CGVPage from './pages/CGVPage';
 import PrivacyPage from './pages/PrivacyPage';
+import MentionsLegalesPage from './pages/MentionsLegalesPage';
+import FAQPage from './pages/FAQPage';
+import NotFoundPage from './pages/NotFoundPage';
 import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import './components/payment/LegalStyles.css';
@@ -48,8 +58,13 @@ function AppContent() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/cgv" element={<CGVPage />} />
         <Route path="/confidentialite" element={<PrivacyPage />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/mentions-legales" element={<MentionsLegalesPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />
+      <ScrollToTop />
+      <CookieConsent />
       <CartDrawer isOpen={isOpen} onClose={closeCart} />
     </div>
   );
@@ -58,27 +73,37 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <HelmetProvider>
       <LanguageProvider>
         <ToastProvider>
           <ProductsProvider>
             <AdminProvider>
               <AuthProvider>
-                <CartProvider>
-                  <CartDrawerProvider>
-                    <WishlistProvider>
-                      <Routes>
-                        <Route path="/admin-login" element={<AdminLoginPage />} />
-                        <Route path="/admin/*" element={<AdminPage />} />
-                        <Route path="/*" element={<AppContent />} />
-                      </Routes>
-                    </WishlistProvider>
-                  </CartDrawerProvider>
-                </CartProvider>
+                <ReviewsProvider>
+                  <LoyaltyProvider>
+                    <AbandonedCartProvider>
+                      <CartProvider>
+                        <CartDrawerProvider>
+                          <WishlistProvider>
+                            <StockAlertProvider>
+                              <Routes>
+                                <Route path="/admin-login" element={<AdminLoginPage />} />
+                                <Route path="/admin/*" element={<AdminPage />} />
+                                <Route path="/*" element={<AppContent />} />
+                              </Routes>
+                            </StockAlertProvider>
+                          </WishlistProvider>
+                        </CartDrawerProvider>
+                      </CartProvider>
+                    </AbandonedCartProvider>
+                  </LoyaltyProvider>
+                </ReviewsProvider>
               </AuthProvider>
             </AdminProvider>
           </ProductsProvider>
         </ToastProvider>
       </LanguageProvider>
+      </HelmetProvider>
     </Router>
   );
 }

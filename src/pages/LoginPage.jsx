@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { storeConfig } from '../data/config';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/layout/SEO';
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login');
@@ -118,6 +119,10 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
+      <SEO
+        title={language === 'fr' ? 'Connexion' : 'Sign In'}
+        path="/login"
+      />
       <div className="login-background">
         <div className="login-pattern"></div>
       </div>

@@ -4,6 +4,7 @@ import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../contexts/ToastContext';
+import SEO from '../components/layout/SEO';
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
@@ -18,6 +19,10 @@ export default function WishlistPage() {
   if (wishlist.length === 0) {
     return (
       <main className="wishlist-page">
+        <SEO
+          title={language === 'fr' ? 'Favoris' : 'Wishlist'}
+          path="/wishlist"
+        />
         <div className="container">
           <motion.div 
             className="empty-wishlist"

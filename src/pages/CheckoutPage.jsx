@@ -5,20 +5,25 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAdmin } from '../contexts/AdminContext';
+import { useToast } from '../contexts/ToastContext';
+import { useLoyalty } from '../contexts/LoyaltyContext';
 import { supabase } from '../lib/supabase';
 import { getTranslation } from '../data/translations';
-import { sendOrderEmail, sendConfirmationEmail } from '../services/emailService';
+import { sendOrderEmail, sendConfirmationEmail, sendInvoiceEmail } from '../services/emailService';
 import { validateCheckoutForm, sanitizeInput } from '../utils/validation';
 import PaymentMethods from '../components/payment/PaymentMethods';
+import SEO from '../components/layout/SEO';
 import '../components/payment/PaymentMethods.css';
 import '../components/payment/CheckoutStyles.css';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cart, subtotal, discount, shipping, total, clearCart } = useCart();
+  const { cart, subtotal, discount, shipping, total, clearCart, promoCode } = useCart();
   const { user, profile } = useAuth();
   const { language } = useLanguage();
+  const { addToast } = useToast();
   const { addOrder, updateStock, products } = useAdmin();
+  const { addPoints } = useLoyalty();
   const t = (key) => getTranslation(language, key);
   const [step, setStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -72,15 +77,21 @@ export default function CheckoutPage() {
   const handlePaymentSuccess = async () => {
     setIsProcessing(true);
     try {
+      const orderShipping = shippingMethod === 'express'
+        ? 19.99
+        : shipping;
+      const orderTotal = subtotal - discount + orderShipping;
+
       const orderData = {
         items: cart,
         customer: shippingInfo,
         shippingMethod,
         paymentMethod,
-        subtotal,
-        discount,
-        shipping: shippingMethod === 'express' ? 19.99 : 9.99,
-        total
+        promoCode: promoCode || null,
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        discount: parseFloat(discount.toFixed(2)),
+        shipping: parseFloat(orderShipping.toFixed(2)),
+        total: parseFloat(orderTotal.toFixed(2))
       };
 
       const orderResult = await addOrder(orderData);
@@ -102,12 +113,22 @@ export default function CheckoutPage() {
       await Promise.all(cart.map(async item => {
         const product = products.find(p => p.id === item.id);
         if (product) {
-          await updateStock(item.id, product.inStock - item.quantity);
+          await updateStock(item.id, product.inStock - item.quantity, product.inStock);
         }
       }));
 
+      if (user) {
+        const pointsEarned = Math.floor(parseFloat(orderTotal.toFixed(2)));
+        if (pointsEarned > 0) {
+          await addPoints(user.id, pointsEarned, `Commande #${orderResult?.orderId || 'N/A'}`, orderResult?.orderId || null);
+        }
+      }
+
+      const orderWithId = { ...orderData, id: orderResult?.orderId || orderData.id };
+
       sendOrderEmail(orderData);
       sendConfirmationEmail(shippingInfo.email, orderData);
+      sendInvoiceEmail(shippingInfo.email, orderWithId);
 
       clearCart();
       setOrderComplete(true);
@@ -156,6 +177,10 @@ export default function CheckoutPage() {
 
   return (
     <main className="checkout-page">
+      <SEO
+        title={language === 'fr' ? 'Paiement' : 'Checkout'}
+        path="/checkout"
+      />
       <div className="container">
         <h1>{t('checkoutTitle')}</h1>
 

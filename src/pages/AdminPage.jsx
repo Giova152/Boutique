@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3,
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut, Download, Printer, Calendar, TrendingDown
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut, Download, Printer, Calendar, TrendingDown, Bell, Settings, Eye, EyeOff, Loader2
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
@@ -11,6 +11,612 @@ import { supabase } from '../lib/supabase';
 import { downloadInvoice, printInvoice } from '../utils/invoice';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 import { ADMIN_EMAILS, isAdminEmail } from '../config/adminConfig';
+
+function StockAlertsTable() {
+  const [alerts, setAlerts] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    const [alertsRes, productsRes] = await Promise.all([
+      supabase.from('stock_alerts').select('*').order('created_at', { ascending: false }),
+      supabase.from('products').select('id, name')
+    ]);
+    if (alertsRes.data) setAlerts(alertsRes.data);
+    if (productsRes.data) setProducts(productsRes.data);
+  }
+
+  async function deleteAlert(id) {
+    await supabase.from('stock_alerts').delete().eq('id', id);
+    setAlerts(prev => prev.filter(a => a.id !== id));
+  }
+
+  return (
+    <div>
+      <div className="admin-table-wrapper">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Email</th>
+              <th>Active</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {alerts.map(alert => {
+              const product = products.find(p => p.id === alert.product_id || p.id === String(alert.product_id));
+              return (
+                <tr key={alert.id}>
+                  <td>{product?.name || alert.product_id}</td>
+                  <td>{alert.email}</td>
+                  <td>{alert.active ? '✓' : '✗'}</td>
+                  <td>{new Date(alert.created_at).toLocaleDateString('fr-CA')}</td>
+                  <td>
+                    <button className="btn-icon" onClick={() => deleteAlert(alert.id)} title="Supprimer">
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+            {alerts.length === 0 && (
+              <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>Aucune alerte de stock</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPanel({ settings, onSave, addToast }) {
+  const [stripeKey, setStripeKey] = useState(settings.stripePublishableKey || '');
+  const [paypalId, setPaypalId] = useState(settings.paypalClientId || '');
+  const [paypalSecret, setPaypalSecret] = useState('');
+  const [showStripe, setShowStripe] = useState(false);
+  const [showPaypal, setShowPaypal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [paypalTesting, setPaypalTesting] = useState(false);
+  const [paypalVerified, setPaypalVerified] = useState(false);
+
+  const isStripeConnected = !!stripeKey;
+  const isPayPalConnected = !!paypalId;
+
+  const saveAll = async () => {
+    setSaving(true);
+    const result = await onSave({
+      stripe_publishable_key: stripeKey.trim(),
+      paypal_client_id: paypalId.trim(),
+      paypal_client_secret: paypalSecret.trim(),
+      paypal_verified: paypalVerified
+    });
+    setSaving(false);
+    if (result.success) {
+      addToast('Paramètres sauvegardés!', 'success');
+    } else {
+      addToast('Erreur lors de la sauvegarde', 'error');
+    }
+  };
+
+  return (
+    <div className="settings-panel">
+      <h2 style={{ marginBottom: 24 }}>Passerelles de Paiement</h2>
+      <p style={{ color: 'var(--text-light)', marginBottom: 32, fontSize: 15 }}>
+        Connectez vos comptes Stripe et PayPal pour accepter les paiements sur votre boutique.
+      </p>
+
+      <div className="gateway-cards">
+        <div className="gateway-card">
+          <div className="gateway-header">
+            <div className="gateway-logo stripe-logo">
+              <svg viewBox="0 0 60 25" width="60" height="25">
+                <path fill="#635BFF" d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.27 4.06-.7v2.94c-1.12.52-2.74.86-4.76.86-4.1 0-6.6-2.37-6.6-6.54 0-3.73 2.28-6.62 6.04-6.62 3.54 0 5.78 2.46 5.78 6.26 0 .74-.08 1.32-.17 1.25zm-4.98-9.08c-1.4 0-2.36.96-2.62 2.44h5.12c-.1-1.3-.94-2.44-2.5-2.44zM41.06 7.8c-1.4 0-2.36.96-2.62 2.44h5.12c-.1-1.3-.94-2.44-2.5-2.44zM32.92 13.8V6.4c0-.94-.08-1.74-.2-2.44h3.28c.08.7.12 1.42.12 2.14v7.7h2.62V7.8c0-.94-.08-1.74-.2-2.44h3.28c-.12.7-.2 1.5-.2 2.44v10.2h2.62v-2.94c.66.52 1.64.94 2.96.94 4.1 0 6.6-3.42 6.6-7.7s-2.5-7.7-6.6-7.7c-1.32 0-2.3.42-2.96.94V3.1H42.3c.12-.7.2-1.5.2-2.44s-.08-1.74-.2-2.44h-6.56c-.12.7-.2 1.5-.2 2.44v10.7h-2.62zM21.5 20.2V6.7c0-.94-.08-1.74-.2-2.44h3.28c-.12.7-.2 1.5-.2 2.44v5.8l5.44-5.8h4.18l-5.72 6.1 6.1 8.6h-4.44l-4.42-6.32-1.62 1.56v4.76H21.5zM12.06 6.4c-1.4 0-2.36.96-2.62 2.44h5.12c-.1-1.3-.94-2.44-2.5-2.44zM3.82 20.2V3.1H1.2V.66h8.06v2.44H5.44v15.1H3.82z"/>
+              </svg>
+            </div>
+            <div className="gateway-info">
+              <h3>Stripe</h3>
+              <p>Paiements par carte de crédit</p>
+            </div>
+            <div className={`gateway-status ${isStripeConnected ? 'connected' : 'disconnected'}`}>
+              {isStripeConnected ? (
+                <>
+                  <span className="status-dot connected-dot" /> Connecté
+                </>
+              ) : (
+                <>
+                  <span className="status-dot" /> Non connecté
+                </>
+              )}
+            </div>
+          </div>
+
+          {isStripeConnected ? (
+            <div className="gateway-connected-state">
+              <div className="gateway-key-display">
+                <label>Votre clé Stripe</label>
+                <div className="input-with-toggle">
+                  <input
+                    type={showStripe ? 'text' : 'password'}
+                    value={stripeKey}
+                    onChange={(e) => setStripeKey(e.target.value)}
+                    className="form-input"
+                    readOnly
+                  />
+                  <button type="button" className="toggle-visibility" onClick={() => setShowStripe(!showStripe)}>
+                    {showStripe ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div className="gateway-actions">
+                <a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" className="btn-outline-sm">
+                  Gérer sur Stripe
+                </a>
+                <button className="btn-disconnect" onClick={() => setStripeKey('')}>
+                  Déconnecter
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="gateway-connect-state">
+              <p className="gateway-desc">
+                Acceptez les paiements par carte de crédit (Visa, Mastercard, American Express) sur votre boutique.
+              </p>
+              <div className="gateway-buttons">
+                <a
+                  href="https://dashboard.stripe.com/register"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-connect-stripe"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.89 8.12l-1.73 1.06c-.42-.83-1.21-1.4-2.16-1.4-.95 0-1.74.57-2.16 1.4l-1.73-1.06c-.7-.43-1.5-.66-2.35-.66-1.7 0-3.2.88-4.05 2.18l1.73 1.06c.34-.76.97-1.24 1.73-1.24.77 0 1.41.49 1.73 1.24l1.73 1.06c-.85 1.3-2.35 2.18-4.05 2.18s-3.2-.88-4.05-2.18l-1.73 1.06c.85 1.3 2.35 2.18 4.05 2.18s3.2-.88 4.05-2.18l1.73-1.06c.34.76.97 1.24 1.73 1.24.77 0 1.41-.49 1.73-1.24l1.73-1.06c.85 1.3 2.35 2.18 4.05 2.18s3.2-.88 4.05-2.18l-1.73-1.06c-.85-1.3-2.35-2.18-4.05-2.18-.85 0-1.65.23-2.35.66z"/>
+                  </svg>
+                  Créer un compte Stripe
+                </a>
+                <a
+                  href="https://dashboard.stripe.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-outline-sm"
+                >
+                  J'ai déjà un compte
+                </a>
+              </div>
+              <div className="gateway-key-section">
+                <label>Collez votre clé Stripe ici :</label>
+                <div className="input-with-toggle">
+                  <input
+                    type={showStripe ? 'text' : 'password'}
+                    value={stripeKey}
+                    onChange={(e) => setStripeKey(e.target.value)}
+                    placeholder="pk_live_..."
+                    className="form-input"
+                  />
+                  <button type="button" className="toggle-visibility" onClick={() => setShowStripe(!showStripe)}>
+                    {showStripe ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="gateway-card">
+          <div className="gateway-header">
+            <div className="gateway-logo paypal-logo">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="#003087">
+                <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/>
+              </svg>
+            </div>
+            <div className="gateway-info">
+              <h3>PayPal</h3>
+              <p>Paiements avec son compte PayPal</p>
+            </div>
+            <div className={`gateway-status ${isPayPalConnected ? 'connected' : 'disconnected'}`}>
+              {isPayPalConnected ? (
+                <>
+                  <span className="status-dot connected-dot" /> Connecté
+                </>
+              ) : (
+                <>
+                  <span className="status-dot" /> Non connecté
+                </>
+              )}
+            </div>
+          </div>
+
+          {isPayPalConnected && paypalVerified ? (
+            <div className="gateway-connected-state">
+              <div className="gateway-key-display">
+                <label>Votre Client ID PayPal</label>
+                <div className="input-with-toggle">
+                  <input
+                    type={showPaypal ? 'text' : 'password'}
+                    value={paypalId}
+                    onChange={(e) => setPaypalId(e.target.value)}
+                    className="form-input"
+                    readOnly
+                  />
+                  <button type="button" className="toggle-visibility" onClick={() => setShowPaypal(!showPaypal)}>
+                    {showPaypal ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div className="gateway-verified">
+                <CheckCircle size={16} />
+                PayPal vérifié - Vos clients peuvent payer avec PayPal
+              </div>
+              <div className="gateway-actions">
+                <a href="https://developer.paypal.com" target="_blank" rel="noopener noreferrer" className="btn-outline-sm">
+                  Gérer sur PayPal
+                </a>
+                <button className="btn-disconnect" onClick={() => { setPaypalId(''); setPaypalVerified(false); }}>
+                  Déconnecter
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="gateway-connect-state">
+              <p className="gateway-desc">
+                Pour accepter les paiements PayPal, créez une application sur le Developer Dashboard de PayPal.
+              </p>
+
+              <div className="oauth-steps-compact">
+                <div className="oauth-step">
+                  <span className="step-n">1</span>
+                  <span>
+                    Allez sur <a href="https://developer.paypal.com" target="_blank" rel="noopener noreferrer">
+                      developer.paypal.com
+                    </a> → <strong>My Apps & Credentials</strong> → <strong>Create App</strong>
+                  </span>
+                </div>
+                <div className="oauth-step">
+                  <span className="step-n">2</span>
+                  <span>
+                    Copiez le <strong>Client ID</strong> et <strong>Client Secret</strong> de votre app
+                  </span>
+                </div>
+                <div className="oauth-step">
+                  <span className="step-n">3</span>
+                  <span>
+                    Collez-les ci-dessous et cliquez sur <strong>Connecter PayPal</strong>
+                  </span>
+                </div>
+              </div>
+
+              <div className="gateway-key-section">
+                <label>Client ID PayPal</label>
+                <input
+                  type={showPaypal ? 'text' : 'password'}
+                  value={paypalId}
+                  onChange={(e) => { setPaypalId(e.target.value); setPaypalVerified(false); }}
+                  placeholder="Ex: AbcDeFgHiJkLmNoPqRsTuVwXyZ1234567890"
+                  className="form-input"
+                />
+              </div>
+
+              <div className="gateway-key-section">
+                <label>Client Secret PayPal</label>
+                <input
+                  type={showPaypal ? 'text' : 'password'}
+                  value={paypalSecret}
+                  onChange={(e) => setPaypalSecret(e.target.value)}
+                  placeholder="Ex: EFGHIJKLMNOPQRSTUVWXYZabcdefghijk"
+                  className="form-input"
+                />
+                <button type="button" className="toggle-visibility-inline" onClick={() => setShowPaypal(!showPaypal)}>
+                  {showPaypal ? <EyeOff size={14} /> : <Eye size={14} />} {showPaypal ? 'Masquer' : 'Afficher'}
+                </button>
+              </div>
+
+              <button
+                className="btn-connect-paypal-full"
+                onClick={async () => {
+                  if (!paypalId || !paypalSecret) {
+                    addToast('Entrez le Client ID et le Client Secret', 'error');
+                    return;
+                  }
+                  setPaypalTesting(true);
+                  try {
+                    const returnUrl = `${window.location.origin}/admin/paypal-callback?client_id=${encodeURIComponent(paypalId)}`;
+                    window.location.href = `https://www.paypal.com/connect?client_id=${encodeURIComponent(paypalId)}&response_type=code&scope=openid+profile+email+address+https%3A%2F%2Furi.paypal.com%2Fservices%2Fpaypalattributes&redirect_uri=${encodeURIComponent(returnUrl)}`;
+                  } catch (err) {
+                    addToast('Erreur de connexion PayPal', 'error');
+                    setPaypalTesting(false);
+                  }
+                }}
+                disabled={paypalTesting}
+              >
+                {paypalTesting ? (
+                  <><Loader2 size={18} className="spin" /> Redirection vers PayPal...</>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
+                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/>
+                    </svg>
+                    Connecter avec PayPal
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {(stripeKey || paypalId) && (
+        <button className="btn-save-gateway" onClick={saveAll} disabled={saving}>
+          {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+        </button>
+      )}
+
+      <style>{`
+        .settings-panel { max-width: 800px; }
+        .gateway-cards { display: flex; flex-direction: column; gap: 24px; }
+        .gateway-card {
+          background: white;
+          border: 2px solid #eee;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: border-color 0.2s;
+        }
+        .gateway-card:hover { border-color: #ddd; }
+        .gateway-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 24px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        .gateway-logo {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .stripe-logo { background: #f6f5ff; }
+        .paypal-logo { background: #f0f7ff; }
+        .gateway-info { flex: 1; }
+        .gateway-info h3 { margin: 0 0 4px; font-size: 18px; }
+        .gateway-info p { margin: 0; color: var(--text-light); font-size: 14px; }
+        .gateway-status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+        .gateway-status.disconnected { background: #fff3e0; color: #e65100; }
+        .gateway-status.connected { background: #e8f5e9; color: #2e7d32; }
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #e65100;
+        }
+        .status-dot.connected-dot { background: #2e7d32; }
+        .gateway-connected-state,
+        .gateway-connect-state {
+          padding: 24px;
+        }
+        .gateway-key-display { margin-bottom: 16px; }
+        .gateway-key-display label,
+        .gateway-key-section label {
+          display: block;
+          font-weight: 600;
+          font-size: 13px;
+          margin-bottom: 8px;
+          color: var(--text-light);
+        }
+        .gateway-actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+        .gateway-buttons { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn-connect-stripe,
+        .btn-connect-paypal {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 28px;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 15px;
+          text-decoration: none;
+          transition: all 0.2s;
+          border: none;
+          cursor: pointer;
+        }
+        .btn-connect-stripe {
+          background: #635BFF;
+          color: white;
+        }
+        .btn-connect-stripe:hover { background: #4B44D9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,91,255,0.3); }
+        .btn-connect-paypal {
+          background: #0070BA;
+          color: white;
+        }
+        .btn-connect-paypal:hover { background: #005f9e; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,112,186,0.3); }
+        .btn-outline-sm {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 18px;
+          border: 2px solid #ddd;
+          border-radius: 8px;
+          color: var(--text);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 13px;
+          transition: all 0.2s;
+        }
+        .btn-outline-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-disconnect {
+          padding: 10px 18px;
+          border: 2px solid #ffebee;
+          border-radius: 8px;
+          background: transparent;
+          color: #c62828;
+          font-weight: 600;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-disconnect:hover { background: #ffebee; }
+        .gateway-desc {
+          color: var(--text-light);
+          font-size: 14px;
+          line-height: 1.6;
+          margin: 0 0 20px;
+        }
+        .gateway-key-section { margin-top: 16px; }
+        .input-with-toggle { display: flex; gap: 8px; }
+        .input-with-toggle input { flex: 1; }
+        .toggle-visibility {
+          padding: 0 12px;
+          background: var(--bg-light);
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          color: var(--text-light);
+        }
+        .toggle-visibility:hover { color: var(--primary); }
+        .form-input {
+          padding: 12px 16px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+          width: 100%;
+        }
+        .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29,78,56,0.1); }
+        .btn-save-gateway {
+          margin-top: 32px;
+          padding: 16px 40px;
+          background: var(--primary);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-save-gateway:hover { background: #163d2d; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(29,78,56,0.25); }
+        .btn-save-gateway:disabled { opacity: 0.6; cursor: not-allowed; }
+        .gateway-verified {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #e8f5e9;
+          color: #2e7d32;
+          padding: 10px 16px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+        .oauth-steps-compact {
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .oauth-step {
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+          font-size: 13px;
+          color: var(--text-light);
+          line-height: 1.5;
+        }
+        .oauth-step a {
+          color: var(--primary);
+          text-decoration: none;
+        }
+        .oauth-step a:hover { text-decoration: underline; }
+        .step-n {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: var(--primary);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+        .gateway-key-section {
+          margin-bottom: 16px;
+        }
+        .gateway-key-section label {
+          display: block;
+          font-weight: 600;
+          font-size: 13px;
+          margin-bottom: 8px;
+          color: var(--text);
+        }
+        .toggle-visibility-inline {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: none;
+          border: none;
+          color: var(--text-light);
+          font-size: 13px;
+          cursor: pointer;
+          margin-top: 6px;
+          padding: 0;
+        }
+        .toggle-visibility-inline:hover { color: var(--primary); }
+        .btn-connect-paypal-full {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          width: 100%;
+          padding: 16px;
+          background: #0070BA;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-top: 8px;
+        }
+        .btn-connect-paypal-full:hover:not(:disabled) {
+          background: #005f9e;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 16px rgba(0,112,186,0.35);
+        }
+        .btn-connect-paypal-full:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  );
+}
 
 function AdminContent() {
   const fileInputRef = useRef(null);
@@ -38,6 +644,8 @@ function AdminContent() {
   const updateProduct = adminCtx?.updateProduct || (() => {});
   const addPromoCode = adminCtx?.addPromoCode || (() => {});
   const seedProducts = adminCtx?.seedProducts || (() => {});
+  const settings = adminCtx?.settings || { stripePublishableKey: '', paypalClientId: '' };
+  const saveSettings = adminCtx?.saveSettings || (() => {});
 
   const [activeTab, setActiveTab] = useState('products');
 
@@ -187,7 +795,9 @@ function AdminContent() {
     { id: 'promos', label: 'Promos', icon: Tag, count: Object.keys(promoCodes).length },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart, count: orders.length },
     { id: 'customers', label: 'Clients', icon: Users, count: getCustomers().length },
-    { id: 'stats', label: 'Stats', icon: BarChart3 }
+    { id: 'stats', label: 'Stats', icon: BarChart3 },
+    { id: 'alerts', label: 'Alertes Stock', icon: Bell },
+    { id: 'settings', label: 'Paramètres', icon: Settings }
   ];
 
   const stats = getStats();
@@ -293,18 +903,18 @@ function AdminContent() {
                         value={productForm.category}
                         onChange={(e) => setProductForm({...productForm, category: e.target.value})}
                       >
+                        <option value="beurre-karite">Beurre de Karité Brut</option>
+                        <option value="gamme-enfants">Gamme Enfants</option>
+                        <option value="exfoliants">Nos Exfoliants</option>
+                        <option value="corps">Produits Corps</option>
+                        <option value="savons">Nos Savons</option>
+                        <option value="pieds">Soins des Pieds</option>
+                        <option value="capillaires">Soins Capillaires</option>
+                        <option value="eczema">Eczéma & Psoriasis</option>
                         <option value="cremes">Crèmes</option>
                         <option value="serums">Sérums</option>
                         <option value="nettoyants">Nettoyants</option>
                         <option value="masques">Masques</option>
-                        <option value="beurre-karite">Beurre de Karité</option>
-                        <option value="gamme-enfants">Gamme Enfants</option>
-                        <option value="exfoliants">Exfoliants</option>
-                        <option value="corps">Corps</option>
-                        <option value="savons">Savons</option>
-                        <option value="pieds">Pieds</option>
-                        <option value="capillaires">Capillaires</option>
-                        <option value="eczema">Eczéma</option>
                       </select>
                     </div>
                     <div className="form-group full">
@@ -495,9 +1105,9 @@ function AdminContent() {
                       <td>{product.price.toFixed(2)} $</td>
                       <td>
                         <div className="stock-control">
-                          <button onClick={() => updateStock(product.id, product.inStock - 1)}>-</button>
+                          <button onClick={() => updateStock(product.id, Math.max(0, product.inStock - 1), product.inStock)}>-</button>
                           <span>{product.inStock}</span>
-                          <button onClick={() => updateStock(product.id, product.inStock + 1)}>+</button>
+                          <button onClick={() => updateStock(product.id, product.inStock + 1, product.inStock)}>+</button>
                         </div>
                       </td>
                       <td>
@@ -726,6 +1336,7 @@ function AdminContent() {
                                 </div>
                                 <div className="order-summary">
                                   <p>Sous-total: {parseFloat(order.subtotal || 0).toFixed(2)} $</p>
+                                  {order.promo_code && <p>Code promo: {order.promo_code}</p>}
                                   {order.discount > 0 && <p>Réduction: -{parseFloat(order.discount).toFixed(2)} $</p>}
                                   <p>Livraison: {parseFloat(order.shipping || 0).toFixed(2)} $</p>
                                   <p><strong>Total: {parseFloat(order.total).toFixed(2)} $</strong></p>
@@ -820,6 +1431,22 @@ function AdminContent() {
                 </table>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'alerts' && (
+          <div className="admin-content">
+            <h2>Alertes de Stock</h2>
+            <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>
+              Clients enregistrés pour être notifiés quand un produit revient en stock.
+            </p>
+            <StockAlertsTable />
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="admin-content">
+            <SettingsPanel settings={settings} onSave={saveSettings} addToast={addToast} />
           </div>
         )}
 

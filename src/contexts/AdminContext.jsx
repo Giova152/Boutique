@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { sendStatusUpdateEmail } from '../services/emailService';
+import { sendStatusUpdateEmail, sendStockRestockEmail } from '../services/emailService';
 
 const AdminContext = createContext();
 
@@ -9,10 +9,15 @@ export function AdminProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [promoCodes, setPromoCodes] = useState({});
   const [stats, setStats] = useState({ visits: [], dailyVisits: {} });
+  const [settings, setSettings] = useState({
+    stripePublishableKey: '',
+    paypalClientId: '',
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
+    loadSettings();
 
     // Subscribe to real-time product changes
     const productsChannel = supabase
@@ -96,6 +101,35 @@ export function AdminProvider({ children }) {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadSettings() {
+    try {
+      const { data } = await supabase.from('admin_settings').select('*').eq('id', 1).single();
+      if (data) {
+        setSettings({
+          stripePublishableKey: data.stripe_publishable_key || '',
+          paypalClientId: data.paypal_client_id || '',
+        });
+      }
+    } catch (err) {
+      console.error('Error loading settings:', err);
+    }
+  }
+
+  async function saveSettings(newSettings) {
+    try {
+      await supabase.from('admin_settings').upsert({
+        id: 1,
+        ...newSettings,
+        updated_at: new Date().toISOString()
+      });
+      setSettings(prev => ({ ...prev, ...newSettings }));
+      return { success: true };
+    } catch (err) {
+      console.error('Error saving settings:', err);
+      return { success: false, error: err.message };
     }
   }
 
@@ -348,9 +382,29 @@ export function AdminProvider({ children }) {
     }
   };
 
-  const updateStock = async (id, inStock) => {
-    await supabase.from('products').update({ in_stock: inStock }).eq('id', id);
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, in_stock: inStock } : p));
+  const updateStock = async (id, newStock, oldStock) => {
+    await supabase.from('products').update({ in_stock: newStock }).eq('id', id);
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, in_stock: newStock } : p));
+
+    if (oldStock === 0 && newStock > 0) {
+      const { data: alerts } = await supabase
+        .from('stock_alerts')
+        .select('*')
+        .eq('product_id', id.toString())
+        .eq('active', true);
+
+      const product = products.find(p => p.id === id);
+
+      if (alerts && alerts.length > 0 && product) {
+        for (const alert of alerts) {
+          if (alert.email) {
+            await sendStockRestockEmail(alert.email, product);
+          }
+        }
+
+        await supabase.from('stock_alerts').update({ active: false }).eq('product_id', id.toString());
+      }
+    }
   };
 
   const addPromoCode = async (code, type, value, description) => {
@@ -680,7 +734,9 @@ export function AdminProvider({ children }) {
       recordVisit,
       getStats,
       seedProducts,
-      reloadProducts
+      reloadProducts,
+      settings,
+      saveSettings
     }}>
       {children}
     </AdminContext.Provider>

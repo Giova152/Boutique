@@ -1,22 +1,23 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Sparkles } from 'lucide-react';
-import { products as localProducts } from '../../data/products';
+import { useProducts } from '../../contexts/ProductsContext';
 import { useLoyalty } from '../../contexts/LoyaltyContext';
 
 export default function ProductRecommendations({ currentProductId, category, onAddToCart }) {
+  const { products } = useProducts();
   const { userPoints, tier, getTierBenefits } = useLoyalty();
   const tierBenefits = getTierBenefits(tier);
 
+  const currentProduct = products.find(p => p.id === currentProductId || p.id === String(currentProductId));
+
   const recommendations = useMemo(() => {
-    let recs = localProducts.filter(p => p.id !== currentProductId);
+    let recs = products.filter(p => p.id !== currentProductId && p.id !== String(currentProductId));
 
     const sameCategory = recs.filter(p => p.category === category);
     const bestsellers = recs.filter(p => p.isBestseller);
     const related = recs.filter(p => 
-      p.skinTypes?.some(s => 
-        localProducts.find(cp => cp.id === currentProductId)?.skinTypes?.includes(s)
-      )
+      p.skinTypes?.some(s => currentProduct?.skinTypes?.includes(s))
     );
 
     const combined = [
@@ -26,7 +27,7 @@ export default function ProductRecommendations({ currentProductId, category, onA
     ].filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
 
     return combined.slice(0, 4);
-  }, [currentProductId, category]);
+  }, [currentProductId, category, products, currentProduct]);
 
   if (recommendations.length === 0) return null;
 

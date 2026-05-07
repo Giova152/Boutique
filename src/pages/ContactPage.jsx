@@ -3,11 +3,14 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { storeConfig } from '../data/config';
 import { sanitizeInput, validateEmail } from '../utils/validation';
+import { supabase } from '../lib/supabase';
+import SEO from '../components/layout/SEO';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,7 +18,7 @@ export default function ContactPage() {
     if (errors[name]) setErrors({ ...errors, [name]: null });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (formData.name.length < 2) newErrors.name = 'Nom invalide';
@@ -26,11 +29,30 @@ export default function ContactPage() {
       setErrors(newErrors);
       return;
     }
-    setSubmitted(true);
+
+    setSaving(true);
+    try {
+      await supabase.from('support_messages').insert([{
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        status: 'new'
+      }]);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Error saving contact:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <main className="contact-page">
+      <SEO
+        title="Contact"
+        description="Contactez l'équipe VEGEDERM pour toute question sur nos produits naturels et biologiques. Réponse sous 24-48h."
+        path="/contact"
+      />
       <div className="container">
         <motion.div 
           className="page-header"
