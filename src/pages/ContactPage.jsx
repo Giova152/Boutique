@@ -175,14 +175,21 @@ export default function ContactPage() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => {
                         setSubmitted(false);
                         setFormData({ name: '', email: '', message: '' });
                       }}
-                      className="btn-primary btn-another"
+                      className="btn-reset-message"
                     >
                       <span>Envoyer un autre message</span>
-                      <ArrowRight size={18} />
+                      <motion.span
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.5, repeatDelay: 2 }}
+                      >
+                        <ArrowRight size={18} />
+                      </motion.span>
                     </motion.button>
                   </motion.div>
                 ) : (

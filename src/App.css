@@ -3568,19 +3568,34 @@ input, textarea, select {
   color: var(--success);
 }
 
-.btn-another {
+.btn-reset-message {
   display: inline-flex !important;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  background: var(--primary) !important;
+  color: white !important;
+  padding: 14px 28px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  cursor: pointer;
+  border: none;
+  margin-top: 20px;
+  transition: all 0.3s ease;
 }
 
-.btn-another svg {
-  transition: transform 0.2s ease;
+.btn-reset-message:hover {
+  background: var(--primary-light) !important;
+  box-shadow: 0 6px 20px rgba(29, 78, 56, 0.35);
+  transform: translateY(-2px);
 }
 
-.btn-another:hover svg {
-  transform: translateX(4px);
+.btn-reset-message:active {
+  transform: translateY(0);
+}
+
+.btn-reset-message span:first-child {
+  font-size: 15px;
 }
 }
 
