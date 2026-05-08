@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { storeConfig } from '../data/config';
-import { sanitizeInput, validateEmail } from '../utils/validation';
-import { supabase } from '../lib/supabase';
+import { validateEmail } from '../utils/validation';
 import SEO from '../components/layout/SEO';
+
+const API_URL = '/api/contact';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -14,16 +15,17 @@ export default function ContactPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: sanitizeInput(value) });
+    setFormData({ ...formData, [name]: value });
     if (errors[name]) setErrors({ ...errors, [name]: null });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     const newErrors = {};
-    if (formData.name.length < 2) newErrors.name = 'Nom invalide';
-    if (!validateEmail(formData.email)) newErrors.email = 'Email invalide';
-    if (formData.message.length < 10) newErrors.message = 'Message trop court';
+    if (!formData.name || formData.name.length < 2) newErrors.name = 'Nom invalide';
+    if (!formData.email || !validateEmail(formData.email)) newErrors.email = 'Email invalide';
+    if (!formData.message || formData.message.length < 10) newErrors.message = 'Message trop court (min 10 caractères)';
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -31,16 +33,30 @@ export default function ContactPage() {
     }
 
     setSaving(true);
+    setErrors({});
+    
     try {
-      await supabase.from('support_messages').insert([{
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-        status: 'new'
-      }]);
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setErrors({ message: data.error || 'Erreur lors de l\'envoi' });
+        setSaving(false);
+        return;
+      }
+      
       setSubmitted(true);
     } catch (err) {
-      console.error('Error saving contact:', err);
+      setErrors({ message: err.message });
     } finally {
       setSaving(false);
     }
@@ -61,7 +77,7 @@ export default function ContactPage() {
         >
           <h1>Contactez-nous</h1>
           <p className="page-subtitle">Nous sommes là pour répondre à toutes vos questions</p>
-        </motion.div>
+        </motion.div> 
 
         <div className="contact-wrapper">
           <motion.div 
@@ -135,6 +151,11 @@ export default function ContactPage() {
               ) : (
                 <>
                   <h2>Envoyez-nous un message</h2>
+                  {errors.message && (
+                    <div style={{color: 'red', marginBottom: '15px', padding: '12px', background: '#ffefef', borderRadius: '8px', border: '1px solid red'}}>
+                      ⚠️ {errors.message}
+                    </div>
+                  )}
                   <form onSubmit={handleSubmit} className="contact-form">
                     <div className="form-group">
                       <label>Nom complet</label>
@@ -175,8 +196,8 @@ export default function ContactPage() {
                       />
                       {errors.message && <span className="error-text">{errors.message}</span>}
                     </div>
-                    <button type="submit" className="btn-primary btn-submit">
-                      <Send size={18} /> Envoyer le message
+                    <button type="submit" className="btn-primary btn-submit" disabled={saving}>
+                      {saving ? 'Envoi en cours...' : <>Envoyer le message</>}
                     </button>
                   </form>
                 </>

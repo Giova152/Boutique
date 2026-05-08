@@ -1,6 +1,6 @@
 import { products as localProducts } from '../data/products';
 
-const BASE_URL = 'https://vegederm229.vercel.app';
+const BASE_URL = import.meta.env.VITE_APP_URL || 'https://vegederm229.vercel.app';
 
 const staticRoutes = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },

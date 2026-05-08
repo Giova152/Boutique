@@ -11,6 +11,7 @@ import { useToast } from '../contexts/ToastContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useProducts } from '../contexts/ProductsContext';
 import { getTranslation } from '../data/translations';
+import { DEFAULT_PRODUCTS } from '../data/products';
 
 export default function BoutiquePage() {
   const [searchParams] = useSearchParams();
@@ -23,18 +24,7 @@ export default function BoutiquePage() {
 
   const { products: dbProducts } = useProducts();
   
-  const defaultProducts = [
-    { id: '1', name: 'Beurre de Karité Pur', price: 24.99, description: 'Pur beurre de karité bio', category: 'beurre-karite', isBestseller: true, images: ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'], inStock: 50, rating: 4.9, reviews: 128 },
-    { id: '2', name: 'Crème Hydratante Enfants', price: 18.99, description: 'Pour les peau sensibles', category: 'gamme-enfants', isNew: true, images: ['https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400'], inStock: 35, rating: 4.8, reviews: 64 },
-    { id: '3', name: 'Savon Noir Africain', price: 12.99, description: 'Nettoyant naturel', category: 'savons', isBestseller: true, images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'], inStock: 100, rating: 4.7, reviews: 89 },
-    { id: '4', name: 'Baume Corps Ultra-Riche', price: 29.99, description: 'Hydratation intense', category: 'corps', isBestseller: true, images: ['https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?w=400'], inStock: 45, rating: 4.9, reviews: 156 },
-    { id: '5', name: 'Gommage Corps', price: 16.99, description: 'Exfoliant doux', category: 'exfoliants', isNew: true, images: ['https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400'], inStock: 40, rating: 4.6, reviews: 72 },
-    { id: '6', name: 'Crème Pieds Réparatrice', price: 22.99, description: 'Pour pieds secs', category: 'pieds', images: ['https://images.unsplash.com/photo-1570194065650-d99fb4b38b07?w=400'], inStock: 28, rating: 4.8, reviews: 95 },
-    { id: '7', name: 'Shampoing Doux', price: 14.99, description: 'Pour cheveux secs', category: 'capillaires', images: ['https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400'], inStock: 32, rating: 4.5, reviews: 48 },
-    { id: '8', name: 'Crème Eczéma', price: 26.99, description: 'Pour peau atopique', category: 'eczema', isPromo: true, images: ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'], inStock: 20, rating: 4.9, reviews: 210 }
-  ];
-  
-  const products = (dbProducts && dbProducts.length > 0) ? dbProducts : defaultProducts;
+  const products = (dbProducts && dbProducts.length > 0) ? dbProducts : DEFAULT_PRODUCTS;
 
   const dynamicCategories = useMemo(() => {
     const cats = products.map(p => p.category).filter(Boolean);

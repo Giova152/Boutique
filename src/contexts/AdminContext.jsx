@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { sendStatusUpdateEmail, sendStockRestockEmail } from '../services/emailService';
-import { sendDeliveryReviewEmail } from '../services/emailService';
+import { sendStatusUpdateEmail, sendStockRestockEmail, sendDeliveryReviewEmail } from '../services/emailService';
+import { DEFAULT_PRODUCTS } from '../data/products';
 
-const RESEND_API_KEY = 're_ZGjw8er8_4GEUJkSKd6JfiCG32DnX7zYp';
+const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || 're_ZGjw8er8_4GEUJkSKd6JfiCG32DnX7zYp';
 
 async function sendEmailViaResend(to, subject, html) {
   try {
@@ -157,181 +157,27 @@ export function AdminProvider({ children }) {
 
   async function seedProducts() {
     console.log('Seeding products...');
-const defaultProducts = [
-  {
-    name: 'Beurre de Karité Pur',
-    category: 'beurre-karite',
-    price: 18.99,
-    description: 'Beurre de karité 100% naturel, riche en vitamines et acides gras essentiels. Parfait pour hydrater et nourrir la peau.',
-    in_stock: 50,
-    image: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400',
-    is_new: true,
-    is_bestseller: true,
-    is_promo: false,
-    rating: 4.8,
-    reviews: 124,
-    benefits: ['Hydratation intense', 'Réparateur cutané', 'Anti-âge naturel'],
-    ingredients: 'Beurre de karité brut 100%',
-    usage: 'Appliquer sur le corps après la douche',
-    is_fixed: true
-  },
-  {
-    name: 'Crème Hydratante Éclat',
-    category: 'cremes',
-    price: 24.99,
-    description: 'Crème hydratante légère et non grasses pour tous types de peau. Elle pénètre rapidement et procure une hydratation durable.',
-    in_stock: 35,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400',
-    is_new: true,
-    is_bestseller: true,
-    is_promo: false,
-    rating: 4.6,
-    reviews: 89,
-    benefits: ['Hydratation 24h', 'Texture légère', 'Non comédogène'],
-    ingredients: 'Eau de rose, glycérine végétale, beurre de karité',
-    usage: 'Appliquer matin et soir sur visage et cou',
-    is_fixed: true
-  },
-  {
-    name: 'Lotion Corps Nutrition',
-    category: 'corps',
-    price: 22.99,
-    description: 'Lotion corporelle ultra-nourrissante pour les peaux très sèches. Texture riche qui laisse la peau douce et satinée.',
-    in_stock: 28,
-    image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?w=400',
-    is_new: true,
-    is_bestseller: true,
-    is_promo: false,
-    rating: 4.7,
-    reviews: 67,
-    benefits: ['Nutrition profonde', 'Texture onctueuse', 'Absorption rapide'],
-    ingredients: 'Beurre de karité, huile d\'amande douce, vitamine E',
-    usage: 'Masser sur tout le corps matin et soir',
-    is_fixed: true
-  },
-  {
-    name: 'Gommage Corporel Douceur',
-    category: 'exfoliants',
-    price: 19.99,
-    description: 'Gommage naturel aux粒 de sucre et huile de karité. Élimine les cellules mortes en douceur.',
-    in_stock: 32,
-    image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400',
-    is_new: true,
-    is_bestseller: true,
-    is_promo: true,
-    promo_price: 15.99,
-    rating: 4.5,
-    reviews: 54,
-    benefits: ['Exfoliation douce', 'Peau douce et brillante', '100% naturel'],
-    ingredients: 'Sucre glace, beurre de karité, huile d\'amande',
-    usage: 'Masser sur peau humide, rincer',
-    is_fixed: true
-  },
-  {
-    name: 'Savon Artisanal au Karité',
-    category: 'savons',
-    price: 8.99,
-    description: 'Savon artisanal enrichi au beurre de karité et aux huiles essentielles. Idéal pour les peaux sensibles.',
-    in_stock: 100,
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.5,
-    reviews: 156,
-    benefits: ['Doux pour la peau', 'Sans sulfate', 'Parfum naturel'],
-    ingredients: 'Beurre de karité, huile d\'olive, huile de coco',
-    usage: 'Pour le corps et le visage',
-    is_fixed: true
-  },
-  {
-    name: 'Shampooing Réparateur',
-    category: 'capillaires',
-    price: 16.99,
-    description: 'Shampooing doux sans sulfate qui répare et renforce les cheveux secs et cassants.',
-    in_stock: 45,
-    image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.4,
-    reviews: 78,
-    benefits: ['Sans sulfate', 'Réparateur', 'Cheveux brillants'],
-    ingredients: 'Beurre de karité, protéines de soja, miel',
-    usage: 'Masser le cuir chevelu, rincer, répéter',
-    is_fixed: true
-  },
-  {
-    name: 'Crème Pieds Ultra-Nourrissante',
-    category: 'pieds',
-    price: 14.99,
-    description: 'Crème spécifique pour les pieds secs et fendillés. Texture riche mais non collante.',
-    in_stock: 40,
-    image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b07?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.7,
-    reviews: 112,
-    benefits: ['Élimine les-callosités', 'Hydrate en profondeur', 'Sensation immédiate'],
-    ingredients: 'Beurre de karité, urée 10%, huile de ricin',
-    usage: 'Appliquer sur pieds propres, masser jusqu\'à absorption',
-    is_fixed: true
-  },
-  {
-    name: 'Crème Réparatrice Éczéma',
-    category: 'eczema',
-    price: 29.99,
-    description: 'Crème apaisante conçue pour les peaux atopiques, psoriasis et eczéma. Soulage les démangeaisons.',
-    in_stock: 20,
-    image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.9,
-    reviews: 203,
-    benefits: ['Apaise les irritations', 'Répare la barrière cutanée', 'Soulage les démangeaisons'],
-    ingredients: 'Beurre de karité, avoine colloïdale, allantoïne',
-    usage: 'Appliquer 2-3 fois par jour sur les zones affectées',
-    is_fixed: true
-  },
-  {
-    name: 'Crème Solaire SPF 50',
-    category: 'cremes',
-    price: 24.99,
-    description: 'Écran solaire minéral SPF 50, water-resistant, pour protéger la peau des UVA/UVB.',
-    in_stock: 25,
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.6,
-    reviews: 45,
-    benefits: ['Minéral', 'Water-resistant', 'Sans nanoparticules'],
-    ingredients: 'Oxyde de zinc, beurre de karité, vitamine E',
-    usage: 'Appliquer 15 min avant exposition, renverser toutes les 2h',
-    is_fixed: true
-  },
-  {
-    name: 'Gel Douche Crémeux',
-    category: 'savons',
-    price: 12.99,
-    description: 'Gel douche crémeux sans savon, respecte le film hydrolipidique de la peau.',
-    in_stock: 60,
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
-    is_new: false,
-    is_bestseller: false,
-    is_promo: false,
-    rating: 4.3,
-    reviews: 92,
-    benefits: ['Sans savons', 'pH neutre', 'Familial'],
-    ingredients: 'Surfactants doux, beurre de karité, glycérine',
-    usage: 'Sous la douche, faire mousser sur le corps',
-    is_fixed: true
-  }
-];
+    
+    const productsToSeed = DEFAULT_PRODUCTS.map(p => ({
+      name: p.name,
+      category: p.category,
+      price: p.price,
+      description: p.description,
+      in_stock: p.inStock,
+      image: p.images[0],
+      is_new: p.isNew || false,
+      is_bestseller: p.isBestseller || false,
+      is_promo: p.isPromo || false,
+      promo_price: p.promoPrice || null,
+      rating: p.rating,
+      reviews: p.reviews,
+      benefits: [],
+      ingredients: '',
+      usage: '',
+      is_fixed: true
+    }));
 
-    for (const product of defaultProducts) {
+    for (const product of productsToSeed) {
       const { error } = await supabase.from('products').insert([product]);
       if (error) {
         console.error('Error inserting product:', error);
@@ -444,7 +290,7 @@ const defaultProducts = [
           <h2>⚠️ Alerte stock bas</h2>
           <p>Le produit <strong>${product.name}</strong> est en stock limite!</p>
           <p><strong>Stock actuel:</strong> ${newStock} unites</p>
-          <p><a href="https://vegederm229.vercel.app/admin">Reapprovisionner</a></p>
+          <p><a href="${import.meta.env.VITE_APP_URL || 'https://vegederm229.vercel.app'}/admin">Reapprovisionner</a></p>
         `;
         await sendEmailViaResend('zoumcosmo@gmail.com', `⚠️ Stock bas: ${product.name}`, html);
       }

@@ -1,12 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-
-const DEFAULT_PRODUCTS = [
-  { id: '1', name: 'Beurre de Karité Pur', price: 18.99, category: 'beurre-karite', isBestseller: true, images: ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'], inStock: 50, rating: 4.8, reviews: 124 },
-  { id: '2', name: 'Crème Hydratante Éclat', price: 24.99, category: 'cremes', isBestseller: true, images: ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'], inStock: 35, rating: 4.6, reviews: 89 },
-  { id: '3', name: 'Savon Artisanal au Karité', price: 8.99, category: 'savons', isPromo: true, promoPrice: 6.99, images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'], inStock: 100, rating: 4.5, reviews: 156 },
-  { id: '4', name: 'Baume Corps Ultra-Riche', price: 29.99, category: 'corps', isBestseller: true, images: ['https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?w=400'], inStock: 45, rating: 4.9, reviews: 156 }
-];
+import { DEFAULT_PRODUCTS } from '../data/products';
 
 const ProductsContext = createContext();
 

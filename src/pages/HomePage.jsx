@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Star, Leaf, Shield, Truck, Award, ChevronRight, X, CheckCircle } from 'lucide-react';
-import { categories } from '../data/products';
+import { categories, DEFAULT_PRODUCTS } from '../data/products';
 import { useAdmin } from '../contexts/AdminContext';
 import { useCart } from '../contexts/CartContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translations } from '../data/translations';
+import { supabase } from '../lib/supabase';
 import SEO from '../components/layout/SEO';
 import ProductModal from '../components/product/ProductModal';
 
@@ -70,17 +71,10 @@ export default function HomePage() {
 const bestsellers = (products || []).filter(p => p.isBestseller).slice(0, 4);
   const newProducts = (products || []).filter(p => p.isNew).slice(0, 4);
   const currentTestimonials = testimonials[language] || testimonials.fr;
-
-  const defaultProducts = [
-    { id: '1', name: 'Beurre de Karité Pur', price: 24.99, isBestseller: true, category: 'beurre-karite', images: ['https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400'], rating: 4.9, reviews: 128 },
-    { id: '2', name: 'Crème Hydratante Enfants', price: 18.99, isNew: true, category: 'gamme-enfants', images: ['https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400'], rating: 4.8, reviews: 64 },
-    { id: '3', name: 'Savon Noir Africain', price: 12.99, isBestseller: true, category: 'savons', images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'], rating: 4.7, reviews: 89 },
-    { id: '4', name: 'Baume Corps Ultra-Riche', price: 29.99, isBestseller: true, category: 'corps', images: ['https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?w=400'], rating: 4.9, reviews: 156 }
-  ];
   
-  const displayProducts = (products && products.length > 0) ? products : defaultProducts;
-  const displayBestsellers = bestsellers.length > 0 ? bestsellers : defaultProducts.filter(p => p.isBestseller);
-  const displayNew = newProducts.length > 0 ? newProducts : defaultProducts.filter(p => p.isNew);
+  const displayProducts = (products && products.length > 0) ? products : DEFAULT_PRODUCTS;
+  const displayBestsellers = bestsellers.length > 0 ? bestsellers : DEFAULT_PRODUCTS.filter(p => p.isBestseller);
+  const displayNew = newProducts.length > 0 ? newProducts : DEFAULT_PRODUCTS.filter(p => p.isNew);
 
   return (
     <main className="home-page">

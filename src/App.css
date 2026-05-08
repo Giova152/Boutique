@@ -3502,6 +3502,8 @@ input, textarea, select {
   border: 2px solid #eee;
   border-radius: 12px;
   font-size: 15px;
+  font-family: inherit;
+  line-height: 1.5;
   transition: var(--transition);
 }
 

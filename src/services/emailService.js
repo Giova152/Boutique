@@ -125,7 +125,7 @@ export async function sendStockRestockEmail(adminEmail, product) {
 }
 
 export async function sendDeliveryReviewEmail(customerEmail, order) {
-  const reviewLink = `${import.meta.env.VITE_BASE_URL || 'https://vegederm229.vercel.app'}/review/${order.id}`;
+  const reviewLink = `${import.meta.env.VITE_APP_URL || 'https://vegederm229.vercel.app'}/review/${order.id}`;
   
   const itemsList = order.items?.map(item => 
     `<li>${item.name} x${item.quantity}</li>`
@@ -157,4 +157,29 @@ export async function sendDeliveryReviewEmail(customerEmail, order) {
   `;
   
   return sendEmailViaResend(customerEmail, 'Votre avis sur VEGE DERM - Produits reçus', html);
+}
+
+export async function sendContactNotification(name, email, message) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #1a5c3a;">📬 Nouveau message de contact - VEGEDERM</h2>
+      
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Nom:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap;">${message}</p>
+      </div>
+      
+      <p style="color: #666; font-size: 14px;">
+        Connectez-vous au panneau admin pour répondre: 
+        <a href="${import.meta.env.VITE_APP_URL || 'https://vegederm229.vercel.app'}/admin" style="color: #1a5c3a;">
+          Voir dans Admin
+        </a>
+      </p>
+    </div>
+  `;
+  
+  return sendEmailViaResend(['zoumcosmo@gmail.com', 'midogiova@gmail.com'], `Nouveau contact de ${name}`, html);
 }

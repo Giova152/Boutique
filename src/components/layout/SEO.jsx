@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-const BASE_URL = 'https://vegederm229.vercel.app';
+const BASE_URL = import.meta.env.VITE_APP_URL || 'https://vegederm229.vercel.app';
 const SITE_NAME = 'VEGEDERM';
 const DEFAULT_DESC_FR = "Cosmétiques biologiques naturels conçus au Canada. Beurre de karité, soins pour enfants, exfoliants et plus. Testé dermatologiquement, sans parabènes.";
 const DEFAULT_DESC_EN = "Natural organic cosmetics made in Canada. Shea butter, kids range, exfoliants and more. Dermatologist tested, no parabens.";
