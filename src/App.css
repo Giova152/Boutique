@@ -509,6 +509,13 @@ input, textarea, select {
 
 .logo-text {
   white-space: nowrap;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, var(--primary) 0%, #2d5a47 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-actions {
