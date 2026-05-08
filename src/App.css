@@ -496,11 +496,14 @@ input, textarea, select {
 .logo-link {
   display: block;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--primary);
   text-decoration: none;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (min-width: 768px) {
@@ -510,6 +513,7 @@ input, textarea, select {
     top: 50%;
     transform: translate(-50%, -50%);
     font-size: 22px;
+    max-width: none;
   }
 }
 
@@ -553,8 +557,8 @@ input, textarea, select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: none;
   border: none;
   cursor: pointer;
@@ -562,6 +566,18 @@ input, textarea, select {
   transition: opacity 0.2s ease;
   position: relative;
   text-decoration: none;
+}
+
+.account-btn {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .account-btn {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .account-btn:hover,
