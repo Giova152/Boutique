@@ -19,10 +19,20 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Admin login check:', session?.user?.email);
       if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
         navigate('/admin');
       }
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
+      if (event === 'SIGNED_IN' && session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+        navigate('/admin');
+      }
+    });
+
+    return () => subscription?.unsubscribe();
   }, [navigate]);
 
   const handleSubmit = async (e) => {
