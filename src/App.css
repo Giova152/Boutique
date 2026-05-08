@@ -498,12 +498,40 @@ input, textarea, select {
   font-family: 'Cormorant Garamond', serif;
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--primary);
   text-decoration: none;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) {
+  .logo-link {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    letter-spacing: 0.12em;
+  }
+}
+
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+@media (min-width: 768px) {
+  .menu-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -548,8 +576,7 @@ input, textarea, select {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
+  gap: 2px;
 }
 
 .account-btn,
@@ -568,13 +595,9 @@ input, textarea, select {
   text-decoration: none;
 }
 
-.account-btn {
-  display: none;
-}
-
 @media (min-width: 768px) {
-  .account-btn {
-    display: inline-flex;
+  .account-btn,
+  .cart-btn {
     width: 36px;
     height: 36px;
   }
