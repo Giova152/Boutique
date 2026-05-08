@@ -25,26 +25,26 @@ async function sendEmailViaResend(to, subject, html) {
   }
 }
 
-export default async function handler(request) {
+export default async function handler(req, res) {
   try {
-    if (request.method === 'GET') {
-      return new Response(JSON.stringify({ status: 'OK' }), { status: 200 });
+    if (req.method === 'GET') {
+      return res.status(200).json({ status: 'OK' });
     }
 
-    if (request.method !== 'POST') {
-      return new Response(JSON.stringify({ error: 'Use POST' }), { status: 405 });
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Use POST' });
     }
 
-    const { name, email, message } = await request.json().catch(() => ({}));
+    const { name, email, message } = req.body || {};
 
     if (!name || name.length < 2) {
-      return new Response(JSON.stringify({ error: 'Nom invalide' }), { status: 400 });
+      return res.status(400).json({ error: 'Nom invalide' });
     }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(JSON.stringify({ error: 'Email invalide' }), { status: 400 });
+      return res.status(400).json({ error: 'Email invalide' });
     }
     if (!message || message.length < 10) {
-      return new Response(JSON.stringify({ error: 'Message trop court' }), { status: 400 });
+      return res.status(400).json({ error: 'Message trop court' });
     }
 
     // Save to Supabase
@@ -67,7 +67,7 @@ export default async function handler(request) {
     if (!response.ok) {
       const errText = await response.text();
       console.error('Supabase error:', errText);
-      return new Response(JSON.stringify({ error: 'Erreur base de données' }), { status: 500 });
+      return res.status(500).json({ error: 'Erreur base de données' });
     }
 
     // Send email notification
@@ -88,9 +88,9 @@ export default async function handler(request) {
       await sendEmailViaResend(adminEmail, `Nouveau contact de ${name}`, html);
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 201 });
+    return res.status(201).json({ success: true });
   } catch (e) {
     console.error('Handler error:', e);
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    return res.status(500).json({ error: e.message });
   }
 }
