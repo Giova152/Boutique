@@ -35,7 +35,7 @@ export default function Header() {
 
   const navLinks = [
     { path: '/', label: t('home') },
-    { path: '/boutique', label: 'VEGEDERM' },
+    { path: '/boutique', label: t('boutique') },
     { path: '/a-propos', label: t('about') },
     { path: '/contact', label: t('contact') }
   ];
@@ -68,7 +68,7 @@ export default function Header() {
           </button>
           
           <Link to="/" className="logo-link">
-            <span className="logo-text">VEGEDERM</span>
+            VEGEDERM
           </Link>
           
           <nav className="nav-pills">
