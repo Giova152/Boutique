@@ -286,7 +286,7 @@ const bestsellers = (products || []).filter(p => p.isBestseller).slice(0, 4);
           >
             <div className="section-title-group">
               <h2>{t('bestsellers')}</h2>
-              <span className="section-badge">{t('popular')}</span>
+              <span className="section-badge">★ {t('popular')}</span>
             </div>
           </motion.div>
           <div className="products-showcase-grid">
