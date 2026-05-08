@@ -1712,63 +1712,72 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Check session - try Supabase first, then localStorage
+  // Check session - simple and robust
   useEffect(() => {
     async function checkAuth() {
       try {
-        // Try to get session from Supabase
-        const { data: { session } } = await supabase.auth.getSession();
+        // Always try to refresh first to get latest session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-          // Valid Supabase session - extend local session
-          localStorage.setItem('adminLoginTime', Date.now().toString());
-          localStorage.setItem('adminEmail', session.user.email);
-          setLoginEmail(session.user.email);
-          setIsAdmin(true);
-          setLoading(false);
-          return;
+        if (error) {
+          console.error('Get session error:', error);
         }
         
-        // Check localStorage session (7 days expiry)
-        const loginTime = localStorage.getItem('adminLoginTime');
-        const savedAdminEmail = localStorage.getItem('adminEmail');
-        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        // Check if we have a valid session from Supabase
+        if (session?.user) {
+          const userEmail = session.user.email?.toLowerCase();
+          if (ADMIN_EMAILS.includes(userEmail)) {
+            localStorage.setItem('adminLoginTime', Date.now().toString());
+            localStorage.setItem('adminEmail', userEmail);
+            setLoginEmail(userEmail);
+            setIsAdmin(true);
+            setLoading(false);
+            return;
+          }
+        }
         
-        if (loginTime && savedAdminEmail && ADMIN_EMAILS.includes(savedAdminEmail.toLowerCase())) {
-          if (Date.now() - parseInt(loginTime) > sevenDays) {
-            // Session expired - try to refresh via Supabase
-            await supabase.auth.signOut();
-            localStorage.removeItem('adminLoginTime');
-            localStorage.removeItem('adminEmail');
-            setIsAdmin(false);
-          } else {
-            // Local session valid
+        // No Supabase session - check localStorage as backup
+        const savedLoginTime = localStorage.getItem('adminLoginTime');
+        const savedAdminEmail = localStorage.getItem('adminEmail');
+        
+        // If we have a local session that's not expired (7 days)
+        if (savedLoginTime && savedAdminEmail) {
+          const sevenDays = 7 * 24 * 60 * 60 * 1000;
+          const sessionAge = Date.now() - parseInt(savedLoginTime);
+          
+          if (sessionAge < sevenDays && ADMIN_EMAILS.includes(savedAdminEmail.toLowerCase())) {
+            // Try to reconnect via Supabase
             setLoginEmail(savedAdminEmail);
             setIsAdmin(true);
+            setLoading(false);
+            return;
           }
-        } else {
-          setIsAdmin(false);
         }
+        
+        // No valid session - show login form
+        setIsAdmin(false);
+        setLoading(false);
+        
       } catch (err) {
         console.error('Auth check error:', err);
         setIsAdmin(false);
-      } finally {
         setLoading(false);
       }
     }
 
     checkAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('adminLoginTime');
-        localStorage.removeItem('adminEmail');
-        setIsAdmin(false);
+    // Keep session alive - refresh every 30 minutes
+    const refreshInterval = setInterval(async () => {
+      try {
+        await supabase.auth.refreshSession();
+        localStorage.setItem('adminLoginTime', Date.now().toString());
+      } catch (err) {
+        console.error('Session refresh error:', err);
       }
-    });
+    }, 30 * 60 * 1000); // 30 minutes
 
-    return () => subscription?.unsubscribe();
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const handleLogin = async (e) => {
@@ -1776,28 +1785,53 @@ export default function AdminPage() {
     setIsLoggingIn(true);
     setLoginError('');
 
-    if (!ADMIN_EMAILS.includes(loginEmail.toLowerCase())) {
+    const email = loginEmail.toLowerCase().trim();
+    
+    if (!ADMIN_EMAILS.includes(email)) {
       setLoginError('Email non autorisé pour l\'accès administrateur');
       setIsLoggingIn(false);
       return;
     }
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: loginEmail.toLowerCase(),
-      password: loginPassword
-    });
+    try {
+      // First try to sign in
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: loginPassword
+      });
 
-    if (authError) {
-      setLoginError(authError.message);
-      setIsLoggingIn(false);
-      return;
-    }
+      if (authError) {
+        // If auth error, try to refresh session
+        const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+        
+        if (refreshError || !session?.user) {
+          setLoginError(authError.message || 'Impossible de se connecter. Veuillez réessayer.');
+          setIsLoggingIn(false);
+          return;
+        }
+        
+        // Got refresh session
+        if (ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+          localStorage.setItem('adminLoginTime', Date.now().toString());
+          localStorage.setItem('adminEmail', session.user.email.toLowerCase());
+          setLoginEmail(session.user.email.toLowerCase());
+          setIsAdmin(true);
+          addToast('Connexion admin réussie !', 'success');
+          setIsLoggingIn(false);
+          return;
+        }
+      }
 
-    if (data.user) {
-      // Stocker le temps de connexion (7 jours d'expiration)
-      localStorage.setItem('adminLoginTime', Date.now().toString());
-      localStorage.setItem('adminEmail', loginEmail.toLowerCase());
-      setIsAdmin(true);
+      if (data.user) {
+        localStorage.setItem('adminLoginTime', Date.now().toString());
+        localStorage.setItem('adminEmail', email);
+        setIsAdmin(true);
+        addToast('Connexion admin réussie !', 'success');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setLoginError('Erreur de connexion. Veuillez réessayer.');
+    } finally {
       setIsLoggingIn(false);
     }
   };
