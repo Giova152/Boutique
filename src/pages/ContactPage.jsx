@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle, ArrowRight } from 'lucide-react';
 import { storeConfig } from '../data/config';
 import { validateEmail } from '../utils/validation';
 import SEO from '../components/layout/SEO';
@@ -139,16 +139,53 @@ export default function ContactPage() {
             transition={{ delay: 0.3 }}
           >
             <div className="form-card">
-              {submitted ? (
-                <div className="success-message">
-                  <div className="success-icon">✓</div>
-                  <h3>Message envoyé !</h3>
-                  <p>Merci de nous avoir contactés. Notre équipe vous répondra sous 24-48 heures.</p>
-                  <button onClick={() => setSubmitted(false)} className="btn-secondary">
-                    Envoyer un autre message
-                  </button>
-                </div>
-              ) : (
+              <AnimatePresence mode="wait">
+                {submitted ? (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3 }}
+                    className="success-message"
+                  >
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                      className="success-icon-circle"
+                    >
+                      <CheckCircle size={48} className="success-icon-svg" />
+                    </motion.div>
+                    <motion.h3
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      Message envoyé !
+                    </motion.h3>
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      Merci de nous avoir contactés. Notre équipe vous répondra sous 24-48 heures.
+                    </motion.p>
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      onClick={() => {
+                        setSubmitted(false);
+                        setFormData({ name: '', email: '', message: '' });
+                      }}
+                      className="btn-primary btn-another"
+                    >
+                      <span>Envoyer un autre message</span>
+                      <ArrowRight size={18} />
+                    </motion.button>
+                  </motion.div>
+                ) : (
                 <>
                   <h2>Envoyez-nous un message</h2>
                   {errors.message && (

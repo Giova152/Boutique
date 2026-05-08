@@ -3554,6 +3554,36 @@ input, textarea, select {
   margin-bottom: 24px;
 }
 
+/* Animated success message */
+.success-icon-circle {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon-svg {
+  color: var(--success);
+}
+
+.btn-another {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-another svg {
+  transition: transform 0.2s ease;
+}
+
+.btn-another:hover svg {
+  transform: translateX(4px);
+}
+}
+
 @media (max-width: 900px) {
   .contact-wrapper {
     grid-template-columns: 1fr;
