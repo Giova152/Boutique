@@ -45,7 +45,6 @@ export function AdminProvider({ children }) {
     loadData();
     loadSettings();
 
-    // Subscribe to real-time product changes
     const productsChannel = supabase
       .channel('products-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
@@ -84,11 +83,9 @@ export function AdminProvider({ children }) {
 
   async function loadData() {
     try {
-      const [productsRes, ordersRes, promoRes, statsRes] = await Promise.all([
+      const [productsRes, ordersRes] = await Promise.all([
         supabase.from('products').select('*'),
-        supabase.from('orders').select('*').order('date', { ascending: false }),
-        supabase.from('promo_codes').select('*'),
-        supabase.from('stats').select('*').eq('id', 1).single()
+        supabase.from('orders').select('*').order('date', { ascending: false }).limit(50)
       ]);
 
       if (productsRes.data && productsRes.data.length > 0) {

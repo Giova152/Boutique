@@ -10,7 +10,7 @@ const ADMIN_SESSION_DURATION = 48 * 60 * 60 * 1000;
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState(null);
