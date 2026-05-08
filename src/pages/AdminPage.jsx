@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Package, Tag, ShoppingCart, BarChart3, Plus, Trash2, Edit3,
-  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut, Download, Printer, Calendar, TrendingDown, Bell, Settings, Eye, EyeOff, Loader2
+  Search, Check, X, Upload, TrendingUp, Users, DollarSign, Package as PackageIcon, Truck, FileText, Shield, LogOut, Download, Printer, Calendar, TrendingDown, Bell, Settings, Eye, EyeOff, Loader2, Star
 } from 'lucide-react';
 import { useAdmin } from '../contexts/AdminContext';
 import { useToast } from '../contexts/ToastContext';
