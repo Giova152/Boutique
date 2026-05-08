@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, Phone, MapPin, UserCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { storeConfig } from '../data/config';
 import { supabase } from '../lib/supabase';
 import SEO from '../components/layout/SEO';
@@ -13,8 +14,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, resetPassword } = useAuth();
   const { addToast } = useToast();
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -78,18 +80,22 @@ export default function LoginPage() {
           setIsLoading(false);
           return;
         }
-        try {
-          const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-            redirectTo: `${window.location.origin}/profile`
-          });
-          if (error) {
-            addToast(error.message || 'Erreur lors de l\'envoi', 'error');
-          } else {
-            addToast('Un lien de réinitialisation a été envoyé à ' + formData.email, 'success');
-            setMode('login');
-          }
-        } catch (err) {
-          addToast('Une erreur est survenue', 'error');
+        
+        // Check if email exists in database
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', formData.email)
+          .single();
+          
+        // Don't reveal if email exists or not - just show same message
+        const result = await resetPassword(formData.email);
+        
+        if (result.success) {
+          addToast('Un lien de réinitialisation a été envoyé à votre email', 'success');
+          setMode('login');
+        } else {
+          addToast(result.message || 'Erreur lors de l\'envoi du lien', 'error');
         }
       }
     } catch (err) {

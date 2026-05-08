@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { ADMIN_EMAILS, isAdminEmail } from '../config/adminConfig';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/authEmailService';
 
 const AuthContext = createContext();
 
@@ -242,6 +243,7 @@ export function AuthProvider({ children }) {
       console.log('Register response:', data);
 
       if (data.user) {
+        // Create profile in database
         await supabase.from('profiles').upsert({
           id: data.user.id,
           full_name: name,
@@ -252,24 +254,34 @@ export function AuthProvider({ children }) {
           if (profileError) console.error('Profile upsert error:', profileError);
         });
 
+        // If email is already confirmed (auto-confirm or disabled), log in directly
         if (data.user.email_confirmed_at) {
           setEmailConfirmed(true);
           saveSession(data.user.email);
           await loadUserData(data.user);
+          
+          // Send welcome email
+          try {
+            await sendWelcomeEmail(data.user.email, name);
+          } catch (e) {
+            console.error('Welcome email error:', e);
+          }
+          
           return { success: true };
         }
 
+        // Email needs confirmation
         return {
           success: true,
           needsConfirmation: true,
-          message: 'Un email de confirmation a été envoyé. Cliquez sur le lien pour activer votre compte.'
+          message: 'Un email de confirmation a été envoyé à votre adresse email. Cliquez sur le lien pour activer votre compte.'
         };
       }
 
       return {
         success: true,
         needsConfirmation: true,
-        message: 'Un email de confirmation a été envoyé. Cliquez sur le lien pour activer votre compte.'
+        message: 'Un email de confirmation a été envoyé à votre adresse email. Cliquez sur le lien pour activer votre compte.'
       };
     } catch (err) {
       console.error('Register catch error:', err);
@@ -280,6 +292,25 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     clearSession();
     await supabase.auth.signOut();
+  };
+
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/profile`
+      });
+      
+      if (error) return { success: false, message: error.message };
+      
+      // Send custom reset email
+      const token = Math.random().toString(36).substring(2);
+      localStorage.setItem(`reset_${email}`, token);
+      await sendPasswordResetEmail(email, token);
+      
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: 'Erreur lors de la réinitialisation' };
+    }
   };
 
   const updateProfile = async (updates) => {
@@ -356,6 +387,7 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      resetPassword,
       updateProfile,
       addOrder,
       refreshSession,
