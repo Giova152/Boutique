@@ -68,13 +68,13 @@ export default function HomePage() {
     return value || key;
   };
 
-const bestsellers = (products || []).filter(p => p.isBestseller).slice(0, 4);
-  const newProducts = (products || []).filter(p => p.isNew).slice(0, 4);
+const bestsellers = (products || []).filter(p => p.isBestseller || p.is_bestseller).slice(0, 4);
+  const newProducts = (products || []).filter(p => p.isNew || p.is_new).slice(-4).reverse();
   const currentTestimonials = testimonials[language] || testimonials.fr;
   
   const displayProducts = (products && products.length > 0) ? products : DEFAULT_PRODUCTS;
   const displayBestsellers = bestsellers.length > 0 ? bestsellers : DEFAULT_PRODUCTS.filter(p => p.isBestseller);
-  const displayNew = newProducts.length > 0 ? newProducts : DEFAULT_PRODUCTS.filter(p => p.isNew);
+  const displayNew = newProducts.length > 0 ? newProducts : DEFAULT_PRODUCTS.filter(p => p.isNew).slice(-4).reverse();
 
   return (
     <main className="home-page">
