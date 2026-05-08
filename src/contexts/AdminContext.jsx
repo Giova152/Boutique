@@ -86,7 +86,7 @@ export function AdminProvider({ children }) {
   async function loadData() {
     try {
       const [productsRes, ordersRes, reviewsRes] = await Promise.all([
-        supabase.from('products').select('*'),
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('orders').select('*').order('date', { ascending: false }).limit(50),
         supabase.from('reviews').select('*').order('created_at', { ascending: false })
       ]);
@@ -100,7 +100,8 @@ export function AdminProvider({ children }) {
           isNew: p.is_new,
           isPromo: p.is_promo,
           inStock: p.in_stock,
-          promoPrice: p.promo_price
+          promoPrice: p.promo_price,
+          createdAt: p.created_at
         }));
         setProducts(productsWithImages);
       } else {
