@@ -4,9 +4,11 @@ import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/layout/SEO';
 
 export default function WishlistPage() {
+  const { language } = useLanguage();
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { addToast } = useToast();
