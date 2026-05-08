@@ -1145,12 +1145,17 @@ function AdminContent() {
                       </td>
                       <td>
                         <div className="action-buttons">
-                          <button className="btn-icon" onClick={() => { setEditingProduct(product); setProductForm({ name: product.name, price: product.price, description: product.description, inStock: product.inStock, category: product.category, image: product.image || (product.images && product.images[0]) || '', isNew: product.is_new, isBestseller: product.is_bestseller, isPromo: product.is_promo, promoPrice: product.promo_price || '' }); setShowProductForm(true); }}>
+                          <button className="btn-icon" onClick={() => { setEditingProduct(product); setProductForm({ name: product.name, price: product.price, description: product.description, inStock: product.in_stock, category: product.category, image: product.image || (product.images && product.images[0]) || '', isNew: product.is_new, isBestseller: product.is_bestseller, isPromo: product.is_promo, promoPrice: product.promo_price || '' }); setShowProductForm(true); }}>
                             <Edit3 size={16} />
                           </button>
-                          <button className="btn-icon delete" onClick={() => deleteProduct(product.id)}>
-                            <Trash2 size={16} />
-                          </button>
+                          {!product.is_fixed && (
+                            <button className="btn-icon delete" onClick={() => deleteProduct(product.id)}>
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                          {product.is_fixed && (
+                            <span className="fixed-badge" title="Produit par défaut">★</span>
+                          )}
                         </div>
                       </td>
                     </tr>

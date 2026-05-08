@@ -801,6 +801,13 @@
   color: var(--error);
 }
 
+.fixed-badge {
+  color: #f59e0b;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: help;
+}
+
 .promo-form {
   background: var(--secondary);
   padding: 24px;
