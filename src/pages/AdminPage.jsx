@@ -1712,17 +1712,63 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Check session expiry (48 hours)
+  // Check session - try Supabase first, then localStorage
   useEffect(() => {
-    const loginTime = localStorage.getItem('adminLoginTime');
-    if (loginTime) {
-      const expiryTime = 48 * 60 * 60 * 1000; // 48 hours in ms
-      if (Date.now() - parseInt(loginTime) > expiryTime) {
-        localStorage.removeItem('adminLoginTime');
+    async function checkAuth() {
+      try {
+        // Try to get session from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+          // Valid Supabase session - extend local session
+          localStorage.setItem('adminLoginTime', Date.now().toString());
+          localStorage.setItem('adminEmail', session.user.email);
+          setLoginEmail(session.user.email);
+          setIsAdmin(true);
+          setLoading(false);
+          return;
+        }
+        
+        // Check localStorage session (7 days expiry)
+        const loginTime = localStorage.getItem('adminLoginTime');
+        const savedAdminEmail = localStorage.getItem('adminEmail');
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        
+        if (loginTime && savedAdminEmail && ADMIN_EMAILS.includes(savedAdminEmail.toLowerCase())) {
+          if (Date.now() - parseInt(loginTime) > sevenDays) {
+            // Session expired - try to refresh via Supabase
+            await supabase.auth.signOut();
+            localStorage.removeItem('adminLoginTime');
+            localStorage.removeItem('adminEmail');
+            setIsAdmin(false);
+          } else {
+            // Local session valid
+            setLoginEmail(savedAdminEmail);
+            setIsAdmin(true);
+          }
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
         setIsAdmin(false);
+      } finally {
+        setLoading(false);
       }
     }
-    setLoading(false);
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('adminLoginTime');
+        localStorage.removeItem('adminEmail');
+        setIsAdmin(false);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
   }, []);
 
   const handleLogin = async (e) => {
@@ -1748,8 +1794,9 @@ export default function AdminPage() {
     }
 
     if (data.user) {
-      // Stocker le temps de connexion (48h d'expiration)
+      // Stocker le temps de connexion (7 jours d'expiration)
       localStorage.setItem('adminLoginTime', Date.now().toString());
+      localStorage.setItem('adminEmail', loginEmail.toLowerCase());
       setIsAdmin(true);
       setIsLoggingIn(false);
     }
