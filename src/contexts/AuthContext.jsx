@@ -5,7 +5,7 @@ import { ADMIN_EMAILS, isAdminEmail } from '../config/adminConfig';
 const AuthContext = createContext();
 
 const USER_SESSION_DURATION = 24 * 60 * 60 * 1000;
-const ADMIN_SESSION_DURATION = 48 * 60 * 60 * 1000;
+const ADMIN_SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days for admins
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -116,6 +116,13 @@ export function AuthProvider({ children }) {
 
   async function checkUser() {
     try {
+      // First try to refresh the session
+      const { data: { session: refreshSession }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('Session refresh error:', refreshError);
+      }
+      
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
@@ -124,48 +131,42 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // Si pas de session Supabase, vérifier localStorage comme backup
-      if (!session?.user) {
-        const loginTime = localStorage.getItem('userLoginTime');
-        const savedEmail = localStorage.getItem('userEmail');
-        const expiry = localStorage.getItem('userLoginExpiry');
-        
-        // Si session locale valide, elle devrait être restaurée par Supabase automatiquement
-        if (savedEmail && expiry && Date.now() < parseInt(expiry)) {
-          // La session existe localement, ne rien faire - Supabase devrait la restaurer
+      // If we have a valid session from Supabase
+      if (session?.user) {
+        const isConfirmed = !!session.user.email_confirmed_at;
+        setEmailConfirmed(isConfirmed);
+
+        if (!isConfirmed) {
+          setConfirmationMessage({
+            type: 'info',
+            title: 'Email non confirmé',
+            text: 'Veuillez vérifier votre boîte email et cliquer sur le lien de confirmation.'
+          });
           setLoading(false);
           return;
         }
+
+        // Save session locally
+        saveSession(session.user.email);
+        await loadUserData(session.user);
         setLoading(false);
         return;
       }
 
-      const isConfirmed = !!session.user.email_confirmed_at;
-      setEmailConfirmed(isConfirmed);
-
-      if (!isConfirmed) {
-        setConfirmationMessage({
-          type: 'info',
-          title: 'Email non confirmé',
-          text: 'Veuillez vérifier votre boîte email et cliquer sur le lien de confirmation.'
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Sauvegarder la session localement si elle est valide
+      // If no Supabase session, check localStorage as backup
       const loginTime = localStorage.getItem('userLoginTime');
       const savedEmail = localStorage.getItem('userEmail');
+      const expiry = localStorage.getItem('userLoginExpiry');
       
-      if (!loginTime || savedEmail !== session.user.email) {
-        saveSession(session.user.email);
+      if (savedEmail && expiry && Date.now() < parseInt(expiry)) {
+        // Try to refresh with Supabase
+        setLoading(false);
+        return;
       }
-
-      await loadUserData(session.user);
-
+      
+      setLoading(false);
     } catch (err) {
       console.error('Erreur checkUser:', err);
-    } finally {
       setLoading(false);
     }
   }

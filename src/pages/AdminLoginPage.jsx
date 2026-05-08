@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
+import { Lock, Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../contexts/ToastContext';
 import { storeConfig } from '../data/config';
@@ -18,17 +18,36 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Admin login check:', session?.user?.email);
-      if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-        navigate('/admin');
+    async function checkExistingSession() {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          return;
+        }
+        
+        if (session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
+          navigate('/admin', { replace: true });
+          return;
+        }
+        
+        const { data: { session: refreshSession } } = await supabase.auth.refreshSession();
+        if (refreshSession?.user && ADMIN_EMAILS.includes(refreshSession.user.email?.toLowerCase())) {
+          navigate('/admin', { replace: true });
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
       }
-    });
+    }
+
+    checkExistingSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
       if (event === 'SIGNED_IN' && session?.user && ADMIN_EMAILS.includes(session.user.email?.toLowerCase())) {
-        navigate('/admin');
+        navigate('/admin', { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        // Session expired, stay on login page
       }
     });
 
@@ -59,7 +78,7 @@ export default function AdminLoginPage() {
 
     if (data.user) {
       addToast('Connexion admin réussie !', 'success');
-      window.location.href = '/admin';
+      navigate('/admin', { replace: true });
     }
   };
 
