@@ -56,16 +56,20 @@ export default function ReviewOrderPage() {
   };
 
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
-      <div className="loading-spinner"></div>
-    </div>;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div className="loading-spinner"></div>
+      </div>
+    );
   }
 
   if (!order) {
     return (
-      <main style={{ padding: '60px 20px', textAlign: 'center' }}>
-        <h1>Commande introuvable</h1>
-        <Link to="/" style={{ color: 'var(--primary)' }}>Retour à l'accueil</Link>
+      <main style={{ padding: '40px 20px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '24px' }}>Commande introuvable</h1>
+        <Link to="/" style={{ color: 'var(--primary)', display: 'inline-block', marginTop: '16px' }}>
+          Retour à l'accueil
+        </Link>
       </main>
     );
   }
@@ -73,14 +77,14 @@ export default function ReviewOrderPage() {
   const productIds = order.items?.map(i => i.productId || i.id) || [];
 
   return (
-    <main style={{ minHeight: '70vh', padding: '40px 20px 60px' }}>
+    <main style={{ minHeight: '60vh', padding: '24px 16px 40px' }}>
       <SEO title="Donner votre avis" path={`/review/${orderId}`} />
       
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <Package size={48} style={{ color: 'var(--primary)', marginBottom: '16px' }} />
-          <h1 style={{ fontSize: '28px', marginBottom: '8px' }}>Merci pour votre commande!</h1>
-          <p style={{ color: 'var(--text-light)' }}>Évaluez les produits reçus</p>
+      <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <Package size={40} style={{ color: 'var(--primary)', marginBottom: '12px' }} />
+          <h1 style={{ fontSize: '22px', marginBottom: '8px' }}>Merci pour votre commande!</h1>
+          <p style={{ fontSize: '14px', color: 'var(--text-light)' }}>Évaluez les produits reçus</p>
         </div>
 
         {productIds.map((productId, idx) => {
@@ -91,13 +95,13 @@ export default function ReviewOrderPage() {
             <div key={idx} style={{ 
               background: 'white', 
               borderRadius: '16px', 
-              padding: '24px', 
-              marginBottom: '24px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
+              padding: '20px', 
+              marginBottom: '16px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.06)'
             }}>
-              <h3 style={{ marginBottom: '16px' }}>{item?.name || 'Produit'}</h3>
+              <h3 style={{ fontSize: '18px', marginBottom: '16px', lineHeight: '1.3' }}>{item?.name || 'Produit'}</h3>
               
-              <div style={{ display: 'flex', gap: '4px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', justifyContent: 'center' }}>
                 {[1, 2, 3, 4, 5].map(star => (
                   <button
                     key={star}
@@ -107,10 +111,11 @@ export default function ReviewOrderPage() {
                       background: 'none', 
                       border: 'none', 
                       cursor: 'pointer',
+                      padding: '4px',
                       color: star <= (reviews[productId] || 0) ? '#f59e0b' : '#d1d5db'
                     }}
                   >
-                    <Star size={32} fill={star <= (reviews[productId] || 0) ? '#f59e0b' : 'none'} />
+                    <Star size={28} fill={star <= (reviews[productId] || 0) ? '#f59e0b' : 'none'} />
                   </button>
                 ))}
               </div>
@@ -120,13 +125,13 @@ export default function ReviewOrderPage() {
                   type="text" 
                   name="title" 
                   placeholder="Titre (optionnel)"
-                  style={{ width: '100%', padding: '12px', marginBottom: '12px', border: '2px solid #e5e7eb', borderRadius: '12px' }}
+                  style={{ width: '100%', padding: '12px', marginBottom: '12px', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', boxSizing: 'border-box' }}
                 />
                 <textarea 
                   name="comment" 
                   placeholder="Votre expérience (optionnel)"
                   rows={3}
-                  style={{ width: '100%', padding: '12px', marginBottom: '12px', border: '2px solid #e5e7eb', borderRadius: '12px' }}
+                  style={{ width: '100%', padding: '12px', marginBottom: '12px', border: '2px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', boxSizing: 'border-box', resize: 'vertical' }}
                 />
                 <button 
                   type="submit" 
@@ -139,6 +144,7 @@ export default function ReviewOrderPage() {
                     border: 'none',
                     borderRadius: '12px',
                     fontWeight: '600',
+                    fontSize: '15px',
                     cursor: reviews[productId] ? 'pointer' : 'not-allowed'
                   }}
                 >
