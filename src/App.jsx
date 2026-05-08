@@ -5,6 +5,9 @@ import { WishlistProvider } from './contexts/WishlistContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { CartDrawerProvider, useCartDrawer } from './contexts/CartDrawerContext';
+import { useAuth } from './contexts/AuthContext';
+import { useAdmin } from './contexts/AdminContext';
+import { useProducts } from './contexts/ProductsContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { ProductsProvider } from './contexts/ProductsContext';
@@ -41,6 +44,17 @@ import './App.css';
 
 function AppContent() {
   const { isOpen, closeCart } = useCartDrawer();
+  const { loading: authLoading } = useAuth();
+  const { loading: adminLoading } = useAdmin();
+  const { loading: productsLoading } = useProducts();
+  
+  if (authLoading || adminLoading || productsLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="app">
