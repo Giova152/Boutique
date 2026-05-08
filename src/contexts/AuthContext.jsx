@@ -71,13 +71,14 @@ export function AuthProvider({ children }) {
     handleEmailConfirmation();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event, session?.user?.email_confirmed_at);
+      console.log('Auth event:', event, session?.user?.email);
 
       if (event === 'SIGNED_IN' && session?.user) {
         const isConfirmed = !!session.user.email_confirmed_at;
         setEmailConfirmed(isConfirmed);
 
         if (isConfirmed) {
+          setUser({ id: session.user.id, email: session.user.email });
           saveSession(session.user.email);
           await loadUserData(session.user);
         } else {
@@ -89,6 +90,8 @@ export function AuthProvider({ children }) {
         }
       } else if (event === 'SIGNED_OUT') {
         clearSession();
+      } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+        setUser({ id: session.user.id, email: session.user.email });
       } else if (event === 'USER_UPDATED') {
         if (session?.user?.email_confirmed_at) {
           setEmailConfirmed(true);
@@ -121,7 +124,18 @@ export function AuthProvider({ children }) {
         return;
       }
 
+      // Si pas de session Supabase, vérifier localStorage comme backup
       if (!session?.user) {
+        const loginTime = localStorage.getItem('userLoginTime');
+        const savedEmail = localStorage.getItem('userEmail');
+        const expiry = localStorage.getItem('userLoginExpiry');
+        
+        // Si session locale valide, elle devrait être restaurée par Supabase automatiquement
+        if (savedEmail && expiry && Date.now() < parseInt(expiry)) {
+          // La session existe localement, ne rien faire - Supabase devrait la restaurer
+          setLoading(false);
+          return;
+        }
         setLoading(false);
         return;
       }
@@ -139,14 +153,12 @@ export function AuthProvider({ children }) {
         return;
       }
 
+      // Sauvegarder la session localement si elle est valide
       const loginTime = localStorage.getItem('userLoginTime');
       const savedEmail = localStorage.getItem('userEmail');
-
-      if (!isSessionValid(loginTime, savedEmail)) {
-        clearSession();
-        await supabase.auth.signOut();
-        setLoading(false);
-        return;
+      
+      if (!loginTime || savedEmail !== session.user.email) {
+        saveSession(session.user.email);
       }
 
       await loadUserData(session.user);
