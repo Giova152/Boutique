@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { sendStatusUpdateEmail, sendStockRestockEmail } from '../services/emailService';
+import { sendDeliveryReviewEmail } from '../services/emailService';
 
 const RESEND_API_KEY = 're_ZGjw8er8_4GEUJkSKd6JfiCG32DnX7zYp';
 
@@ -32,6 +33,7 @@ export function AdminProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [promoCodes, setPromoCodes] = useState({});
+  const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ visits: [], dailyVisits: {} });
   const [settings, setSettings] = useState({
     stripePublishableKey: '',
@@ -83,9 +85,10 @@ export function AdminProvider({ children }) {
 
   async function loadData() {
     try {
-      const [productsRes, ordersRes] = await Promise.all([
+      const [productsRes, ordersRes, reviewsRes] = await Promise.all([
         supabase.from('products').select('*'),
-        supabase.from('orders').select('*').order('date', { ascending: false }).limit(50)
+        supabase.from('orders').select('*').order('date', { ascending: false }).limit(50),
+        supabase.from('reviews').select('*').order('created_at', { ascending: false })
       ]);
 
       if (productsRes.data && productsRes.data.length > 0) {
@@ -105,15 +108,9 @@ export function AdminProvider({ children }) {
         await seedProducts();
       }
       if (ordersRes.data) setOrders(ordersRes.data);
-      if (promoRes.data) {
-        const codes = {};
-        promoRes.data.forEach(p => codes[p.code] = p);
-        setPromoCodes(codes);
-      }
-      if (statsRes.data) setStats(statsRes.data);
+      if (reviewsRes.data) setReviews(reviewsRes.data);
     } catch (err) {
       console.error('Erreur chargement:', err);
-      // Try seeding on error
       try {
         const { data: checkProducts } = await supabase.from('products').select('*');
         if (!checkProducts || checkProducts.length === 0) {
@@ -475,7 +472,13 @@ export function AdminProvider({ children }) {
     const now = new Date().toISOString();
     
     if (status === 'expéditée') updates.shipped_at = now;
-    if (status === 'livrée') updates.delivered_at = now;
+    if (status === 'livrée') {
+      updates.delivered_at = now;
+      // Send review request email to customer
+      if (order?.customer?.email) {
+        sendDeliveryReviewEmail(order.customer.email, order);
+      }
+    }
     
     // Add to status history
     const statusHistory = order?.status_history || [];
@@ -491,7 +494,7 @@ export function AdminProvider({ children }) {
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
       
       // Send email notification to customer
-      if (order?.customer?.email) {
+      if (order?.customer?.email && status !== 'livrée') {
         sendStatusUpdateEmail(order.customer.email, order, status);
       }
     }
@@ -755,6 +758,7 @@ export function AdminProvider({ children }) {
     <AdminContext.Provider value={{
       products,
       orders,
+      reviews,
       promoCodes,
       stats,
       loading,

@@ -826,6 +826,7 @@ function AdminContent() {
     { id: 'products', label: 'Produits', icon: Package, count: products.length },
     { id: 'promos', label: 'Promos', icon: Tag, count: Object.keys(promoCodes).length },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart, count: orders.length },
+    { id: 'reviews', label: 'Avis', icon: Star },
     { id: 'customers', label: 'Clients', icon: Users, count: getCustomers().length },
     { id: 'stats', label: 'Stats', icon: BarChart3 },
     { id: 'alerts', label: 'Alertes Stock', icon: Bell },
@@ -1261,6 +1262,12 @@ function AdminContent() {
               >
                 Livrées ({orders.filter(o => o.status === 'livrée').length})
               </button>
+              <button 
+                className={`filter-btn ${orderFilter === 'avis donnée' ? 'active' : ''}`}
+                onClick={() => setOrderFilter('avis donnée')}
+              >
+                Avis ({orders.filter(o => o.status === 'avis donnée').length})
+              </button>
             </div>
 
             <div className="orders-list">
@@ -1386,6 +1393,45 @@ function AdminContent() {
                     ))}
                   </tbody>
                 </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <div className="admin-content">
+            <h2>Avis Clients</h2>
+            <div className="reviews-list">
+              {reviews.length === 0 ? (
+                <div className="empty-state">
+                  <Star size={48} />
+                  <p>Aucun avis pour le moment</p>
+                </div>
+              ) : (
+                <div className="reviews-grid">
+                  {reviews.map(review => (
+                    <div key={review.id} className="review-card">
+                      <div className="review-header">
+                        <div className="review-stars">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} size={16} fill={s <= review.rating ? '#f59e0b' : 'none'} color="#f59e0b" />
+                          ))}
+                        </div>
+                        <span className="review-date">
+                          {new Date(review.created_at).toLocaleDateString('fr-CA')}
+                        </span>
+                      </div>
+                      <h4>{review.title}</h4>
+                      <p>{review.comment}</p>
+                      <div className="review-meta">
+                        <span>{review.user_name}</span>
+                        {review.verified_purchase && (
+                          <span className="verified-badge">Achat vérifié</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

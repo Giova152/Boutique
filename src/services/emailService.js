@@ -48,179 +48,113 @@ export async function sendInvoiceEmail(customerEmail, order) {
     <h3>RÉCAPITULATIF</h3>
     <p><strong>Sous-total:</strong> ${parseFloat(order.subtotal || 0).toFixed(2)}$</p>
     ${order.promoCode ? `<p><strong>Code promo utilisé:</strong> ${order.promoCode}</p>` : ''}
-    ${order.discount > 0 ? `<p><strong>Réduction:</strong> -${parseFloat(order.discount).toFixed(2)}$</p>` : ''}
-    <p><strong>Livraison:</strong> ${parseFloat(order.shipping || 0).toFixed(2)}$</p>
-    <hr>
-    <p><strong>TOTAL: ${parseFloat(order.total || 0).toFixed(2)}$</strong></p>
+    <p><strong>Frais de livraison:</strong> ${parseFloat(order.shipping || 0).toFixed(2)}$</p>
+    <p><strong>Total:</strong> <strong>${parseFloat(order.total || 0).toFixed(2)}$</strong></p>
     
-    <p style="margin-top: 30px;">Merci pour votre confiance!<br>
-    <strong>VEGE DERM</strong> - Cosmétiques Naturels & Bio<br>
-    www.vegederm.ca<br>
-    Contact: zoumcosmo@gmail.com</p>
+    <p style="margin-top: 30px; font-size: 12px; color: #666;">
+      VEGE DERM - Cosmétiques Naturels & Bio au Canada<br>
+      Merci pour votre confiance!
+    </p>
   `;
-
-  try {
-    await sendEmailViaResend(customerEmail, `VEGE DERM - Facture #${order.id}`, html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi facture:', error);
-    return false;
-  }
+  
+  return sendEmailViaResend(customerEmail, `Facture #${order.id} - VEGE DERM`, html);
 }
 
-export async function sendStockRestockEmail(customerEmail, product) {
-  const html = `
-    <h2>Bonne nouvelle!</h2>
-    <p>Le produit "${product.name}" est de retour en stock!</p>
-    <p>Ne tardez pas - les stocks sont limits!</p>
-    <p><a href="${typeof window !== 'undefined' ? window.location.origin : ''}/boutique">Commandez maintenant</a></p>
-    <p>L'equipe VEGE DERM</p>
-  `;
+export async function sendConfirmationEmail(customerEmail, order) {
+  const itemsList = order.items?.map(item =>
+    `${item.name} x${item.quantity}`
+  ).join(', ');
 
-  try {
-    await sendEmailViaResend(customerEmail, `Notification - "${product.name}" est de retour en stock!`, html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi alerte stock:', error);
-    return false;
-  }
+  const html = `
+    <h2>VEGE DERM - CONFIRMATION DE COMMANDE</h2>
+    <p>Bonjour ${order.customer?.firstName || ''},</p>
+    <p>Votre commande a été confirmée!</p>
+    <p><strong>Commande #${order.id}</strong></p>
+    <p>Articles: ${itemsList}</p>
+    <p><strong>Total:</strong> ${parseFloat(order.total || 0).toFixed(2)}$</p>
+    
+    <p>Nous vous tiendrons informé de l'avancement de votre livraison.</p>
+    
+    <p>L'équipe VEGE DERM 🌿</p>
+  `;
+  
+  return sendEmailViaResend(customerEmail, `Commande confirmée #${order.id} - VEGE DERM`, html);
 }
 
-export async function sendAbandonedCartEmail(customerEmail, cartItems, cartUrl) {
-  const itemsList = cartItems?.map(item =>
-    `- ${item.name} x${item.quantity} (${parseFloat(item.price).toFixed(2)}$)`
-  ).join('<br>') || '';
-
-  const html = `
-    <h2>Vous avez laisse des articles dans votre panier!</h2>
-    <h3>VOTRE PANIER</h3>
-    <p>${itemsList}</p>
-    <p><a href="${cartUrl}">Recuperez votre panier</a></p>
-    <p><strong>Offre speciale:</strong> Utilisez le code BIENVENUE15 pour obtenir 15% de reduction sur votre premiere commande!</p>
-    <p>L'equipe VEGE DERM</p>
-  `;
-
-  try {
-    await sendEmailViaResend(customerEmail, 'Votre panier VEGE DERM vous attend!', html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi panier abandonne:', error);
-    return false;
-  }
+export async function sendOrderEmail(customerEmail, order) {
+  return sendConfirmationEmail(customerEmail, order);
 }
 
-export async function sendOrderEmail(orderData) {
-  const { customer, items, total, subtotal, discount, shipping, shippingMethod, paymentMethod } = orderData;
-
-  const itemsList = items.map(item =>
-    `${item.name} x${item.quantity} -- ${(item.price * item.quantity).toFixed(2)}$`
-  ).join('<br>');
+export async function sendStatusUpdateEmail(customerEmail, order, status) {
+  const statusInfo = {
+    'en cours': { title: 'En attente de paiement', color: '#f39c12' },
+    'confirmée': { title: 'Confirmée', color: '#3498db' },
+    'expéditée': { title: 'Expédiée', color: '#9b59b6' },
+    'livrée': { title: 'Livrée', color: '#27ae60' }
+  }[status] || { title: status, color: '#666' };
 
   const html = `
-    <h2>Nouvelle commande - VEGEDERM</h2>
-    <h3>INFORMATIONS CLIENT</h3>
-    <p><strong>Nom:</strong> ${customer.firstName} ${customer.lastName}<br>
-    <strong>Email:</strong> ${customer.email}<br>
-    <strong>Telephone:</strong> ${customer.phone}</p>
+    <h2>VEGE DERM - MISE À JOUR DE COMMANDE</h2>
+    <p>Bonjour,</p>
+    <p>Votre commande <strong>#${order.id}</strong> est maintenant: <strong style="color: ${statusInfo.color}">${statusInfo.title}</strong></p>
     
-    <h3>ADRESSE DE LIVRAISON</h3>
-    <p>${customer.address}<br>
-    ${customer.city}, ${customer.province}<br>
-    ${customer.postalCode}</p>
+    ${status === 'expéditée' ? `
+      <p>Votre colis est en route! Vous pouvez suivre la livraison.</p>
+    ` : ''}
     
-    <p><strong>Methode de livraison:</strong> ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}<br>
-    <strong>Methode de paiement:</strong> ${paymentMethod === 'stripe' ? 'Stripe (Carte)' : 'PayPal'}</p>
+    ${status === 'livrée' ? `
+      <p>Votre commande a été livrée!</p>
+      <p>Merci de nous donner votre avis sur les produits.</p>
+    ` : ''}
     
-    <h3>COMMANDES</h3>
-    <p>${itemsList}</p>
-    
-    <p><strong>Sous-total:</strong> ${subtotal.toFixed(2)}$<br>
-    <strong>Reduction:</strong> -${discount.toFixed(2)}$<br>
-    <strong>Livraison:</strong> ${shipping.toFixed(2)}$<br>
-    <strong>TOTAL:</strong> ${total.toFixed(2)}$</p>
-    
-    <p>---<br>
-    VEGEDERM - Cosmetiques Naturels & Bio<br>
-    zoumcosmo@gmail.com</p>
+    <p>L'équipe VEGE DERM 🌿</p>
   `;
-
-  try {
-    await sendEmailViaResend('zoumcosmo@gmail.com', `Nouvelle commande de ${customer.firstName} ${customer.lastName} - ${total.toFixed(2)}$`, html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi email:', error);
-    return false;
-  }
+  
+  return sendEmailViaResend(customerEmail, `Commande ${order.id} - ${statusInfo.title}`, html);
 }
 
-export async function sendConfirmationEmail(customerEmail, orderData) {
-  const { items, total, subtotal, discount, shipping, shippingMethod } = orderData;
-
-  const itemsList = items.map(item =>
-    `- ${item.name} x${item.quantity}`
-  ).join('<br>');
-
+export async function sendStockRestockEmail(adminEmail, product) {
   const html = `
-    <h2>Merci pour votre commande!</h2>
-    <p>Bonjour ${orderData.customer.firstName},</p>
-    <p>Votre commande a ete confirmee!</p>
-    
-    <h3>COMMANDES</h3>
-    <p>${itemsList}</p>
-    
-    <p><strong>Sous-total:</strong> ${subtotal.toFixed(2)}$<br>
-    <strong>Reduction:</strong> -${discount.toFixed(2)}$<br>
-    <strong>Livraison:</strong> ${shipping.toFixed(2)}$<br>
-    <strong>TOTAL:</strong> ${total.toFixed(2)}$</p>
-    
-    <p>Mode de livraison: ${shippingMethod === 'express' ? 'Express (1-2 jours)' : 'Standard (3-5 jours)'}</p>
-    
-    <p>Nous vous remercions de votre confiance!<br>
-    L'equipe VEGEDERM</p>
+    <h2>VEGE DERM - ALERTE STOCK</h2>
+    <p>Le produit <strong>${product.name}</strong> est presque épuisé.</p>
+    <p>Stock actuel: ${product.in_stock}</p>
+    <p>Veuillez vérifier et réapprovisionner.</p>
   `;
-
-  try {
-    await sendEmailViaResend(customerEmail, 'Confirmation de commande - VEGEDERM', html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi confirmation:', error);
-    return false;
-  }
+  
+  return sendEmailViaResend(adminEmail, `Alerte stock: ${product.name}`, html);
 }
 
-export async function sendStatusUpdateEmail(customerEmail, orderData, newStatus) {
-  const statusMessages = {
-    'confirmee': {
-      title: 'Votre commande est confirmee!',
-      message: 'Nous avons bien recu votre paiement. Votre commande est en cours de preparation.'
-    },
-    'expeditee': {
-      title: 'Votre commande a ete expediee!',
-      message: 'Votre colis est en route! Vous recevrez bientot votre commande.'
-    },
-    'livree': {
-      title: 'Votre commande est livree!',
-      message: 'Votre commande a ete livree. Nous esperons que vous l\'aimez!'
-    }
-  };
-
-  const statusInfo = statusMessages[newStatus] || { title: 'Mise a jour de commande', message: 'Le statut de votre commande a ete mis a jour.' };
+export async function sendDeliveryReviewEmail(customerEmail, order) {
+  const reviewLink = `${import.meta.env.VITE_BASE_URL || 'https://vegederm229.vercel.app'}/review/${order.id}`;
+  
+  const itemsList = order.items?.map(item => 
+    `<li>${item.name} x${item.quantity}</li>`
+  ).join('') || '';
 
   const html = `
-    <h2>${statusInfo.title}</h2>
-    <p>Bonjour ${orderData.customer?.firstName || 'Client'},</p>
-    <p>${statusInfo.message}</p>
-    <p><strong>Numero de commande:</strong> ${orderData.id}<br>
-    <strong>Total:</strong> ${parseFloat(orderData.total).toFixed(2)}$</p>
-    <p>Merci pour votre confiance!<br>
-    L'equipe VEGEDERM</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #1a5c3a;">VEGE DERM - Merci pour votre commande!</h2>
+      
+      <p>Bonjour,</p>
+      <p>Nous espérons que vous êtes satisfait de votre commande!<br>
+      Votre colis a été livré et nous aimerions connaître votre avis sur les produits que vous avez achetés.</p>
+      
+      <h3 style="color: #1a5c3a;">Produits commandés:</h3>
+      <ul>${itemsList}</ul>
+      
+      <p>Cliquez sur le bouton ci-dessous pour donner votre avis:</p>
+      
+      <a href="${reviewLink}" style="display: inline-block; background: #1a5c3a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+        Donner mon avis
+      </a>
+      
+      <p style="margin-top: 30px; font-size: 14px; color: #666;">
+        Votre avis nous aide à améliorer nos produits et à mieux servir nos clients.
+      </p>
+      
+      <p style="margin-top: 20px;">L'équipe VEGE DERM 🌿</p>
+    </div>
   `;
-
-  try {
-    await sendEmailViaResend(customerEmail, `Commande ${orderData.id} - ${statusInfo.title}`, html);
-    return true;
-  } catch (error) {
-    console.error('Erreur envoi notification statut:', error);
-    return false;
-  }
+  
+  return sendEmailViaResend(customerEmail, 'Votre avis sur VEGE DERM - Produits reçus', html);
 }
