@@ -34,10 +34,10 @@ export default function Header() {
   const t = (key) => getTranslation(language, key);
 
   const navLinks = [
-    { path: '/', label: t('home') },
-    { path: '/boutique', label: t('boutique') },
-    { path: '/a-propos', label: t('about') },
-    { path: '/contact', label: t('contact') }
+    { path: '/', label: 'Accueil' },
+    { path: '/boutique', label: 'Boutique' },
+    { path: '/a-propos', label: 'À propos' },
+    { path: '/contact', label: 'Contact' }
   ];
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
