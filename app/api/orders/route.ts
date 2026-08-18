@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { sendAdminOrderNotification } from "@/app/lib/email";
+import { sendAdminOrderNotification, sendCustomerInvoiceEmail } from "@/app/lib/email";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -88,7 +88,11 @@ export async function POST(request: Request) {
       });
     }
 
-    // Trigger Admin Email Notification
+    // Trigger Customer Invoice Email & Admin Notification
+    sendCustomerInvoiceEmail(order).catch((err) =>
+      console.error("Error sending customer invoice email:", err)
+    );
+
     sendAdminOrderNotification(order).catch((err) =>
       console.error("Error sending admin notification:", err)
     );

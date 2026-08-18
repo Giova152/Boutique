@@ -14,7 +14,7 @@ export interface ProductType {
   slug: string;
   description: string;
   price: number;
-  images: string; // JSON array
+  images: string;
   category?: { name: string; slug: string };
   stock: number;
   ingredients?: string;
@@ -53,59 +53,58 @@ export default function ProductCard({ product }: { product: ProductType }) {
   };
 
   return (
-    <div className="group flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300">
-      {/* Photo Container */}
-      <div className="relative aspect-4/3 bg-slate-100/80 overflow-hidden">
-        {/* Badges */}
+    <article className="group flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card hover:shadow-card-hover hover:border-primary-200 transition-all duration-300">
+      <div className="relative aspect-[4/3] bg-slate-100/80 overflow-hidden">
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
           {product.featured && (
-            <span className="badge-new">Vedette</span>
+            <span className="badge badge-new">Vedette</span>
           )}
           {product.stock <= 0 ? (
-            <span className="badge-out">Épuisé</span>
+            <span className="badge badge-out">Épuisé</span>
           ) : product.stock <= 5 ? (
-            <span className="badge-sale">Stock Limité ({product.stock})</span>
+            <span className="badge badge-low-stock">Stock limité ({product.stock})</span>
           ) : null}
         </div>
 
-        <Link href={`/produit/${product.slug}`} className="block w-full h-full">
+        <Link
+          href={`/produit/${product.slug}`}
+          className="block w-full h-full focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+          aria-label={`Voir ${product.name}`}
+        >
           <Image
             src={imageUrl}
             unoptimized
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-108 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-[1.05] transition-transform duration-500"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         </Link>
       </div>
 
-      {/* Product Content */}
       <div className="p-5 flex flex-col flex-1 bg-white">
         {product.category && (
-          <span className="text-[11px] font-extrabold tracking-wider text-emerald-600 uppercase mb-1">
+          <span className="inline-block mb-2 text-[11px] font-extrabold tracking-wider text-primary-600 uppercase">
             {product.category.name}
           </span>
         )}
 
         <Link
           href={`/produit/${product.slug}`}
-          className="font-serif text-lg font-bold text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1 mb-1.5"
+          className="font-serif text-lg font-bold text-slate-900 group-hover:text-primary-600 transition-colors line-clamp-1 mb-1.5 focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded"
+          aria-label={`Voir ${product.name}`}
         >
           {product.name}
         </Link>
 
-        {/* Rating */}
-        <div className="mb-2">
-          <StarRating rating={product.avgRating} reviewsCount={product.reviewCount} size={15} />
+        <div className="mb-3">
+          <StarRating rating={product.avgRating} reviewsCount={product.reviewCount} size={14} />
         </div>
 
-        {/* Short description */}
         <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4 flex-1 font-normal">
           {product.description}
         </p>
 
-        {/* Price + Action Button */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-auto">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Prix CAD</span>
@@ -117,28 +116,32 @@ export default function ProductCard({ product }: { product: ProductType }) {
           <button
             onClick={handleAddToCart}
             disabled={product.stock <= 0}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all duration-200 ${
-              added
+            className={`
+              px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all duration-200
+              focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+              ${added
                 ? "bg-slate-900 text-white"
                 : product.stock <= 0
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md hover:shadow-emerald-600/30 active:scale-95"
-            }`}
+                : "bg-primary-500 text-white hover:bg-primary-600 shadow-btn hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
+              }
+            `}
+            aria-label={added ? "Ajouté au panier" : product.stock <= 0 ? "Produit épuisé" : `Ajouter ${product.name} au panier`}
           >
             {added ? (
               <>
-                <Check size={16} /> Ajouté
+                <Check size={16} aria-hidden="true" /> Ajouté
               </>
             ) : product.stock <= 0 ? (
               "Épuisé"
             ) : (
               <>
-                <ShoppingBag size={16} /> Ajouter
+                <ShoppingBag size={16} aria-hidden="true" /> Ajouter
               </>
             )}
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
