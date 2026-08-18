@@ -8,9 +8,15 @@ interface ImageUploaderProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  accept?: string;
 }
 
-export default function ImageUploader({ value, onChange, label = "Photo du produit" }: ImageUploaderProps) {
+export default function ImageUploader({
+  value,
+  onChange,
+  label = "Photo du produit",
+  accept = "image/*,.ico,image/x-icon,image/vnd.microsoft.icon",
+}: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
@@ -45,8 +51,9 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
       <label className="block text-xs font-bold text-slate-800">{label}</label>
 
       {value ? (
-        <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-2 border-primary-500 bg-slate-100 group shadow-sm">
-          <Image src={value} unoptimized alt="Preview" fill className="object-cover" />
+        <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-2 border-primary-500 bg-slate-100 group shadow-sm flex items-center justify-center p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={value} alt="Preview" className="max-w-full max-h-full object-contain" />
           <button
             type="button"
             onClick={() => onChange("")}
@@ -56,7 +63,7 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
             <X size={16} />
           </button>
           <div className="absolute bottom-2 left-2 right-2 bg-slate-950/80 text-primary-400 text-[10px] font-bold py-1 text-center rounded-lg backdrop-blur-xs">
-            Photo téléversée ✓
+            Icône téléversée ✓
           </div>
         </div>
       ) : (
@@ -90,17 +97,17 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
                 <Upload size={20} />
               </div>
               <span className="text-xs font-bold text-slate-800">
-                Cliquez pour téléverser une photo
+                Cliquez pour téléverser une icône / image
               </span>
               <span className="text-[10px] text-slate-400">
-                Format PNG, JPG, WEBP jusqu'à 10 Mo
+                Format ICO, PNG, JPG, WEBP, SVG jusqu&apos;à 10 Mo
               </span>
             </div>
           )}
 
           <input
             type="file"
-            accept="image/*"
+            accept={accept}
             className="hidden"
             onChange={(e) => {
               if (e.target.files?.[0]) handleFileChange(e.target.files[0]);

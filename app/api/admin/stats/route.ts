@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 export async function GET() {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const totalOrders = await prisma.order.count();
     const totalProducts = await prisma.product.count();

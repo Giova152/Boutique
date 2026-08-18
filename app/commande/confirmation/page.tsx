@@ -17,9 +17,10 @@ import {
 export default function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ id?: string; session_id?: string }>;
 }) {
-  const { id } = use(searchParams);
+  const { id, session_id } = use(searchParams);
+  const orderId = id || session_id;
   const { showToast } = useToast();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,12 +29,12 @@ export default function ConfirmationPage({
   const [timeLeftMs, setTimeLeftMs] = useState<number | null>(null);
 
   useEffect(() => {
-    if (id) {
-      fetchOrder();
+    if (orderId) {
+      fetchOrder(orderId);
     } else {
       setLoading(false);
     }
-  }, [id]);
+  }, [orderId]);
 
   useEffect(() => {
     if (!order?.createdAt || order.status === "cancelled") return;
@@ -51,9 +52,9 @@ export default function ConfirmationPage({
     return () => clearInterval(interval);
   }, [order]);
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (targetId: string) => {
     try {
-      const res = await fetch(`/api/orders/${id}`);
+      const res = await fetch(`/api/orders/${targetId}`);
       const data = await res.json();
       if (res.ok) setOrder(data);
     } catch (e) {

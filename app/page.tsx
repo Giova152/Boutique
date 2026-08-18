@@ -112,8 +112,8 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header onSearch={(q) => setSearchQuery(q)} searchQuery={searchQuery} />
 
-      {/* HERO BANNER AVEC HAUT CONTRASTE LISIBLE */}
-      <section className="relative bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white overflow-hidden py-12 md:py-16 border-b border-slate-800">
+      {/* HERO BANNER AVEC COMPATIBILITÉ ET TAILLE OPTIMISÉE MOBILE */}
+      <section className="relative bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white overflow-hidden py-6 sm:py-10 md:py-16 border-b border-slate-800">
         <div className="absolute inset-0 z-0 opacity-25">
           <Image
             src="/images/hero-banner.png"
@@ -124,31 +124,31 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase tracking-widest shadow-lg">
-            <Sparkles size={14} aria-hidden="true" /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-2.5 sm:space-y-5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest shadow-md">
+            <Sparkles size={12} className="sm:w-3.5 sm:h-3.5" aria-hidden="true" /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
           </div>
 
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white max-w-3xl mx-auto leading-tight drop-shadow-md">
+          <h1 className="font-serif text-xl sm:text-3xl md:text-5xl font-extrabold tracking-tight text-white max-w-3xl mx-auto leading-tight drop-shadow-md">
             Pommades Bio-Cosméceutiques <br className="hidden sm:inline" />
             &amp; Soins Botaniques
           </h1>
 
-          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-200 font-medium leading-relaxed drop-shadow-xs">
+          <p className="max-w-xl mx-auto text-xs sm:text-base text-slate-200 font-medium leading-relaxed drop-shadow-xs">
             Formules riches en huiles végétales et beurres rares pour la peau et les cheveux.
           </p>
 
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-300 font-semibold">
-            <span className="flex items-center gap-2">
-              <Leaf size={16} className="text-emerald-400" aria-hidden="true" /> Ingrédients Biologiques
+          <div className="pt-1 sm:pt-2 flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-1.5 text-[11px] sm:text-xs text-slate-300 font-semibold">
+            <span className="flex items-center gap-1.5">
+              <Leaf size={14} className="text-emerald-400 shrink-0" aria-hidden="true" /> Ingrédients Biologiques
             </span>
-            <span className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-emerald-400" aria-hidden="true" /> Formules Sans Parabènes
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-emerald-400 shrink-0" aria-hidden="true" /> Formules Sans Parabènes
             </span>
-            <span className="flex items-center gap-2">
-              <Award size={16} className="text-emerald-400" aria-hidden="true" /> Fabriqué au Québec
+            <span className="flex items-center gap-1.5">
+              <Award size={14} className="text-emerald-400 shrink-0" aria-hidden="true" /> Fabriqué au Québec
             </span>
           </div>
         </div>

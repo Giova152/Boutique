@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 /**
  * GET /api/admin/stripe/connect/callback
@@ -7,6 +8,9 @@ import { prisma } from "@/app/lib/prisma";
  * Échange le `code` contre les informations du compte Stripe (account_id, access_token, etc.).
  */
 export async function GET(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const error = requestUrl.searchParams.get("error");

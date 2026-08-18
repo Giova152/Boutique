@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { generateInvoicePDFBuffer } from "@/app/lib/pdf";
 
 export interface OrderEmailData {
   id: string;
@@ -372,6 +373,13 @@ Total : ${order.total.toFixed(2)} $ CAD
 =================================================================
 `);
 
+  let pdfBuffer: Buffer | null = null;
+  try {
+    pdfBuffer = await generateInvoicePDFBuffer(order);
+  } catch (err) {
+    console.error("Échec de génération de la facture PDF:", err);
+  }
+
   if (process.env.SMTP_HOST && process.env.SMTP_USER) {
     try {
       const transporter = nodemailer.createTransport({
@@ -389,6 +397,15 @@ Total : ${order.total.toFixed(2)} $ CAD
         to: recipientEmail,
         subject: `📄 Votre Facture & Confirmation de Commande #${shortId} — VEGEDERM`,
         html: emailHtml,
+        attachments: pdfBuffer
+          ? [
+              {
+                filename: `facture-VEGEDERM-${shortId}.pdf`,
+                content: pdfBuffer,
+                contentType: "application/pdf",
+              },
+            ]
+          : [],
       });
     } catch (err) {
       console.error("Échec de l'envoi de la facture par SMTP:", err);
@@ -461,3 +478,113 @@ Lien Panneau Admin : ${hostUrl}/admin/commandes/${order.id}
     }
   }
 }
+
+/**
+ * Alerte l'administrateur lorsqu'une commande a été annulée par un client.
+ */
+export async function sendAdminOrderCancellationEmail(order: OrderEmailData) {
+  const shortId = order.id.slice(-8).toUpperCase();
+  const adminEmail = process.env.ADMIN_EMAIL || "midogiova@gmail.com";
+  const hostUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+  console.log(`
+=================================================================
+⚠️ ALERTE ADMIN : COMMANDE ANNULÉE — VEGEDERM
+=================================================================
+Commande N° : #${shortId} (ID: ${order.id})
+Client : ${order.guestName || "Client Invité"} (${order.guestEmail || "Non renseigné"})
+Montant Annulé : ${order.total.toFixed(2)} $ CAD
+Statut Stock : Remis en stock automatiquement
+=================================================================
+`);
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: Boolean(process.env.SMTP_SECURE),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"VEGEDERM ALERTE" <alertes@vegedermbiocosmeceutiques.com>',
+        to: adminEmail,
+        subject: `⚠️ ALERTE : Commande #${shortId} Annulée (${order.total.toFixed(2)} $ CAD)`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+            <h2 style="color: #e11d48;">VEGEDERM BIO COSMECEUTIQUES</h2>
+            <h3 style="color: #9f1239;">Alerte : Commande Annulée</h3>
+            <p>La commande <strong>#${shortId}</strong> a été annulée par le client dans la période de rétractation de 30 minutes.</p>
+            <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 16px 0;" />
+            <p><strong>Client :</strong> ${order.guestName || "Invité"} (${order.guestEmail})</p>
+            <p><strong>Montant Annulé :</strong> ${order.total.toFixed(2)} $ CAD</p>
+            <p><strong>Impact Stock :</strong> Les articles ont été automatiquement remis en stock.</p>
+            <a href="${hostUrl}/admin/commandes/${order.id}" style="background: #e11d48; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 12px;">
+              Voir dans le Panneau Admin →
+            </a>
+          </div>
+        `,
+      });
+    } catch (err) {
+      console.error("Échec d'envoi du mail d'annulation admin par SMTP:", err);
+    }
+  }
+}
+
+/**
+ * Envoie une confirmation d'annulation de commande au client.
+ */
+export async function sendCustomerOrderCancellationEmail(order: OrderEmailData) {
+  const recipientEmail = order.guestEmail;
+  if (!recipientEmail) return;
+
+  const shortId = order.id.slice(-8).toUpperCase();
+
+  console.log(`
+=================================================================
+❌ CONFIRMATION D'ANNULATION CLIENT — VEGEDERM
+=================================================================
+Destinataire : ${recipientEmail}
+Commande N° : #${shortId}
+Montant : ${order.total.toFixed(2)} $ CAD
+=================================================================
+`);
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: Boolean(process.env.SMTP_SECURE),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"VEGEDERM BIO COSMECEUTIQUES" <service@vegedermbiocosmeceutiques.com>',
+        to: recipientEmail,
+        subject: `❌ Annulation confirmée — Commande #${shortId} VEGEDERM`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+            <h2 style="color: #059669;">VEGEDERM BIO COSMECEUTIQUES</h2>
+            <h3>Votre commande a bien été annulée</h3>
+            <p>Bonjour ${order.guestName || ""},</p>
+            <p>Nous vous confirmons que votre commande <strong>#${shortId}</strong> d'un montant de <strong>${order.total.toFixed(2)} $ CAD</strong> a été annulée sans aucun frais.</p>
+            <p style="color: #64748b; font-size: 13px;">Si vous avez des questions ou souhaitez passer une nouvelle commande, toute notre équipe reste à votre entière disposition.</p>
+            <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #94a3b8;">© ${new Date().getFullYear()} VEGEDERM BIO COSMECEUTIQUES</p>
+          </div>
+        `,
+      });
+    } catch (err) {
+      console.error("Échec d'envoi du mail d'annulation client par SMTP:", err);
+    }
+  }
+}
+

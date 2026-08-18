@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -15,7 +19,16 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     // Convert file to Base64 Data URI for Vercel Serverless compatibility
-    const mimeType = file.type || "image/png";
+    let mimeType = file.type;
+    if (!mimeType || mimeType === "application/octet-stream") {
+      if (file.name.toLowerCase().endsWith(".ico")) {
+        mimeType = "image/x-icon";
+      } else if (file.name.toLowerCase().endsWith(".svg")) {
+        mimeType = "image/svg+xml";
+      } else {
+        mimeType = "image/png";
+      }
+    }
     const base64Data = buffer.toString("base64");
     const dataUrl = `data:${mimeType};base64,${base64Data}`;
 

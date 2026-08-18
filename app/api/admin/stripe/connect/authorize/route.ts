@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 /**
  * GET /api/admin/stripe/connect/authorize
  * Redirige l'administrateur vers la page d'autorisation OAuth de Stripe Connect.
  */
 export async function GET(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     // 1. Récupérer le Client ID depuis l'environnement ou les paramètres enregistrés
     let clientId = process.env.STRIPE_CLIENT_ID;

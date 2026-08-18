@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import {
+  sendAdminOrderCancellationEmail,
+  sendCustomerOrderCancellationEmail,
+} from "@/app/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +15,11 @@ export async function POST(request: Request) {
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
     });
 
     if (!order) {
@@ -41,6 +49,11 @@ export async function POST(request: Request) {
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: { status: "cancelled" },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
     });
 
     for (const item of order.items) {
@@ -49,6 +62,15 @@ export async function POST(request: Request) {
         data: { stock: { increment: item.quantity } },
       });
     }
+
+    // Trigger Admin & Customer Cancellation Notifications
+    sendAdminOrderCancellationEmail(updatedOrder).catch((err) =>
+      console.error("Échec d'envoi du mail d'annulation à l'admin:", err)
+    );
+
+    sendCustomerOrderCancellationEmail(updatedOrder).catch((err) =>
+      console.error("Échec d'envoi du mail d'annulation au client:", err)
+    );
 
     return NextResponse.json({
       success: true,

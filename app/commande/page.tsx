@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/app/components/layout/Header";
 import Footer from "@/app/components/layout/Footer";
 import Button from "@/app/components/ui/Button";
@@ -39,26 +40,36 @@ const CANADIAN_PROVINCES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const { items, subtotal, promoDiscount, promoCode, applyPromoCode, removePromoCode, clearCart } = useCart();
   const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "card">("stripe");
   const [promoInput, setPromoInput] = useState("");
   const [loadingPromo, setLoadingPromo] = useState(false);
   const [promoMsg, setPromoMsg] = useState<{ success?: boolean; text?: string }>({});
 
   const [formData, setFormData] = useState({
-    name: "Jean Tremblay",
-    email: "jean.tremblay@example.ca",
-    phone: "514-555-0199",
-    street: "742 Rue Sainte-Catherine Est",
-    apartment: "Apt 304",
-    city: "Montréal",
+    name: "",
+    email: "",
+    phone: "",
+    street: "",
+    apartment: "",
+    city: "",
     province: "QC",
-    postalCode: "H2L 2E7",
-    instructions: "Déposer devant la porte si absent.",
+    postalCode: "",
+    instructions: "",
   });
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || session.user?.name || "",
+        email: prev.email || session.user?.email || "",
+      }));
+    }
+  }, [session]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -101,23 +112,35 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      if (paymentMethod === "stripe") {
-        const stripeRes = await fetch("/api/checkout/stripe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items,
-            guestEmail: formData.email,
-            guestName: formData.name,
-            address: formData,
-          }),
-        });
+      const stripeRes = await fetch("/api/checkout/stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          guestEmail: formData.email,
+          guestName: formData.name,
+          address: formData,
+          promoCode,
+        }),
+      });
 
-        const stripeData = await stripeRes.json();
-        if (stripeData.url) {
-          window.location.href = stripeData.url;
-          return;
-        }
+      const stripeData = await stripeRes.json();
+      if (stripeData.url) {
+        clearCart();
+        window.location.href = stripeData.url;
+        return;
+      }
+
+      // Paiement Stripe indisponible (clé invalide, erreur réseau, etc.)
+      // => NE PAS créer la commande ni afficher un faux succès.
+      if (!stripeRes.ok || !stripeData.url) {
+        showToast(
+          stripeData.error ||
+            stripeData.message ||
+            "Le paiement Stripe est temporairement indisponible. Veuillez réessayer.",
+          "error"
+        );
+        return;
       }
 
       const orderPayload = {
@@ -198,6 +221,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Ex: Marie Tremblay"
                     className={`input ${errors.name ? "input-error" : ""}`}
                   />
                   {errors.name && <p className="form-error">{errors.name}</p>}
@@ -211,6 +235,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Ex: marie.tremblay@example.ca"
                     className={`input ${errors.email ? "input-error" : ""}`}
                   />
                   {errors.email && <p className="form-error">{errors.email}</p>}
@@ -337,48 +362,19 @@ export default function CheckoutPage() {
                 <span>3. Mode de paiement sécurisé</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label
-                  onClick={() => setPaymentMethod("stripe")}
-                  className={`p-4 rounded-2xl border-2 flex items-center gap-3 cursor-pointer transition-all ${
-                    paymentMethod === "stripe"
-                      ? "border-primary-500 bg-primary-50/50 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    checked={paymentMethod === "stripe"}
-                    onChange={() => setPaymentMethod("stripe")}
-                    className="accent-primary-500 w-4 h-4"
-                  />
-                  <div>
-                    <span className="font-bold text-slate-900 text-sm block">Paiement Stripe 💳</span>
-                    <span className="text-xs text-slate-600 font-medium">Cartes bancaires (Visa, Mastercard, Amex)</span>
+              <div className="p-4 rounded-2xl border-2 border-primary-500 bg-primary-50/50 shadow-sm flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center shrink-0">
+                    <CreditCard size={20} />
                   </div>
-                </label>
-
-                <label
-                  onClick={() => setPaymentMethod("card")}
-                  className={`p-4 rounded-2xl border-2 flex items-center gap-3 cursor-pointer transition-all ${
-                    paymentMethod === "card"
-                      ? "border-primary-500 bg-primary-50/50 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="payment"
-                    checked={paymentMethod === "card"}
-                    onChange={() => setPaymentMethod("card")}
-                    className="accent-primary-500 w-4 h-4"
-                  />
                   <div>
-                    <span className="font-bold text-slate-900 text-sm block">Paiement à la livraison / Virement</span>
-                    <span className="text-xs text-slate-600 font-medium">Confirmation directe de la commande</span>
+                    <span className="font-bold text-slate-900 text-sm block">Paiement par carte bancaire 💳</span>
+                    <span className="text-xs text-slate-600 font-medium">Cartes bancaires acceptées (Visa, Mastercard, Amex)</span>
                   </div>
-                </label>
+                </div>
+                <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full shrink-0">
+                  100% Sécurisé
+                </span>
               </div>
             </div>
           </div>

@@ -55,21 +55,33 @@ export default function CustomerOrdersPage() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      await signOut({ redirect: false });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/compte/connexion";
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        {/* User Account Bar */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-6">
         {session?.user && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-800 flex items-center justify-center font-bold text-base border border-primary-200 shrink-0">
-                {(session.user.name || session.user.email || "C")[0].toUpperCase()}
+              <div className="w-12 h-12 rounded-2xl bg-primary-100 text-primary-700 flex items-center justify-center font-extrabold text-lg">
+                <User size={24} />
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Compte Client Connecté</span>
-                <h2 className="text-sm font-extrabold text-slate-900">{session.user.name || "Client"} <span className="text-slate-400 font-normal">({session.user.email})</span></h2>
+                <h1 className="font-serif text-lg font-bold text-slate-900">
+                  {session.user.name || "Client VEGEDERM"}
+                </h1>
+                <p className="text-xs text-slate-500 font-mono">{session.user.email}</p>
               </div>
             </div>
 
@@ -82,8 +94,8 @@ export default function CustomerOrdersPage() {
               </Link>
 
               <button
-                onClick={() => signOut({ callbackUrl: "/compte/connexion" })}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center gap-1.5"
+                onClick={handleLogout}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <LogOut size={14} /> Déconnexion
               </button>

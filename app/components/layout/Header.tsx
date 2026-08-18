@@ -38,21 +38,33 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      await signOut({ redirect: false });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/compte/connexion";
+    }
+  };
+
   return (
     <>
-      <div className="bg-slate-950 text-white text-xs py-2 px-4 text-center font-medium border-b border-slate-800 flex items-center justify-center gap-2">
-        <Sparkles size={14} className="text-primary-400 shrink-0" aria-hidden="true" />
-        <span>🌿 <strong>VEGEDERM BIO COSMECEUTIQUES</strong> — Soins Bio & Produits Botaniques</span>
-        <span className="hidden sm:inline-block text-slate-600" aria-hidden="true">|</span>
-        <span className="hidden sm:inline-block text-primary-400 font-semibold">🇨🇦 Livraison gratuite au Canada dès 75 $</span>
-      </div>
+      <header className="sticky top-0 z-50 w-full">
+        <div className="bg-slate-950 text-white text-xs py-2 px-4 text-center font-medium border-b border-slate-800 flex items-center justify-center gap-2">
+          <Sparkles size={14} className="text-primary-400 shrink-0" aria-hidden="true" />
+          <span>🌿 <strong>VEGEDERM BIO COSMECEUTIQUES</strong> — Soins Bio &amp; Produits Botaniques</span>
+          <span className="hidden sm:inline-block text-slate-600" aria-hidden="true">|</span>
+          <span className="hidden sm:inline-block text-primary-400 font-semibold">🇨🇦 Livraison gratuite au Canada dès 75 $</span>
+        </div>
 
-      <header
-        className={`
-          sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all duration-200
-          ${scrolled ? "shadow-sm" : "shadow-xs"}
-        `}
-      >
+        <div
+          className={`
+            bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all duration-200
+            ${scrolled ? "shadow-md" : "shadow-xs"}
+          `}
+        >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           <Link
             href="/"
@@ -111,9 +123,9 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
                 </Link>
 
                 <button
-                  onClick={() => signOut({ callbackUrl: "/compte/connexion" })}
+                  onClick={handleLogout}
                   title="Déconnexion"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
                 >
                   <LogOut size={15} />
                   <span>Déconnexion</span>
@@ -191,9 +203,9 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
                   <button
                     onClick={() => {
                       closeMobileMenu();
-                      signOut({ callbackUrl: "/compte/connexion" });
+                      handleLogout();
                     }}
-                    className="w-full text-left py-2 px-3 rounded-lg hover:bg-rose-50 text-sm font-bold text-rose-600 transition-colors flex items-center gap-2"
+                    className="w-full text-left py-2 px-3 rounded-lg hover:bg-rose-50 text-sm font-bold text-rose-600 transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     <LogOut size={18} aria-hidden="true" />
                     <span>Se Déconnecter</span>
@@ -212,9 +224,10 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
             </nav>
           </div>
         )}
-      </header>
+      </div>
+    </header>
 
-      <CartDrawer />
+    <CartDrawer />
     </>
   );
 }

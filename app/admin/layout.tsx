@@ -25,6 +25,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      await signOut({ redirect: false });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/admin/connexion";
+    }
+  };
+
   // If on admin login page, don't wrap with layout sidebar
   if (pathname === "/admin/connexion") {
     return <>{children}</>;
@@ -103,8 +114,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Footer Admin Logout */}
         <div className="p-4 border-t border-slate-800">
           <button
-            onClick={() => signOut({ callbackUrl: "/admin/connexion" })}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/50 rounded-xl transition-colors"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/50 rounded-xl transition-colors cursor-pointer"
           >
             <LogOut size={16} />
             <span>Déconnexion Admin</span>
@@ -120,25 +131,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="relative w-4/5 max-w-xs bg-slate-900 text-white flex flex-col h-full z-10 shadow-2xl">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm">
-                  V
-                </div>
-                <span className="font-serif text-sm font-bold text-white">
-                  VEGEDERM ADMIN
-                </span>
-              </div>
+          <div className="relative w-72 bg-slate-900 text-white flex flex-col h-full z-10 shadow-2xl">
+            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+              <span className="font-serif font-bold text-sm">VEGEDERM ADMIN</span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
               {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive =
@@ -152,7 +156,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                       isActive
-                        ? "bg-emerald-600 text-white shadow-md"
+                        ? "bg-emerald-600 text-white"
                         : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -177,8 +181,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
 
               <button
-                onClick={() => signOut({ callbackUrl: "/admin/connexion" })}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/50 rounded-xl"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/50 rounded-xl cursor-pointer"
               >
                 <LogOut size={16} />
                 <span>Déconnexion</span>

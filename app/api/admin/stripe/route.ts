@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 const STRIPE_KEYS = [
   "stripe_secret_key",
@@ -16,6 +17,9 @@ const STRIPE_KEYS = [
  * Retourne le statut de connexion Stripe (OAuth Connect ou Clés manuelles).
  */
 export async function GET() {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const rows = await prisma.storeSettings.findMany({
       where: { key: { in: STRIPE_KEYS } },
@@ -53,6 +57,9 @@ export async function GET() {
  * Sauvegarde les clés Stripe manuelles ou la mise à jour du Client ID Connect.
  */
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { stripe_secret_key, stripe_publishable_key, stripe_client_id } = body as {
@@ -129,6 +136,9 @@ export async function POST(request: Request) {
  * Supprime la connexion Stripe (OAuth et clés manuelles).
  */
 export async function DELETE() {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     await prisma.storeSettings.deleteMany({
       where: { key: { in: STRIPE_KEYS } },

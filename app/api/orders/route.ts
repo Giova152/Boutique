@@ -54,23 +54,54 @@ export async function POST(request: Request) {
       );
     }
 
+    // Sécurité : recalculer les prix depuis la base (ignorer les prix envoyés par le client)
+    const productIds = items.map((item: any) => item.id);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    let serverSubtotal = 0;
+    const orderItemData: { productId: string; quantity: number; unitPrice: number }[] = [];
+
+    for (const item of items) {
+      const product = productMap.get(item.id);
+      if (!product) {
+        return NextResponse.json(
+          { error: `Produit introuvable (${item.id})` },
+          { status: 400 }
+        );
+      }
+      const qty = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      if (product.stock < qty) {
+        return NextResponse.json(
+          {
+            error: `Stock insuffisant pour « ${product.name} » (${product.stock} restant).`,
+          },
+          { status: 400 }
+        );
+      }
+      serverSubtotal += product.price * qty;
+      orderItemData.push({ productId: product.id, quantity: qty, unitPrice: product.price });
+    }
+
+    const serverShippingCost = serverSubtotal >= 75 ? 0 : 9.99;
+    const serverTaxAmount = Math.round(serverSubtotal * 0.14975 * 100) / 100;
+    const serverTotal = serverSubtotal + serverShippingCost + serverTaxAmount;
+
     const order = await prisma.order.create({
       data: {
         customerId: customerId || null,
         guestEmail: guestEmail || null,
         guestName: guestName || null,
         address: typeof address === "string" ? address : JSON.stringify(address),
-        subtotal: parseFloat(subtotal),
-        shippingCost: parseFloat(shippingCost),
-        taxAmount: parseFloat(taxAmount),
-        total: parseFloat(total),
+        subtotal: Math.round(serverSubtotal * 100) / 100,
+        shippingCost: serverShippingCost,
+        taxAmount: serverTaxAmount,
+        total: Math.round(serverTotal * 100) / 100,
         status: "processing",
         items: {
-          create: items.map((item: any) => ({
-            productId: item.id,
-            quantity: item.quantity,
-            unitPrice: parseFloat(item.price),
-          })),
+          create: orderItemData,
         },
       },
       include: {
@@ -81,9 +112,9 @@ export async function POST(request: Request) {
     });
 
     // Update stock levels
-    for (const item of items) {
+    for (const item of orderItemData) {
       await prisma.product.update({
-        where: { id: item.id },
+        where: { id: item.productId },
         data: { stock: { decrement: item.quantity } },
       });
     }

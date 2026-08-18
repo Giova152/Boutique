@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 import { sendAdminInvitationEmail } from "@/app/lib/email";
+import { requireAdmin } from "@/app/api/admin/require-admin";
 
 /**
  * GET /api/admin/users
  * Liste tous les administrateurs enregistrés.
  */
 export async function GET() {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const admins = await prisma.admin.findMany({
       orderBy: { createdAt: "desc" },
@@ -34,6 +38,9 @@ export async function GET() {
  * Crée un nouvel administrateur et lui envoie un mail personnalisé d'invitation avec ses accès.
  */
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { name, email, password, role } = await request.json();
 
@@ -114,6 +121,9 @@ export async function POST(request: Request) {
  * Modifie un administrateur existant (nom, courriel, rôle, et éventuellement mot de passe).
  */
 export async function PUT(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { id, name, email, role, password } = await request.json();
 
@@ -194,6 +204,9 @@ export async function PUT(request: Request) {
  * Supprime un administrateur.
  */
 export async function DELETE(request: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
