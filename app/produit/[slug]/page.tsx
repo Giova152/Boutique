@@ -46,6 +46,14 @@ export default function ProductDetailPage({
   const [activeTab, setActiveTab] = useState<"desc" | "ingredients" | "benefits" | "usage">("desc");
   const [added, setAdded] = useState(false);
 
+  // Review Form States
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
   useEffect(() => {
     fetchProduct();
   }, [slug]);
@@ -57,6 +65,7 @@ export default function ProductDetailPage({
       const data = await res.json();
       if (res.ok) {
         setProduct(data);
+        setReviewsList(data.reviews || []);
         let imgs = ["/images/products/lumiere-noire.png"];
         try {
           imgs = JSON.parse(data.images);
@@ -134,9 +143,40 @@ export default function ProductDetailPage({
         stock: product.stock,
       });
     }
-    setAdded(true);
-    showToast(`${quantity} x "${product.name}" ajouté au panier !`, "success");
-    setTimeout(() => setAdded(false), 1500);
+    showToast(`${quantity} x "${product.name}" ajouté(s) au panier !`, "success");
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!product) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          authorName: reviewName,
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast("Avis publié avec succès !", "success");
+        setReviewsList([data, ...reviewsList]);
+        setReviewName("");
+        setReviewComment("");
+        setReviewRating(5);
+        setShowReviewForm(false);
+      } else {
+        showToast(data.error || "Erreur de soumission de l'avis", "error");
+      }
+    } catch {
+      showToast("Erreur serveur", "error");
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   return (
@@ -204,129 +244,97 @@ export default function ProductDetailPage({
             )}
           </div>
 
-          {/* Right Column: Product Info */}
-          <div className="flex flex-col space-y-6">
-            {/* Category & Title */}
-            <div>
+          {/* Right Column: Details & Add to Cart */}
+          <div className="space-y-6 flex flex-col justify-between">
+            <div className="space-y-4">
               {product.category && (
-                <span className="text-xs font-extrabold tracking-widest text-emerald-600 uppercase block mb-1.5">
+                <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold uppercase tracking-wider">
                   {product.category.name}
                 </span>
               )}
+
               <h1 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
                 {product.name}
               </h1>
-            </div>
 
-            {/* Rating & Stock status */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <StarRating rating={product.avgRating} reviewsCount={product.reviewCount} size={18} />
-              <div>
-                {product.stock > 5 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> En stock ({product.stock} dispo)
-                  </span>
-                ) : product.stock > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Stock limité ({product.stock} restants)
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 bg-red-50 border border-red-200 px-3 py-1 rounded-full">
-                    Épuisé
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Price CAD */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-extrabold text-slate-900">{product.price.toFixed(2)} $</span>
-              <span className="text-xs font-extrabold text-slate-500 uppercase">CAD</span>
-              <span className="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg font-bold border border-emerald-200">
-                Taxes incluses à la caisse
-              </span>
-            </div>
-
-            {/* Description */}
-            <p className="text-sm text-slate-700 leading-relaxed font-normal">
-              {product.description}
-            </p>
-
-            {/* Quantity Selector + Add to Cart */}
-            <div className="space-y-4 pt-2">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-slate-800">Quantité :</span>
-                <div className="flex items-center border border-slate-300 rounded-xl bg-slate-50">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2.5 text-slate-700 hover:bg-slate-200 transition-colors rounded-l-xl"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="px-4 font-extrabold text-sm text-slate-900">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="p-2.5 text-slate-700 hover:bg-slate-200 transition-colors rounded-r-xl"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
+                <StarRating rating={product.avgRating} reviewsCount={product.reviewCount} size={18} />
+                <span className="text-xs text-slate-400 font-bold">•</span>
+                <span className="text-xs text-slate-600 font-bold flex items-center gap-1">
+                  <ShieldCheck size={16} className="text-emerald-600" /> Stock disponible ({product.stock} unités)
+                </span>
               </div>
 
-              <Button
-                variant="primary"
-                size="lg"
-                fullWidth
-                disabled={product.stock <= 0}
-                onClick={handleAddToCart}
-                className={added ? "!bg-slate-900" : ""}
-              >
-                {added ? (
-                  <>
-                    <Check size={18} /> Ajouté au panier !
-                  </>
-                ) : product.stock <= 0 ? (
-                  "Épuisé"
-                ) : (
-                  <>
-                    <Sparkles size={18} /> Ajouter au panier ({(product.price * quantity).toFixed(2)} $ CAD)
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Canada Shipping Guarantee Box */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2 text-xs text-emerald-950">
-              <div className="flex items-center gap-2 font-bold">
-                <Truck size={18} className="text-emerald-700" />
-                <span>🇨🇦 Expédition Express Canada Uniquement</span>
+              <div className="py-3 border-y border-slate-100 flex items-baseline gap-3">
+                <span className="text-3xl font-extrabold text-slate-900">
+                  {product.price.toFixed(2)} $ <span className="text-xs text-slate-500 font-normal">CAD</span>
+                </span>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  Taxes incluses • Livraison au Canada
+                </span>
               </div>
-              <p className="text-emerald-800 leading-relaxed font-medium">
-                Expédié depuis notre laboratoire au Québec sous 24h à 48h. Retours gratuits sous 30 jours.
+
+              <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                {product.description}
               </p>
             </div>
 
-            {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-xs text-slate-600 font-bold">
-              <div className="flex flex-col items-center gap-1">
-                <Leaf size={20} className="text-emerald-600" />
-                <span>100% Botanique</span>
+            {/* Actions: Quantity & Add to Cart */}
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border border-slate-300 rounded-2xl p-1 bg-slate-50">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-2xs"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-12 text-center text-sm font-extrabold text-slate-900">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-2xs"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={product.stock <= 0}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  className="!bg-emerald-600 hover:!bg-emerald-700 font-bold py-4 text-base shadow-lg"
+                >
+                  {added ? (
+                    <>
+                      <Check size={20} /> Ajouté au panier ({quantity})
+                    </>
+                  ) : (
+                    `Ajouter au panier • ${(product.price * quantity).toFixed(2)} $ CAD`
+                  )}
+                </Button>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <ShieldCheck size={20} className="text-emerald-600" />
-                <span>Sans Parabènes</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Award size={20} className="text-emerald-600" />
-                <span>Fabriqué au Québec</span>
+
+              <div className="grid grid-cols-2 gap-3 pt-2 text-xs font-bold text-slate-600">
+                <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                  <Truck size={18} className="text-emerald-600 shrink-0" />
+                  <span>Livraison rapide partout au Canada</span>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                  <Leaf size={18} className="text-emerald-600 shrink-0" />
+                  <span>Formule artisanale 100% naturelle</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Detailed Tabs: Description, Ingredients, Benefits, Usage */}
+        {/* Tabbed Info Section */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
-          <div className="flex border-b border-slate-200 overflow-x-auto gap-8">
+          <div className="flex items-center gap-6 border-b border-slate-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab("desc")}
               className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
@@ -345,7 +353,7 @@ export default function ProductDetailPage({
                   : "border-transparent text-slate-500 hover:text-slate-900"
               }`}
             >
-              Ingrédients & Composition
+              Ingrédients botaniques
             </button>
             <button
               onClick={() => setActiveTab("usage")}
@@ -407,18 +415,93 @@ export default function ProductDetailPage({
 
         {/* Customer Reviews Section */}
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="font-serif text-xl font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="text-emerald-600" size={22} /> Avis Clients Vérifiés
-            </h3>
-            <span className="text-xs text-slate-600 font-bold">
-              Note moyenne : <strong className="text-slate-900">{product.avgRating.toFixed(1)} / 5</strong> ({product.reviewCount} avis)
-            </span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-serif text-xl font-bold text-slate-900 flex items-center gap-2">
+                <MessageSquare className="text-emerald-600" size={22} /> Avis Clients Vérifiés
+              </h3>
+              <span className="text-xs text-slate-600 font-bold">
+                Note moyenne : <strong className="text-slate-900">{product.avgRating.toFixed(1)} / 5</strong> ({reviewsList.length} avis)
+              </span>
+            </div>
+
+            <Button
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              variant="outline"
+              size="md"
+              className="!border-emerald-600 !text-emerald-700 hover:!bg-emerald-50 font-bold self-start sm:self-auto"
+            >
+              {showReviewForm ? "Fermer le formulaire" : "✍️ Laisser un avis client"}
+            </Button>
           </div>
 
-          {product.reviews && product.reviews.length > 0 ? (
+          {/* Interactive Review Form */}
+          {showReviewForm && (
+            <form onSubmit={handleReviewSubmit} className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 shadow-inner">
+              <h4 className="font-bold text-sm text-slate-900">Partagez votre expérience sur cette pommade :</h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Votre Nom / Prénom *</label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewName}
+                    onChange={(e) => setReviewName(e.target.value)}
+                    placeholder="Ex: Sophie Gagnon"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-emerald-600 focus:outline-none bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">Votre Note *</label>
+                  <div className="flex items-center gap-2 pt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setReviewRating(star)}
+                        className={`text-xl transition-transform hover:scale-125 ${
+                          star <= reviewRating ? "text-amber-400" : "text-slate-300"
+                        }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                    <span className="text-xs font-bold text-slate-700 ml-2">
+                      ({reviewRating} / 5 étoiles)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">Votre commentaire *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Décrivez l'effet sur votre peau ou vos cheveux, la texture, le parfum..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none bg-white"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                loading={submittingReview}
+                className="!bg-emerald-600 hover:!bg-emerald-700 font-bold"
+              >
+                Publier mon avis
+              </Button>
+            </form>
+          )}
+
+          {reviewsList && reviewsList.length > 0 ? (
             <div className="space-y-4 divide-y divide-slate-100">
-              {product.reviews.map((rev: any) => (
+              {reviewsList.map((rev: any) => (
                 <div key={rev.id} className="pt-4 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-sm text-slate-900">{rev.authorName}</span>
