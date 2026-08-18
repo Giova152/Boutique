@@ -13,6 +13,129 @@ export interface OrderEmailData {
   createdAt: Date | string;
 }
 
+export interface AdminInvitationEmailData {
+  name: string;
+  email: string;
+  password?: string;
+  role: string;
+}
+
+/**
+ * Envoie un courriel personnalisé d'invitation avec les accès lors de la création d'un administrateur.
+ */
+export async function sendAdminInvitationEmail(adminData: AdminInvitationEmailData) {
+  const hostUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const loginUrl = `${hostUrl}/admin/connexion`;
+
+  const emailHtml = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Accès Administrateur — VEGEDERM</title>
+  </head>
+  <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
+      
+      <!-- Header -->
+      <div style="background-color: #0f172a; padding: 32px 24px; text-align: center; color: #ffffff;">
+        <div style="width: 48px; height: 48px; background: #059669; border-radius: 12px; font-size: 22px; font-weight: bold; line-height: 48px; margin: 0 auto 12px auto; color: white;">V</div>
+        <h1 style="margin: 0; font-size: 22px; font-family: Georgia, serif; color: #ffffff;">VEGEDERM BIO COSMECEUTIQUES</h1>
+        <p style="margin: 6px 0 0 0; font-size: 12px; color: #10b981; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">Accès au Panneau d'Administration</p>
+      </div>
+
+      <!-- Content -->
+      <div style="padding: 32px 24px;">
+        <p style="font-size: 15px; margin-top: 0; font-weight: bold;">Bonjour ${adminData.name},</p>
+        <p style="font-size: 14px; color: #475569; line-height: 1.6;">
+          Un compte d'administration avec le rôle <strong>${adminData.role === "superadmin" ? "Super Administrateur" : "Administrateur Standard"}</strong> a été créé pour vous sur la plateforme de gestion VEGEDERM.
+        </p>
+
+        <!-- Access Box -->
+        <div style="background-color: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; margin: 24px 0;">
+          <h4 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px;">Vos identifiants de connexion :</h4>
+          <table style="width: 100%; font-size: 13px;">
+            <tr>
+              <td style="color: #64748b; padding-bottom: 8px;">Identifiant / Email :</td>
+              <td style="text-align: right; font-weight: bold; font-family: monospace; color: #0f172a;">${adminData.email}</td>
+            </tr>
+            ${
+              adminData.password
+                ? `<tr>
+                    <td style="color: #64748b; padding-bottom: 8px;">Mot de passe temporaire :</td>
+                    <td style="text-align: right; font-weight: bold; font-family: monospace; color: #059669; font-size: 14px;">${adminData.password}</td>
+                  </tr>`
+                : ""
+            }
+            <tr>
+              <td style="color: #64748b;">Rôle attribué :</td>
+              <td style="text-align: right; font-weight: bold; color: #0f172a; text-transform: capitalize;">${adminData.role}</td>
+            </tr>
+          </table>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
+          🔒 Pour des raisons de sécurité, vous pouvez vous connecter directement via le lien ci-dessous.
+        </p>
+
+        <!-- Login Button -->
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${loginUrl}" style="background-color: #059669; color: #ffffff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);">
+            Accéder au Panneau Admin →
+          </a>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0 20px 0;">
+
+        <p style="font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.5; margin: 0;">
+          Si vous n'êtes pas l'auteur de cette demande ou si vous avez des questions, veuillez contacter l'administrateur principal.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
+        © ${new Date().getFullYear()} VEGEDERM BIO COSMECEUTIQUES — Sécurité Administration
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  console.log(`
+=================================================================
+✉️ COURRIEL D'INVITATION ADMIN ENVOYÉ
+=================================================================
+Destinataire : ${adminData.email} (${adminData.name})
+Rôle : ${adminData.role}
+Mot de Passe : ${adminData.password || "[Masqué / inchangé]"}
+Lien d'accès : ${loginUrl}
+=================================================================
+`);
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: Boolean(process.env.SMTP_SECURE),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"VEGEDERM ADMIN" <admin@vegedermbiocosmeceutiques.com>',
+        to: adminData.email,
+        subject: `🔐 Vos accès Administrateur VEGEDERM — Bienvenue ${adminData.name}`,
+        html: emailHtml,
+      });
+    } catch (err) {
+      console.error("Échec de l'envoi de l'invitation admin par SMTP:", err);
+    }
+  }
+}
+
 /**
  * Envoie un courriel de confirmation et de facture officielle au client.
  */
@@ -29,7 +152,6 @@ export async function sendCustomerInvoiceEmail(order: OrderEmailData) {
   } catch {}
 
   const shortId = order.id.slice(-8).toUpperCase();
-  const hostUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const formattedDate = new Date(order.createdAt).toLocaleDateString("fr-CA", {
     year: "numeric",
     month: "long",

@@ -93,44 +93,41 @@ export default function ForgotPasswordPage() {
           {!success && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Adresse courriel du compte *
-                </label>
+                <label htmlFor="fp-email" className="label">Adresse courriel du compte *</label>
                 <input
+                  id="fp-email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="midogiova@gmail.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Nouveau mot de passe *
-                </label>
+                <label htmlFor="fp-password" className="label">Nouveau mot de passe *</label>
                 <input
+                  id="fp-password"
                   type="password"
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Au moins 6 caractères"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
+                  className="input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">
-                  Confirmer le nouveau mot de passe *
-                </label>
+                <label htmlFor="fp-confirm" className="label">Confirmer le nouveau mot de passe *</label>
                 <input
+                  id="fp-confirm"
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Répétez le mot de passe"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
+                  className="input"
                 />
               </div>
 
@@ -140,9 +137,9 @@ export default function ForgotPasswordPage() {
                 size="lg"
                 fullWidth
                 loading={loading}
-                className="!bg-primary-600 hover:!bg-primary-700 font-bold"
+                className="font-bold"
               >
-                Réinitialiser mon mot de passe <ArrowRight size={16} />
+                Réinitialiser mon mot de passe <ArrowRight size={16} aria-hidden="true" />
               </Button>
             </form>
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -29,21 +29,7 @@ export default function ShopHomePage() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, searchQuery, priceSort, onlyInStock]);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      const data = await res.json();
-      if (Array.isArray(data)) setCategories(data);
-    } catch (e) {
-      console.error("Failed to fetch categories", e);
-    }
-  };
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       let url = `/api/products?sort=${priceSort}`;
@@ -69,6 +55,20 @@ export default function ShopHomePage() {
       console.error("Failed to fetch products", e);
     } finally {
       setLoading(false);
+    }
+  }, [priceSort, selectedCategory, searchQuery, onlyInStock]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      if (Array.isArray(data)) setCategories(data);
+    } catch (e) {
+      console.error("Failed to fetch categories", e);
     }
   };
 
