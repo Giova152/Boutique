@@ -1,91 +1,118 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
+import Header from "@/app/components/layout/Header";
+import Footer from "@/app/components/layout/Footer";
+import ProductCard from "@/app/components/ui/ProductCard";
+import {
+  Sparkles,
+  Leaf,
+  ShieldCheck,
+  Award,
+  Filter,
+  SlidersHorizontal,
+  X,
+  RefreshCw,
+  Search,
+} from "lucide-react";
 import Image from "next/image";
-import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
-import ProductCard, { ProductType } from "./components/ui/ProductCard";
-import { Filter, SlidersHorizontal, Sparkles, RefreshCw, Leaf, ShieldCheck, Award, X } from "lucide-react";
 
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-export default function ShopHomePage() {
-  const [products, setProducts] = useState<ProductType[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+export default function HomePage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // Filtres
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSkinType, setSelectedSkinType] = useState<string>("");
-  const [priceSort, setPriceSort] = useState<string>("newest");
   const [onlyInStock, setOnlyInStock] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [prodRes, catRes] = await Promise.all([
+          fetch("/api/products"),
+          fetch("/api/categories"),
+        ]);
+
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          setProducts(prodData);
+        }
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          setCategories(catData);
+        }
+      } catch (err) {
+        console.error("Erreur de chargement de la boutique:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
   }, []);
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      let url = `/api/products?sort=${priceSort}`;
-      if (selectedCategory) url += `&category=${selectedCategory}`;
-      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-      const res = await fetch(url);
-      let data = await res.json();
-
-      if (Array.isArray(data)) {
-        if (onlyInStock) {
-          data = data.filter((p: ProductType) => p.stock > 0);
-        }
-        if (selectedSkinType) {
-          data = data.filter((p: ProductType) =>
-            p.description.toLowerCase().includes(selectedSkinType.toLowerCase()) ||
-            (p.ingredients && p.ingredients.toLowerCase().includes(selectedSkinType.toLowerCase())) ||
-            (p.benefits && p.benefits.toLowerCase().includes(selectedSkinType.toLowerCase()))
-          );
-        }
-        setProducts(data);
-      }
-    } catch (e) {
-      console.error("Failed to fetch products", e);
-    } finally {
-      setLoading(false);
+  // Filtrage des produits
+  let filteredProducts = products.filter((p) => {
+    // Filtre recherche
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = p.name?.toLowerCase().includes(q);
+      const matchDesc = p.description?.toLowerCase().includes(q);
+      const matchCat = p.category?.name?.toLowerCase().includes(q);
+      if (!matchName && !matchDesc && !matchCat) return false;
     }
-  }, [priceSort, selectedCategory, searchQuery, onlyInStock]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      const data = await res.json();
-      if (Array.isArray(data)) setCategories(data);
-    } catch (e) {
-      console.error("Failed to fetch categories", e);
+    // Filtre catégorie
+    if (selectedCategory && p.category?.slug !== selectedCategory) {
+      return false;
     }
-  };
+
+    // En stock uniquement
+    if (onlyInStock && p.stock <= 0) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Tri
+  if (sortBy === "price-asc") {
+    filteredProducts.sort((a, b) => a.price - b.price);
+  } else if (sortBy === "price-desc") {
+    filteredProducts.sort((a, b) => b.price - a.price);
+  } else if (sortBy === "rating") {
+    filteredProducts.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
+  } else {
+    // Par défaut "newest"
+    filteredProducts.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
 
   const handleResetFilters = () => {
     setSelectedCategory("");
     setSelectedSkinType("");
-    setSearchQuery("");
     setOnlyInStock(false);
-    setPriceSort("newest");
+    setSearchQuery("");
+    setSortBy("newest");
   };
 
-  const hasActiveFilters = selectedCategory || selectedSkinType || onlyInStock || searchQuery;
+  const hasActiveFilters =
+    Boolean(selectedCategory) ||
+    Boolean(selectedSkinType) ||
+    onlyInStock ||
+    Boolean(searchQuery);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header onSearch={(q) => setSearchQuery(q)} searchQuery={searchQuery} />
 
+      {/* HERO BANNER AVEC HAUT CONTRASTE LISIBLE */}
       <section className="relative bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white overflow-hidden py-12 md:py-16 border-b border-slate-800">
         <div className="absolute inset-0 z-0 opacity-25">
           <Image
@@ -115,32 +142,34 @@ export default function ShopHomePage() {
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-300 font-semibold">
             <span className="flex items-center gap-2">
-              <Leaf size={16} className="text-primary-400" aria-hidden="true" /> Ingrédients Biologiques
+              <Leaf size={16} className="text-emerald-400" aria-hidden="true" /> Ingrédients Biologiques
             </span>
             <span className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-primary-400" aria-hidden="true" /> Formules Sans Parabènes
+              <ShieldCheck size={16} className="text-emerald-400" aria-hidden="true" /> Formules Sans Parabènes
             </span>
             <span className="flex items-center gap-2">
-              <Award size={16} className="text-primary-400" aria-hidden="true" /> Fabriqué au Québec
+              <Award size={16} className="text-emerald-400" aria-hidden="true" /> Fabriqué au Québec
             </span>
           </div>
         </div>
       </section>
 
+      {/* CATALOGUE ET FILTRES */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* SIDEBAR FILTRES DESKTOP */}
           <aside className="w-full lg:w-72 shrink-0">
             <div className="lg:sticky lg:top-24 space-y-6">
               <div className="hidden lg:block bg-white p-6 rounded-2xl border border-slate-200 shadow-card space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-                    <Filter size={18} className="text-primary-500" aria-hidden="true" />
+                    <Filter size={18} className="text-emerald-600" aria-hidden="true" />
                     <span>Filtres de recherche</span>
                   </div>
                   {hasActiveFilters && (
                     <button
                       onClick={handleResetFilters}
-                      className="text-xs text-primary-600 font-bold hover:underline flex items-center gap-1"
+                      className="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1"
                     >
                       <RefreshCw size={12} aria-hidden="true" /> Effacer
                     </button>
@@ -148,7 +177,7 @@ export default function ShopHomePage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-3">
+                  <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-3">
                     Catégories de soin
                   </label>
                   <div className="space-y-1.5">
@@ -156,8 +185,8 @@ export default function ShopHomePage() {
                       onClick={() => setSelectedCategory("")}
                       className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                         selectedCategory === ""
-                          ? "bg-primary-600 text-white shadow-sm"
-                          : "text-slate-700 hover:bg-slate-100"
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                       }`}
                     >
                       Toutes les pommades
@@ -168,8 +197,8 @@ export default function ShopHomePage() {
                         onClick={() => setSelectedCategory(cat.slug)}
                         className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                           selectedCategory === cat.slug
-                            ? "bg-primary-600 text-white shadow-sm"
-                            : "text-slate-700 hover:bg-slate-100"
+                            ? "bg-emerald-600 text-white shadow-sm"
+                            : "text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                         }`}
                       >
                         {cat.name}
@@ -184,39 +213,41 @@ export default function ShopHomePage() {
                       type="checkbox"
                       checked={onlyInStock}
                       onChange={(e) => setOnlyInStock(e.target.checked)}
-                      className="w-4 h-4 rounded text-primary-500 focus:ring-primary-500 accent-primary-500 cursor-pointer"
+                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
                     />
                     <span>En stock uniquement</span>
                   </label>
                 </div>
               </div>
 
+              {/* BOUTON FILTRES MOBILE */}
               <button
                 onClick={() => setFiltersOpen(!filtersOpen)}
-                className="lg:hidden w-full flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 shadow-card hover:border-primary-300 transition-colors"
+                className="lg:hidden w-full flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 shadow-card hover:border-emerald-300 transition-colors"
                 aria-expanded={filtersOpen}
               >
-                <Filter size={16} className="text-primary-500" aria-hidden="true" />
+                <Filter size={16} className="text-emerald-600" aria-hidden="true" />
                 <span>Filtres</span>
                 {hasActiveFilters && (
-                  <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">
                     {[selectedCategory, selectedSkinType, onlyInStock, searchQuery].filter(Boolean).length}
                   </span>
                 )}
                 {filtersOpen ? <X size={16} aria-hidden="true" /> : <SlidersHorizontal size={16} aria-hidden="true" />}
               </button>
 
+              {/* PANNEAU FILTRES MOBILE */}
               {filtersOpen && (
                 <div className="lg:hidden bg-white p-6 rounded-2xl border border-slate-200 shadow-card space-y-6 animate-slide-down">
                   <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                     <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-                      <Filter size={18} className="text-primary-500" aria-hidden="true" />
+                      <Filter size={18} className="text-emerald-600" aria-hidden="true" />
                       <span>Filtres de recherche</span>
                     </div>
                     {hasActiveFilters && (
                       <button
                         onClick={handleResetFilters}
-                        className="text-xs text-primary-600 font-bold hover:underline flex items-center gap-1"
+                        className="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1"
                       >
                         <RefreshCw size={12} aria-hidden="true" /> Effacer
                       </button>
@@ -224,7 +255,7 @@ export default function ShopHomePage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-3">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-3">
                       Catégories de soin
                     </label>
                     <div className="space-y-1.5">
@@ -232,8 +263,8 @@ export default function ShopHomePage() {
                         onClick={() => setSelectedCategory("")}
                         className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                           selectedCategory === ""
-                            ? "bg-primary-600 text-white shadow-sm"
-                            : "text-slate-700 hover:bg-slate-100"
+                            ? "bg-emerald-600 text-white shadow-sm"
+                            : "text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                         }`}
                       >
                         Toutes les pommades
@@ -244,8 +275,8 @@ export default function ShopHomePage() {
                           onClick={() => setSelectedCategory(cat.slug)}
                           className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                             selectedCategory === cat.slug
-                              ? "bg-primary-600 text-white shadow-sm"
-                              : "text-slate-700 hover:bg-slate-100"
+                              ? "bg-emerald-600 text-white shadow-sm"
+                              : "text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200"
                           }`}
                         >
                           {cat.name}
@@ -260,7 +291,7 @@ export default function ShopHomePage() {
                         type="checkbox"
                         checked={onlyInStock}
                         onChange={(e) => setOnlyInStock(e.target.checked)}
-                        className="w-4 h-4 rounded text-primary-500 focus:ring-primary-500 accent-primary-500 cursor-pointer"
+                        className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
                       />
                       <span>En stock uniquement</span>
                     </label>
@@ -270,65 +301,62 @@ export default function ShopHomePage() {
             </div>
           </aside>
 
+          {/* LISTE DES PRODUITS */}
           <div className="flex-1 space-y-6">
-            <div className="bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-card flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-sm font-bold text-slate-800">
-                {loading ? (
-                  <span className="text-slate-400">Recherche en cours…</span>
-                ) : (
-                  <span>
-                    <strong className="text-primary-500 text-base">{products.length}</strong>{" "}
-                    pommade{products.length > 1 ? "s" : ""} trouvée{products.length > 1 ? "s" : ""}
-                  </span>
-                )}
-              </div>
+            {/* BARRE DE TRI */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <p className="text-xs font-bold text-slate-700">
+                <span className="text-emerald-700 text-sm font-extrabold">{filteredProducts.length}</span> pommades trouvées
+              </p>
 
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                <SlidersHorizontal size={15} className="text-slate-400" aria-hidden="true" />
-                <span>Trier par :</span>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <label htmlFor="sort-select" className="text-xs font-bold text-slate-500 shrink-0">
+                  Trier par :
+                </label>
                 <select
-                  value={priceSort}
-                  onChange={(e) => setPriceSort(e.target.value)}
-                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-primary-500"
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-600"
                 >
                   <option value="newest">Nouveautés</option>
                   <option value="price-asc">Prix : croissant</option>
                   <option value="price-desc">Prix : décroissant</option>
-                  <option value="popular">Les plus populaires</option>
-                  <option value="rating">Meilleures évaluations</option>
+                  <option value="rating">Meilleures notes</option>
                 </select>
               </div>
             </div>
 
+            {/* GRILLE DE PRODUITS */}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-2xl border border-slate-200 p-4 h-80 flex flex-col justify-between">
-                    <div className="w-full h-44 skeleton rounded-xl" />
-                    <div className="h-4 w-3/4 skeleton rounded" />
-                    <div className="h-3 w-1/2 skeleton rounded" />
-                    <div className="h-10 w-full skeleton rounded-xl" />
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div key={n} className="h-80 bg-white rounded-2xl border border-slate-200 p-4 space-y-4 animate-pulse">
+                    <div className="h-40 bg-slate-200 rounded-xl" />
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-4 bg-slate-200 rounded w-1/2" />
                   </div>
                 ))}
               </div>
-            ) : products.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-600 space-y-4">
-                <p className="text-base font-bold text-slate-900">
-                  Aucune pommade ne correspond à ces critères.
+            ) : filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 shadow-card">
+                <Search size={48} className="text-slate-300 mx-auto" />
+                <h3 className="text-lg font-bold text-slate-900 font-serif">Aucune pommade ne correspond</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Essayez de modifier vos critères de recherche ou de réinitialiser vos filtres.
                 </p>
-                <p className="text-xs text-slate-500">
-                  Essayez de réinitialiser vos filtres pour découvrir nos formules botaniques.
-                </p>
-                <button
-                  onClick={handleResetFilters}
-                  className="px-5 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-bold shadow-btn hover:bg-primary-700 transition-all"
-                >
-                  Afficher tout le catalogue
-                </button>
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetFilters}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-md"
+                  >
+                    <RefreshCw size={14} /> Réinitialiser les filtres
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
