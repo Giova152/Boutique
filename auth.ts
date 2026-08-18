@@ -18,7 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const emailStr = (credentials.email as string).trim().toLowerCase();
         const passStr = credentials.password as string;
 
-        // 1. Check if user is in Admin table first
+        // 1. Priorité Administrateur : Vérification dans la table Admin
         const admin = await prisma.admin.findUnique({
           where: { email: emailStr },
         });
@@ -33,9 +33,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               role: admin.role || "admin",
             };
           }
+          return null; // Si l'email est admin mais mot de passe faux, ne pas chercher dans Customer
         }
 
-        // 2. Check if user is in Customer table
+        // 2. Espace Client Acheteur : Vérification dans la table Customer
         const customer = await prisma.customer.findUnique({
           where: { email: emailStr },
         });
