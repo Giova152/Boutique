@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/app/components/layout/Header";
@@ -19,8 +19,6 @@ import {
   Minus,
   Check,
   MessageSquare,
-  Sparkles,
-  Award,
 } from "lucide-react";
 
 export default function ProductDetailPage({
@@ -46,7 +44,6 @@ export default function ProductDetailPage({
   const [activeTab, setActiveTab] = useState<"desc" | "ingredients" | "benefits" | "usage">("desc");
   const [added, setAdded] = useState(false);
 
-  // Review Form States
   const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [reviewName, setReviewName] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
@@ -72,7 +69,6 @@ export default function ProductDetailPage({
         } catch {}
         setSelectedImage(imgs[0] || "/images/products/lumiere-noire.png");
 
-        // Fetch related products
         const relRes = await fetch("/api/products");
         const relData = await relRes.json();
         if (Array.isArray(relData)) {
@@ -90,7 +86,7 @@ export default function ProductDetailPage({
     return (
       <div className="min-h-screen flex flex-col bg-slate-50">
         <Header />
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="h-96 skeleton rounded-2xl" />
             <div className="space-y-4">
@@ -110,9 +106,9 @@ export default function ProductDetailPage({
     return (
       <div className="min-h-screen flex flex-col bg-slate-50">
         <Header />
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-16 text-center space-y-4">
-          <h1 className="text-2xl font-bold text-slate-900">Produit introuvable</h1>
-          <p className="text-sm text-slate-500">La pommade demandée n'existe pas ou a été retirée.</p>
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 text-center space-y-4">
+          <h1 className="font-serif text-2xl font-bold text-slate-900">Produit introuvable</h1>
+          <p className="text-sm text-slate-500">La pommade demandée n&apos;existe pas ou a été retirée.</p>
           <Link href="/">
             <Button variant="primary" size="md">
               Retourner au catalogue
@@ -143,7 +139,9 @@ export default function ProductDetailPage({
         stock: product.stock,
       });
     }
+    setAdded(true);
     showToast(`${quantity} x "${product.name}" ajouté(s) au panier !`, "success");
+    setTimeout(() => setAdded(false), 1800);
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -183,32 +181,29 @@ export default function ProductDetailPage({
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
 
-      {/* Breadcrumb */}
-      <nav className="bg-white border-b border-slate-200 py-3.5">
+      <nav className="bg-white border-b border-slate-200 py-3.5" aria-label="Fil d'Ariane">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-emerald-600 transition-colors">
+          <Link href="/" className="hover:text-primary-600 transition-colors">
             Accueil
           </Link>
-          <ChevronRight size={14} className="text-slate-300" />
+          <ChevronRight size={14} className="text-slate-300 shrink-0" aria-hidden="true" />
           {product.category && (
             <>
               <Link
                 href={`/?category=${product.category.slug}`}
-                className="hover:text-emerald-600 transition-colors"
+                className="hover:text-primary-600 transition-colors"
               >
                 {product.category.name}
               </Link>
-              <ChevronRight size={14} className="text-slate-300" />
+              <ChevronRight size={14} className="text-slate-300 shrink-0" aria-hidden="true" />
             </>
           )}
           <span className="text-slate-900 truncate font-extrabold">{product.name}</span>
         </div>
       </nav>
 
-      {/* Main Product Container */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm">
-          {/* Left Column: Image Gallery */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-10 sm:space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14 bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-slate-200 shadow-card">
           <div className="space-y-4">
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-100/70 border border-slate-200 group">
               <Image
@@ -216,24 +211,27 @@ export default function ProductDetailPage({
                 unoptimized
                 alt={product.name}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-108 cursor-zoom-in"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.05] cursor-zoom-in"
                 priority
               />
-              <span className="absolute top-4 left-4 bg-slate-950 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full border border-slate-800 shadow-md">
-                🌿 100% Botanique & Bio
+              <span className="absolute top-4 left-4 bg-slate-950 text-primary-400 text-xs font-bold px-3.5 py-1.5 rounded-full border border-slate-800 shadow-md">
+                <span className="flex items-center gap-1.5">
+                  <Leaf size={13} aria-hidden="true" /> 100% Botanique & Bio
+                </span>
               </span>
             </div>
 
-            {/* Thumbnail selector */}
             {imagesList.length > 1 && (
               <div className="flex items-center gap-3">
                 {imagesList.map((img, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => setSelectedImage(img)}
-                    className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                    aria-label={`Voir l'image ${idx + 1}`}
+                    className={`relative w-16 sm:w-20 h-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
                       selectedImage === img
-                        ? "border-emerald-600 shadow-md scale-105"
+                        ? "border-primary-500 shadow-md scale-105"
                         : "border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100"
                     }`}
                   >
@@ -244,32 +242,34 @@ export default function ProductDetailPage({
             )}
           </div>
 
-          {/* Right Column: Details & Add to Cart */}
           <div className="space-y-6 flex flex-col justify-between">
             <div className="space-y-4">
               {product.category && (
-                <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold uppercase tracking-wider">
+                <span className="inline-block px-3 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-extrabold uppercase tracking-wider">
                   {product.category.name}
                 </span>
               )}
 
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
                 {product.name}
               </h1>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <StarRating rating={product.avgRating} reviewsCount={product.reviewCount} size={18} />
-                <span className="text-xs text-slate-400 font-bold">•</span>
+                <span className="text-xs text-slate-400 font-bold" aria-hidden="true">•</span>
                 <span className="text-xs text-slate-600 font-bold flex items-center gap-1">
-                  <ShieldCheck size={16} className="text-emerald-600" /> Stock disponible ({product.stock} unités)
+                  <ShieldCheck size={16} className="text-primary-500 shrink-0" aria-hidden="true" />
+                  {product.stock > 0
+                    ? `Stock disponible (${product.stock} unités)`
+                    : "Actuellement épuisé"}
                 </span>
               </div>
 
-              <div className="py-3 border-y border-slate-100 flex items-baseline gap-3">
-                <span className="text-3xl font-extrabold text-slate-900">
+              <div className="py-3 border-y border-slate-100 flex flex-wrap items-baseline gap-3">
+                <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">
                   {product.price.toFixed(2)} $ <span className="text-xs text-slate-500 font-normal">CAD</span>
                 </span>
-                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                <span className="text-xs text-primary-700 font-bold bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200">
                   Taxes incluses • Livraison au Canada
                 </span>
               </div>
@@ -279,24 +279,27 @@ export default function ProductDetailPage({
               </p>
             </div>
 
-            {/* Actions: Quantity & Add to Cart */}
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border border-slate-300 rounded-2xl p-1 bg-slate-50">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex items-center border border-slate-300 rounded-2xl p-1 bg-slate-50 self-start">
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-2xs"
+                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-xs"
+                    aria-label="Diminuer la quantité"
                   >
-                    <Minus size={16} />
+                    <Minus size={16} aria-hidden="true" />
                   </button>
-                  <span className="w-12 text-center text-sm font-extrabold text-slate-900">
+                  <span className="w-12 text-center text-sm font-extrabold text-slate-900" aria-live="polite">
                     {quantity}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-2xs"
+                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 font-bold shadow-xs"
+                    aria-label="Augmenter la quantité"
                   >
-                    <Plus size={16} />
+                    <Plus size={16} aria-hidden="true" />
                   </button>
                 </div>
 
@@ -306,11 +309,11 @@ export default function ProductDetailPage({
                   variant="primary"
                   size="lg"
                   fullWidth
-                  className="!bg-emerald-600 hover:!bg-emerald-700 font-bold py-4 text-base shadow-lg"
+                  className="font-bold py-4 text-base shadow-lg"
                 >
                   {added ? (
                     <>
-                      <Check size={20} /> Ajouté au panier ({quantity})
+                      <Check size={20} aria-hidden="true" /> Ajouté au panier ({quantity})
                     </>
                   ) : (
                     `Ajouter au panier • ${(product.price * quantity).toFixed(2)} $ CAD`
@@ -318,13 +321,13 @@ export default function ProductDetailPage({
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2 text-xs font-bold text-slate-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs font-bold text-slate-600">
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
-                  <Truck size={18} className="text-emerald-600 shrink-0" />
+                  <Truck size={18} className="text-primary-500 shrink-0" aria-hidden="true" />
                   <span>Livraison rapide partout au Canada</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
-                  <Leaf size={18} className="text-emerald-600 shrink-0" />
+                  <Leaf size={18} className="text-primary-500 shrink-0" aria-hidden="true" />
                   <span>Formule artisanale 100% naturelle</span>
                 </div>
               </div>
@@ -332,49 +335,29 @@ export default function ProductDetailPage({
           </div>
         </div>
 
-        {/* Tabbed Info Section */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
-          <div className="flex items-center gap-6 border-b border-slate-200 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab("desc")}
-              className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === "desc"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Description détaillée
-            </button>
-            <button
-              onClick={() => setActiveTab("ingredients")}
-              className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === "ingredients"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Ingrédients botaniques
-            </button>
-            <button
-              onClick={() => setActiveTab("usage")}
-              className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === "usage"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Conseils d'utilisation
-            </button>
-            <button
-              onClick={() => setActiveTab("benefits")}
-              className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === "benefits"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              Bénéfices constatés
-            </button>
+        <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-8 lg:p-10 shadow-card space-y-6">
+          <div className="flex items-center gap-5 sm:gap-6 border-b border-slate-200 overflow-x-auto" role="tablist">
+            {([
+              ["desc", "Description détaillée"],
+              ["ingredients", "Ingrédients botaniques"],
+              ["usage", "Conseils d'utilisation"],
+              ["benefits", "Bénéfices constatés"],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === key}
+                onClick={() => setActiveTab(key)}
+                className={`pb-4 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === key
+                    ? "border-primary-500 text-primary-600"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           <div className="text-sm text-slate-800 leading-relaxed pt-2 font-medium">
@@ -382,14 +365,14 @@ export default function ProductDetailPage({
               <div className="space-y-3">
                 <p>{product.description}</p>
                 <p>
-                  Chaque pot de pommade est conçu à partir d'ingrédients botaniques sélectionnés avec soin pour garantir une qualité irréprochable et un respect optimal de la peau et des cheveux.
+                  Chaque pot de pommade est conçu à partir d&apos;ingrédients botaniques sélectionnés avec soin pour garantir une qualité irréprochable et un respect optimal de la peau et des cheveux.
                 </p>
               </div>
             )}
             {activeTab === "ingredients" && (
               <div className="space-y-3">
                 <h4 className="font-bold text-slate-900">Formule botaniquement active :</h4>
-                <p className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-950 font-bold">
+                <p className="bg-primary-50 border border-primary-200 p-4 rounded-xl text-primary-950 font-bold">
                   {product.ingredients || "Formulation confidentielle 100% bio et naturelle."}
                 </p>
               </div>
@@ -405,7 +388,7 @@ export default function ProductDetailPage({
             {activeTab === "benefits" && (
               <div className="space-y-3">
                 <h4 className="font-bold text-slate-900">Résultats & Bénéfices :</h4>
-                <p className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-950 font-bold">
+                <p className="bg-primary-50 border border-primary-200 p-4 rounded-xl text-primary-950 font-bold">
                   {product.benefits || "Hydratation profonde et protection contre les agressions extérieures."}
                 </p>
               </div>
@@ -413,12 +396,11 @@ export default function ProductDetailPage({
           </div>
         </div>
 
-        {/* Customer Reviews Section */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
+        <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-8 lg:p-10 shadow-card space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-serif text-xl font-bold text-slate-900 flex items-center gap-2">
-                <MessageSquare className="text-emerald-600" size={22} /> Avis Clients Vérifiés
+                <MessageSquare className="text-primary-500" size={22} aria-hidden="true" /> Avis Clients Vérifiés
               </h3>
               <span className="text-xs text-slate-600 font-bold">
                 Note moyenne : <strong className="text-slate-900">{product.avgRating.toFixed(1)} / 5</strong> ({reviewsList.length} avis)
@@ -429,39 +411,40 @@ export default function ProductDetailPage({
               onClick={() => setShowReviewForm(!showReviewForm)}
               variant="outline"
               size="md"
-              className="!border-emerald-600 !text-emerald-700 hover:!bg-emerald-50 font-bold self-start sm:self-auto"
+              className="font-bold self-start sm:self-auto"
             >
-              {showReviewForm ? "Fermer le formulaire" : "✍️ Laisser un avis client"}
+              {showReviewForm ? "Fermer le formulaire" : "Laisser un avis client"}
             </Button>
           </div>
 
-          {/* Interactive Review Form */}
           {showReviewForm && (
             <form onSubmit={handleReviewSubmit} className="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 shadow-inner">
               <h4 className="font-bold text-sm text-slate-900">Partagez votre expérience sur cette pommade :</h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">Votre Nom / Prénom *</label>
+                  <label htmlFor="review-name" className="label">Votre Nom / Prénom *</label>
                   <input
+                    id="review-name"
                     type="text"
                     required
                     value={reviewName}
                     onChange={(e) => setReviewName(e.target.value)}
                     placeholder="Ex: Sophie Gagnon"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-emerald-600 focus:outline-none bg-white"
+                    className="input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">Votre Note *</label>
-                  <div className="flex items-center gap-2 pt-1">
+                  <span className="label">Votre Note *</span>
+                  <div className="flex items-center gap-1.5 pt-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         type="button"
                         key={star}
                         onClick={() => setReviewRating(star)}
-                        className={`text-xl transition-transform hover:scale-125 ${
+                        aria-label={`${star} étoile${star > 1 ? "s" : ""}`}
+                        className={`text-2xl transition-transform hover:scale-125 ${
                           star <= reviewRating ? "text-amber-400" : "text-slate-300"
                         }`}
                       >
@@ -476,14 +459,15 @@ export default function ProductDetailPage({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">Votre commentaire *</label>
+                <label htmlFor="review-comment" className="label">Votre commentaire *</label>
                 <textarea
+                  id="review-comment"
                   required
                   rows={3}
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Décrivez l'effet sur votre peau ou vos cheveux, la texture, le parfum..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none bg-white"
+                  className="input"
                 />
               </div>
 
@@ -492,7 +476,7 @@ export default function ProductDetailPage({
                 variant="primary"
                 size="md"
                 loading={submittingReview}
-                className="!bg-emerald-600 hover:!bg-emerald-700 font-bold"
+                className="font-bold"
               >
                 Publier mon avis
               </Button>
@@ -507,7 +491,7 @@ export default function ProductDetailPage({
                     <span className="font-bold text-sm text-slate-900">{rev.authorName}</span>
                     <StarRating rating={rev.rating} size={14} />
                   </div>
-                  <p className="text-xs text-slate-700 italic font-medium">"{rev.comment}"</p>
+                  <p className="text-xs text-slate-700 italic font-medium">&quot;{rev.comment}&quot;</p>
                   <span className="text-[10px] text-slate-400 block font-semibold">
                     {new Date(rev.createdAt).toLocaleDateString("fr-CA")} • Achat vérifié Canada
                   </span>
@@ -521,7 +505,6 @@ export default function ProductDetailPage({
           )}
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="space-y-6">
             <h3 className="font-serif text-2xl font-bold text-slate-900">

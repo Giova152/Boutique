@@ -34,7 +34,6 @@ export default function CustomerLoginPage() {
         setError("Identifiants incorrects. Veuillez vérifier votre adresse courriel et votre mot de passe.");
         setLoading(false);
       } else {
-        // Fetch updated session to check role & auto-redirect
         const session = await getSession();
         const role = (session?.user as { role?: string })?.role;
 
@@ -55,11 +54,11 @@ export default function CustomerLoginPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
 
-      <main className="flex-1 max-w-md mx-auto w-full px-4 py-16">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl space-y-6">
+      <main className="flex-1 max-w-md mx-auto w-full px-4 sm:px-6 py-14 sm:py-16">
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-card space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-sm">
-              <User size={28} />
+            <div className="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 border border-primary-200 flex items-center justify-center mx-auto shadow-card">
+              <User size={28} aria-hidden="true" />
             </div>
             <h1 className="font-serif text-2xl font-bold text-slate-900">
               {isLogin ? "Connexion à votre espace" : "Créer un compte"}
@@ -70,7 +69,7 @@ export default function CustomerLoginPage() {
           </div>
 
           {error && (
-            <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-bold text-center">
+            <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 font-bold text-center" role="status">
               {error}
             </div>
           )}
@@ -78,60 +77,62 @@ export default function CustomerLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1">Nom complet *</label>
+                <label htmlFor="register-name" className="label">Nom complet *</label>
                 <input
+                  id="register-name"
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Jean Tremblay"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-medium"
+                  className="input"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">Adresse courriel *</label>
+              <label htmlFor="login-email" className="label">Adresse courriel *</label>
               <input
+                id="login-email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre.courriel@example.ca"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-semibold"
+                className="input"
               />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-bold text-slate-800">Mot de passe *</label>
+                <label htmlFor="login-password" className="label mb-0">Mot de passe *</label>
                 <Link
                   href="/compte/mot-de-passe-oublie"
-                  className="text-[11px] font-bold text-emerald-700 hover:underline"
+                  className="text-[11px] font-bold text-primary-700 hover:underline"
                 >
                   Mot de passe oublié ?
                 </Link>
               </div>
               <input
+                id="login-password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-semibold"
+                className="input"
               />
             </div>
 
-            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} className="!bg-emerald-600 hover:!bg-emerald-700 font-bold">
-              {isLogin ? "Se connecter" : "S'inscrire"} <ArrowRight size={16} />
+            <Button type="submit" variant="primary" size="lg" fullWidth loading={loading} className="font-bold">
+              {isLogin ? "Se connecter" : "S'inscrire"} <ArrowRight size={16} aria-hidden="true" />
             </Button>
           </form>
 
-
-
           <div className="pt-2 text-center border-t border-slate-100">
             <button
+              type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-xs text-emerald-700 font-bold hover:underline"
+              className="text-xs text-primary-700 font-bold hover:underline"
             >
               {isLogin
                 ? "Pas encore de compte ? S'inscrire gratuitement"

@@ -94,7 +94,7 @@ export default function AdminCategoriesPage() {
         {/* Form Create */}
         <form onSubmit={handleCreate} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
           <h3 className="font-bold text-sm text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-            <Plus size={16} className="text-emerald-600" /> Créer une catégorie
+            <Plus size={16} className="text-primary-600" /> Créer une catégorie
           </h3>
 
           <div>
@@ -117,7 +117,7 @@ export default function AdminCategoriesPage() {
                 });
               }}
               placeholder="Ex: NOS SOINS DE PIEDS"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -129,7 +129,7 @@ export default function AdminCategoriesPage() {
               value={formData.slug}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
               placeholder="nos-soins-de-pieds"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-mono focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-mono focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -140,11 +140,11 @@ export default function AdminCategoriesPage() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Soin intense réparateur..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs focus:border-primary-600 focus:outline-none"
             />
           </div>
 
-          <Button type="submit" variant="primary" size="md" fullWidth loading={creating} className="!bg-emerald-600 font-bold">
+          <Button type="submit" variant="primary" size="md" fullWidth loading={creating} className="!bg-primary-600 font-bold">
             Ajouter la catégorie
           </Button>
         </form>
@@ -169,7 +169,7 @@ export default function AdminCategoriesPage() {
                     <td className="p-4 font-extrabold text-slate-900">{cat.name}</td>
                     <td className="p-4 font-mono text-slate-500">{cat.slug}</td>
                     <td className="p-4">
-                      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">
+                      <span className="bg-primary-50 text-primary-800 border border-primary-200 px-2.5 py-0.5 rounded-full font-bold">
                         {cat._count?.products || 0} produit(s)
                       </span>
                     </td>

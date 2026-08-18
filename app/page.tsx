@@ -100,7 +100,7 @@ export default function ShopHomePage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-primary-500/50 text-primary-400 text-xs font-bold uppercase tracking-widest shadow-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-950/90 border border-primary-500/50 text-primary-400 text-xs font-bold uppercase tracking-widest shadow-lg">
             <Sparkles size={14} aria-hidden="true" /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
           </div>
 

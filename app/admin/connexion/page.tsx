@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-charcoal-900 px-4">
       <div className="bg-white rounded-3xl p-8 sm:p-10 max-w-md w-full shadow-2xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-primary-600 flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-primary-100 text-primary-600 flex items-center justify-center mx-auto shadow-sm">
             <ShieldCheck size={32} />
           </div>
           <h1 className="font-serif text-2xl font-bold text-gray-900">

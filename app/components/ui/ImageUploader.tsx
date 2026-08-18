@@ -45,7 +45,7 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
       <label className="block text-xs font-bold text-slate-800">{label}</label>
 
       {value ? (
-        <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 group shadow-sm">
+        <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-2 border-primary-500 bg-slate-100 group shadow-sm">
           <Image src={value} unoptimized alt="Preview" fill className="object-cover" />
           <button
             type="button"
@@ -55,7 +55,7 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
           >
             <X size={16} />
           </button>
-          <div className="absolute bottom-2 left-2 right-2 bg-slate-950/80 text-emerald-400 text-[10px] font-bold py-1 text-center rounded-lg backdrop-blur-xs">
+          <div className="absolute bottom-2 left-2 right-2 bg-slate-950/80 text-primary-400 text-[10px] font-bold py-1 text-center rounded-lg backdrop-blur-xs">
             Photo téléversée ✓
           </div>
         </div>
@@ -75,18 +75,18 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
           }}
           className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
             dragActive
-              ? "border-emerald-600 bg-emerald-50"
-              : "border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-white"
+              ? "border-primary-600 bg-primary-50"
+              : "border-slate-300 hover:border-primary-500 bg-slate-50 hover:bg-white"
           }`}
         >
           {uploading ? (
-            <div className="flex flex-col items-center gap-2 text-emerald-600">
+            <div className="flex flex-col items-center gap-2 text-primary-600">
               <Loader2 size={28} className="animate-spin" />
               <span className="text-xs font-bold">Téléversement en cours…</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-slate-500 text-center">
-              <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 border border-primary-200 flex items-center justify-center">
                 <Upload size={20} />
               </div>
               <span className="text-xs font-bold text-slate-800">

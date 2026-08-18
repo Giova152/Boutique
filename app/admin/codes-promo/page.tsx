@@ -94,7 +94,7 @@ export default function AdminPromoCodesPage() {
         {/* Create Form */}
         <form onSubmit={handleCreate} className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
           <h3 className="font-bold text-sm text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-            <Plus size={16} className="text-emerald-600" /> Nouveau Code Promo
+            <Plus size={16} className="text-primary-600" /> Nouveau Code Promo
           </h3>
 
           <div>
@@ -105,7 +105,7 @@ export default function AdminPromoCodesPage() {
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               placeholder="Ex: VEGEDERM20"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold uppercase focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold uppercase focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -114,7 +114,7 @@ export default function AdminPromoCodesPage() {
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-primary-600 focus:outline-none"
             >
               <option value="percentage">Pourcentage (%)</option>
               <option value="fixed">Montant fixe ($ CAD)</option>
@@ -129,7 +129,7 @@ export default function AdminPromoCodesPage() {
               value={formData.value}
               onChange={(e) => setFormData({ ...formData, value: e.target.value })}
               placeholder="10"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -140,11 +140,11 @@ export default function AdminPromoCodesPage() {
               value={formData.minPurchase}
               onChange={(e) => setFormData({ ...formData, minPurchase: e.target.value })}
               placeholder="30"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
-          <Button type="submit" variant="primary" size="md" fullWidth loading={creating} className="!bg-emerald-600 font-bold">
+          <Button type="submit" variant="primary" size="md" fullWidth loading={creating} className="!bg-primary-600 font-bold">
             Ajouter le code promo
           </Button>
         </form>
@@ -166,7 +166,7 @@ export default function AdminPromoCodesPage() {
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                 {promos.map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 font-mono font-extrabold text-emerald-700 text-sm">
+                    <td className="p-4 font-mono font-extrabold text-primary-700 text-sm">
                       {p.code}
                     </td>
                     <td className="p-4 font-bold text-slate-900">

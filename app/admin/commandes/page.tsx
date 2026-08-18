@@ -68,7 +68,7 @@ export default function AdminOrdersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher N° commande, nom, courriel, ville…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 font-semibold focus:border-emerald-600 focus:outline-none shadow-xs"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-xs text-slate-900 font-semibold focus:border-primary-600 focus:outline-none shadow-xs"
           />
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
         </div>
@@ -96,7 +96,7 @@ export default function AdminOrdersPage() {
           <button
             onClick={() => setFilterStatus("shipped")}
             className={`px-3 py-1.5 rounded-xl transition-all ${
-              filterStatus === "shipped" ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              filterStatus === "shipped" ? "bg-primary-600 text-white" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             Expédiées ({orders.filter((o) => o.status === "shipped").length})
@@ -181,7 +181,7 @@ export default function AdminOrdersPage() {
                       <td className="p-4">
                         <span className="font-bold text-slate-900 block">{ord.guestName || "Client"}</span>
                         <span className="text-[11px] text-slate-400 block">{ord.guestEmail}</span>
-                        <span className="text-[10px] text-emerald-700 font-bold block">🇨🇦 {addressObj.city || "Canada"}</span>
+                        <span className="text-[10px] text-primary-700 font-bold block">🇨🇦 {addressObj.city || "Canada"}</span>
                       </td>
                       <td className="p-4">
                         <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-800 font-bold px-2.5 py-1 rounded-lg">
@@ -195,7 +195,7 @@ export default function AdminOrdersPage() {
                         <span
                           className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase border ${
                             ord.status === "shipped"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              ? "bg-primary-50 text-primary-800 border-primary-200"
                               : ord.status === "cancelled"
                               ? "bg-red-50 text-red-700 border-red-200"
                               : "bg-amber-50 text-amber-900 border-amber-200"

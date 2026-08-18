@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, User, ShieldCheck, Sparkles, Menu, X, ShoppingBag } from "lucide-react";
+import { Search, User, ShieldCheck, Sparkles, Menu, X, ShoppingBag, LogOut } from "lucide-react";
 import CartIcon from "../ui/CartIcon";
 import CartDrawer from "../cart/CartDrawer";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -41,10 +41,10 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
   return (
     <>
       <div className="bg-slate-950 text-white text-xs py-2 px-4 text-center font-medium border-b border-slate-800 flex items-center justify-center gap-2">
-        <Sparkles size={14} className="text-emerald-400 shrink-0" aria-hidden="true" />
+        <Sparkles size={14} className="text-primary-400 shrink-0" aria-hidden="true" />
         <span>🌿 <strong>VEGEDERM BIO COSMECEUTIQUES</strong> — Soins Bio & Produits Botaniques</span>
         <span className="hidden sm:inline-block text-slate-600" aria-hidden="true">|</span>
-        <span className="hidden sm:inline-block text-emerald-400 font-semibold">🇨🇦 Livraison gratuite au Canada dès 75 $</span>
+        <span className="hidden sm:inline-block text-primary-400 font-semibold">🇨🇦 Livraison gratuite au Canada dès 75 $</span>
       </div>
 
       <header
@@ -92,29 +92,40 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
 
           <div className="flex items-center gap-2">
             {session ? (
-              <Link
-                href={(session.user as { role?: string })?.role === "admin" ? "/admin" : "/compte/commandes"}
-                className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors border border-slate-200 focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-              >
-                {(session.user as { role?: string })?.role === "admin" ? (
-                  <>
-                    <ShieldCheck size={16} className="text-primary-500" aria-hidden="true" />
-                    <span>Admin</span>
-                  </>
-                ) : (
-                  <>
-                    <User size={16} className="text-primary-500" aria-hidden="true" />
-                    <span>Mon Compte</span>
-                  </>
-                )}
-              </Link>
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  href={(session.user as { role?: string })?.role === "admin" ? "/admin" : "/compte/commandes"}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors border border-slate-200"
+                >
+                  {(session.user as { role?: string })?.role === "admin" ? (
+                    <>
+                      <ShieldCheck size={16} className="text-primary-500" aria-hidden="true" />
+                      <span>Admin</span>
+                    </>
+                  ) : (
+                    <>
+                      <User size={16} className="text-primary-500" aria-hidden="true" />
+                      <span className="max-w-[120px] truncate">{session.user?.name || session.user?.email || "Mon Compte"}</span>
+                    </>
+                  )}
+                </Link>
+
+                <button
+                  onClick={() => signOut({ callbackUrl: "/compte/connexion" })}
+                  title="Déconnexion"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors"
+                >
+                  <LogOut size={15} />
+                  <span>Déconnexion</span>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/compte/connexion"
-                className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-primary-600 px-3.5 py-2 rounded-xl hover:bg-primary-50 transition-colors border border-slate-200/80 focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-primary-600 px-3.5 py-2 rounded-xl hover:bg-primary-50 transition-colors border border-slate-200/80"
               >
                 <User size={16} className="text-primary-500" aria-hidden="true" />
-                <span>Connexion</span>
+                <span>Connexion / Inscription</span>
               </Link>
             )}
 
@@ -122,7 +133,7 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-700 hover:text-slate-900 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+              className="md:hidden p-2 text-slate-700 hover:text-slate-900 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
               aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-menu"
@@ -167,14 +178,37 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
                 <ShoppingBag size={18} className="text-primary-500" aria-hidden="true" />
                 <span>Mon Panier</span>
               </Link>
-              <Link
-                href="/compte/connexion"
-                onClick={closeMobileMenu}
-                className="py-2 px-3 rounded-lg hover:bg-slate-100 text-sm font-bold text-slate-800 transition-colors flex items-center gap-2"
-              >
-                <User size={18} className="text-primary-500" aria-hidden="true" />
-                <span>Espace Client</span>
-              </Link>
+              {session ? (
+                <>
+                  <Link
+                    href={(session.user as { role?: string })?.role === "admin" ? "/admin" : "/compte/commandes"}
+                    onClick={closeMobileMenu}
+                    className="py-2 px-3 rounded-lg hover:bg-slate-100 text-sm font-bold text-slate-800 transition-colors flex items-center gap-2"
+                  >
+                    <User size={18} className="text-primary-500" aria-hidden="true" />
+                    <span>Mon Compte ({session.user?.name || session.user?.email})</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      closeMobileMenu();
+                      signOut({ callbackUrl: "/compte/connexion" });
+                    }}
+                    className="w-full text-left py-2 px-3 rounded-lg hover:bg-rose-50 text-sm font-bold text-rose-600 transition-colors flex items-center gap-2"
+                  >
+                    <LogOut size={18} aria-hidden="true" />
+                    <span>Se Déconnecter</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/compte/connexion"
+                  onClick={closeMobileMenu}
+                  className="py-2 px-3 rounded-lg hover:bg-slate-100 text-sm font-bold text-slate-800 transition-colors flex items-center gap-2"
+                >
+                  <User size={18} className="text-primary-500" aria-hidden="true" />
+                  <span>Connexion / Inscription</span>
+                </Link>
+              )}
             </nav>
           </div>
         )}

@@ -131,7 +131,7 @@ export default function AdminNewProductPage() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: VEGEDERM — Savon Artisan Bio"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function AdminNewProductPage() {
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-primary-600 focus:outline-none"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -158,7 +158,7 @@ export default function AdminNewProductPage() {
               required
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function AdminNewProductPage() {
               required
               value={formData.stock}
               onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function AdminNewProductPage() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Soin bio-cosméceutique enrichi aux huiles naturelles..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
           />
         </div>
 
@@ -194,7 +194,7 @@ export default function AdminNewProductPage() {
               value={formData.ingredients}
               onChange={(e) => setFormData({ ...formData, ingredients: e.target.value })}
               placeholder="Beurre de karité, Huile d'olive..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -205,7 +205,7 @@ export default function AdminNewProductPage() {
               value={formData.instructions}
               onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
               placeholder="Appliquer matin et soir..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function AdminNewProductPage() {
               value={formData.benefits}
               onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
               placeholder="Hydratation 24h, apaisant..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
         </div>
@@ -227,12 +227,12 @@ export default function AdminNewProductPage() {
               type="checkbox"
               checked={formData.featured}
               onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-              className="w-4 h-4 rounded text-emerald-600 accent-emerald-600"
+              className="w-4 h-4 rounded text-primary-600 accent-primary-600"
             />
             <span>Mettre en avant ce produit (Badge Vedette)</span>
           </label>
 
-          <Button type="submit" variant="primary" size="lg" loading={loading} className="!bg-emerald-600 font-bold">
+          <Button type="submit" variant="primary" size="lg" loading={loading} className="!bg-primary-600 font-bold">
             <Save size={18} /> Enregistrer le produit
           </Button>
         </div>

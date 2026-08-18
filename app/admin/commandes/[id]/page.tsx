@@ -124,7 +124,7 @@ export default function AdminOrderDetailPage({
             value={order.status}
             onChange={(e) => handleStatusChange(e.target.value)}
             disabled={updating}
-            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-extrabold text-slate-900 focus:border-emerald-600 focus:outline-none shadow-xs"
+            className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-extrabold text-slate-900 focus:border-primary-600 focus:outline-none shadow-xs"
           >
             <option value="processing">En traitement</option>
             <option value="shipped">Expédiée 🇨🇦</option>
@@ -140,7 +140,7 @@ export default function AdminOrderDetailPage({
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
             <h3 className="font-serif font-bold text-lg text-slate-900 pb-3 border-b border-slate-100 flex items-center justify-between">
               <span>Articles commandés ({totalItemsCount})</span>
-              <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <span className="text-xs font-extrabold text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200">
                 {order.items?.length || 0} référence(s)
               </span>
             </h3>
@@ -194,7 +194,7 @@ export default function AdminOrderDetailPage({
               </div>
               <div className="flex justify-between text-base font-extrabold text-slate-900 pt-3 border-t border-slate-200">
                 <span>Total de la commande</span>
-                <span className="text-emerald-600 text-lg">{order.total.toFixed(2)} $ CAD</span>
+                <span className="text-primary-600 text-lg">{order.total.toFixed(2)} $ CAD</span>
               </div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function AdminOrderDetailPage({
           {/* Customer Info */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
             <h3 className="font-serif font-bold text-base text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-              <User size={18} className="text-emerald-600" /> Information Client
+              <User size={18} className="text-primary-600" /> Information Client
             </h3>
             <div className="text-xs space-y-1.5 text-slate-700 font-medium">
               <p><strong className="text-slate-900">Nom :</strong> {order.guestName || "Client Invité"}</p>
@@ -219,13 +219,13 @@ export default function AdminOrderDetailPage({
           {/* Shipping Address */}
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
             <h3 className="font-serif font-bold text-base text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-              <MapPin size={18} className="text-emerald-600" /> Adresse de Livraison (Canada)
+              <MapPin size={18} className="text-primary-600" /> Adresse de Livraison (Canada)
             </h3>
             <div className="text-xs space-y-1 text-slate-700 font-medium bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
               <p className="font-bold text-slate-900">{addressObj.street}</p>
               {addressObj.apartment && <p>{addressObj.apartment}</p>}
               <p>{addressObj.city}, {addressObj.province} {addressObj.postalCode}</p>
-              <p className="text-emerald-800 font-bold mt-1">🇨🇦 {addressObj.country || "Canada"}</p>
+              <p className="text-primary-800 font-bold mt-1">🇨🇦 {addressObj.country || "Canada"}</p>
 
               {addressObj.instructions && (
                 <div className="mt-3 pt-2 border-t border-slate-200 text-[11px] text-slate-600">

@@ -48,73 +48,75 @@ export default function CartPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
-            <h1 className="font-serif text-3xl font-bold text-slate-900">Mon Panier</h1>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Mon Panier</h1>
             <p className="text-xs text-slate-600 font-medium mt-1">
               Gérez vos articles et appliquez vos offres promotionnelles.
             </p>
           </div>
-          <Link href="/" className="text-xs font-bold text-emerald-700 hover:underline">
+          <Link href="/" className="text-xs font-bold text-primary-700 hover:underline">
             ← Continuer mes achats
           </Link>
         </div>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
-              <ShoppingBag size={32} />
+          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4 max-w-lg mx-auto my-12 shadow-card">
+            <div className="w-16 h-16 rounded-full bg-primary-50 text-primary-600 border border-primary-200 flex items-center justify-center mx-auto">
+              <ShoppingBag size={32} aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Votre panier est actuellement vide</h2>
+            <h2 className="font-serif text-xl font-bold text-slate-900">Votre panier est actuellement vide</h2>
             <p className="text-xs text-slate-600 font-medium max-w-sm mx-auto">
               Découvrez nos pommades cosmétiques naturelles adaptées à tous vos besoins.
             </p>
             <Link href="/">
-              <Button variant="primary" size="md" className="!bg-emerald-600 font-bold">
+              <Button variant="primary" size="md" className="font-bold">
                 Explorer le catalogue
               </Button>
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Items List */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm divide-y divide-slate-100">
+              <div className="bg-white rounded-3xl border border-slate-200 p-4 sm:p-6 shadow-card divide-y divide-slate-100">
                 {items.map((item) => (
                   <div key={item.id} className="py-5 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-5 items-center">
-                    <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                       <Image src={item.image} alt={item.name} fill className="object-cover" />
                     </div>
 
                     <div className="flex-1 space-y-1 text-center sm:text-left">
                       <Link
                         href={`/produit/${item.slug}`}
-                        className="font-serif font-bold text-lg text-slate-900 hover:text-emerald-600 transition-colors"
+                        className="font-serif font-bold text-base sm:text-lg text-slate-900 hover:text-primary-600 transition-colors"
                       >
                         {item.name}
                       </Link>
                       <p className="text-xs text-slate-500 font-semibold">Pommade Cosmétique • Soin Bio</p>
-                      <p className="text-sm font-extrabold text-emerald-700">
+                      <p className="text-sm font-extrabold text-primary-700">
                         {item.price.toFixed(2)} $ CAD
                       </p>
                     </div>
 
-                    {/* Quantity Selector */}
                     <div className="flex items-center gap-4">
                       <div className="flex items-center border border-slate-300 rounded-xl bg-slate-50">
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="p-2 text-slate-700 hover:bg-slate-200 transition-colors rounded-l-xl"
+                          aria-label="Diminuer la quantité"
                         >
-                          <Minus size={14} />
+                          <Minus size={14} aria-hidden="true" />
                         </button>
                         <span className="px-3 font-extrabold text-xs text-slate-900">{item.quantity}</span>
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="p-2 text-slate-700 hover:bg-slate-200 transition-colors rounded-r-xl"
+                          aria-label="Augmenter la quantité"
                         >
-                          <Plus size={14} />
+                          <Plus size={14} aria-hidden="true" />
                         </button>
                       </div>
 
@@ -123,11 +125,13 @@ export default function CartPage() {
                       </span>
 
                       <button
+                        type="button"
                         onClick={() => removeItem(item.id)}
                         className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                         title="Supprimer l'article"
+                        aria-label={`Supprimer ${item.name}`}
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={18} aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -135,54 +139,47 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Order Summary & Promo */}
             <div className="space-y-6">
-              {/* Summary Card */}
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-5">
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-card space-y-5">
                 <h3 className="font-serif font-bold text-lg text-slate-900 pb-3 border-b border-slate-100">
                   Récapitulatif de la commande
                 </h3>
 
-                {/* Promo Input */}
                 <form onSubmit={handleApplyPromo} className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
-                    <Tag size={14} className="text-emerald-600" /> Code promo
+                  <label htmlFor="promo-input" className="label flex items-center gap-1 normal-case tracking-normal">
+                    <Tag size={14} className="text-primary-500" aria-hidden="true" /> Code promo
                   </label>
                   <div className="flex gap-2">
                     <input
+                      id="promo-input"
                       type="text"
                       value={inputCode}
                       onChange={(e) => setInputCode(e.target.value)}
                       placeholder="Ex: BIENVENUE10"
-                      className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl text-xs uppercase text-slate-900 font-bold focus:outline-none focus:border-emerald-600"
+                      className="input flex-1 uppercase"
                     />
                     <Button variant="secondary" size="sm" loading={loadingCode} type="submit" className="font-bold border-slate-300">
                       Appliquer
                     </Button>
                   </div>
                   {codeMessage.text && (
-                    <p
-                      className={`text-xs font-bold ${
-                        codeMessage.success ? "text-emerald-700" : "text-red-600"
-                      }`}
-                    >
+                    <p className={`text-xs font-bold ${codeMessage.success ? "text-primary-700" : "text-red-600"}`} role="status">
                       {codeMessage.text}
                     </p>
                   )}
                 </form>
 
                 {promoCode && (
-                  <div className="flex justify-between items-center text-xs bg-emerald-50 text-emerald-950 p-3 rounded-xl border border-emerald-200 font-bold">
+                  <div className="flex justify-between items-center text-xs bg-primary-50 text-primary-900 p-3 rounded-xl border border-primary-200 font-bold">
                     <span>
                       Code <strong>{promoCode}</strong> (-{promoDiscount.toFixed(2)} $)
                     </span>
-                    <button onClick={removePromoCode} className="text-emerald-800 font-bold underline">
+                    <button type="button" onClick={removePromoCode} className="text-primary-800 font-bold underline">
                       Retirer
                     </button>
                   </div>
                 )}
 
-                {/* Price Breakdown */}
                 <div className="space-y-2.5 text-xs text-slate-700 font-semibold pt-2 border-t border-slate-100">
                   <div className="flex justify-between">
                     <span>Sous-total</span>
@@ -190,7 +187,7 @@ export default function CartPage() {
                   </div>
 
                   {promoDiscount > 0 && (
-                    <div className="flex justify-between text-emerald-700 font-bold">
+                    <div className="flex justify-between text-primary-700 font-bold">
                       <span>Rabais promotionnel</span>
                       <span>- {promoDiscount.toFixed(2)} $</span>
                     </div>
@@ -208,18 +205,18 @@ export default function CartPage() {
 
                   <div className="flex justify-between text-base font-extrabold text-slate-900 pt-3 border-t border-slate-200">
                     <span>Total (CAD)</span>
-                    <span className="text-emerald-600 text-xl">{total.toFixed(2)} $</span>
+                    <span className="text-primary-600 text-xl">{total.toFixed(2)} $</span>
                   </div>
                 </div>
 
                 <Link href="/commande">
-                  <Button variant="primary" size="lg" fullWidth className="mt-4 !bg-emerald-600 font-bold">
-                    Passer la commande <ArrowRight size={18} />
+                  <Button variant="primary" size="lg" fullWidth className="mt-4 font-bold">
+                    Passer la commande <ArrowRight size={18} aria-hidden="true" />
                   </Button>
                 </Link>
 
                 <div className="text-xs text-slate-500 font-bold text-center flex items-center justify-center gap-1 pt-2">
-                  <ShieldCheck size={16} className="text-emerald-600" />
+                  <ShieldCheck size={16} className="text-primary-500" aria-hidden="true" />
                   <span>Paiement 100% sécurisé • Exclusif Canada 🇨🇦</span>
                 </div>
               </div>

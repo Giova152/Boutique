@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
       <main className="flex-1 max-w-md mx-auto w-full px-4 py-16">
         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-primary-50 text-primary-600 border border-primary-200 flex items-center justify-center mx-auto shadow-sm">
               <KeyRound size={28} />
             </div>
             <h1 className="font-serif text-2xl font-bold text-slate-900">
@@ -76,14 +76,14 @@ export default function ForgotPasswordPage() {
           )}
 
           {success && (
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-xs text-emerald-900 font-bold space-y-2 text-center">
-              <div className="flex items-center justify-center gap-1.5 text-emerald-700">
+            <div className="bg-primary-50 border border-primary-200 p-4 rounded-xl text-xs text-primary-900 font-bold space-y-2 text-center">
+              <div className="flex items-center justify-center gap-1.5 text-primary-700">
                 <CheckCircle2 size={18} />
                 <span>{success}</span>
               </div>
               <Link
                 href="/compte/connexion"
-                className="inline-block mt-2 text-emerald-700 underline font-bold"
+                className="inline-block mt-2 text-primary-700 underline font-bold"
               >
                 Se connecter maintenant →
               </Link>
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="midogiova@gmail.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-semibold"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
                 />
               </div>
 
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Au moins 6 caractères"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-semibold"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
                 />
               </div>
 
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Répétez le mot de passe"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-emerald-600 focus:outline-none font-semibold"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-primary-600 focus:outline-none font-semibold"
                 />
               </div>
 
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
                 size="lg"
                 fullWidth
                 loading={loading}
-                className="!bg-emerald-600 hover:!bg-emerald-700 font-bold"
+                className="!bg-primary-600 hover:!bg-primary-700 font-bold"
               >
                 Réinitialiser mon mot de passe <ArrowRight size={16} />
               </Button>

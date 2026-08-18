@@ -156,12 +156,12 @@ export default function AdminUsersPage() {
                 {admins.map((adm) => (
                   <tr key={adm.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="p-4 font-bold text-gray-900 flex items-center gap-2">
-                      <UserCheck size={16} className="text-emerald-600 shrink-0" />
+                      <UserCheck size={16} className="text-primary-600 shrink-0" />
                       {adm.name}
                     </td>
                     <td className="p-4 font-mono text-gray-500">{adm.email}</td>
                     <td className="p-4">
-                      <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px]">
+                      <span className="bg-primary-50 text-primary-800 border border-primary-200 px-2.5 py-0.5 rounded-full font-bold uppercase text-[10px]">
                         {adm.role}
                       </span>
                     </td>

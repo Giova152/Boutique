@@ -165,7 +165,7 @@ export default function EditProductPage({
             required
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
           />
         </div>
 
@@ -177,7 +177,7 @@ export default function EditProductPage({
               required
               value={formData.categoryId}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-primary-600 focus:outline-none"
             >
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -196,7 +196,7 @@ export default function EditProductPage({
               required
               value={formData.price}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold focus:border-primary-600 focus:outline-none"
             />
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function EditProductPage({
               required
               value={formData.stock}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -220,7 +220,7 @@ export default function EditProductPage({
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-bold bg-white focus:border-primary-600 focus:outline-none"
             >
               <option value="active">Actif</option>
               <option value="inactive">Inactif</option>
@@ -236,7 +236,7 @@ export default function EditProductPage({
             required
             value={formData.description}
             onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
           />
         </div>
 
@@ -248,7 +248,7 @@ export default function EditProductPage({
               rows={2}
               value={formData.ingredients}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -259,7 +259,7 @@ export default function EditProductPage({
               rows={2}
               value={formData.instructions}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
 
@@ -270,7 +270,7 @@ export default function EditProductPage({
               rows={2}
               value={formData.benefits}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-emerald-600 focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-medium focus:border-primary-600 focus:outline-none"
             />
           </div>
         </div>
@@ -282,12 +282,12 @@ export default function EditProductPage({
               name="featured"
               checked={formData.featured}
               onChange={handleChange}
-              className="w-4 h-4 rounded text-emerald-600 accent-emerald-600"
+              className="w-4 h-4 rounded text-primary-600 accent-primary-600"
             />
             <span>Mettre en avant ce produit (Badge Vedette)</span>
           </label>
 
-          <Button type="submit" variant="primary" size="lg" loading={saving} className="!bg-emerald-600 font-bold">
+          <Button type="submit" variant="primary" size="lg" loading={saving} className="!bg-primary-600 font-bold">
             <Save size={18} /> Mettre à jour le produit
           </Button>
         </div>

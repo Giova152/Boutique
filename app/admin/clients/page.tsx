@@ -58,7 +58,7 @@ export default function AdminCustomersPage() {
                   <td className="p-4 font-bold text-gray-900">{c.name}</td>
                   <td className="p-4 font-mono text-gray-500">{c.email}</td>
                   <td className="p-4">
-                    <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-bold">
+                    <span className="bg-primary-50 text-primary-700 px-2.5 py-1 rounded-full font-bold">
                       {c._count?.orders || 0} commande(s)
                     </span>
                   </td>

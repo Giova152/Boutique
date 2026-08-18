@@ -73,7 +73,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={() => setPeriod("30")}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              period === "30" ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              period === "30" ? "bg-primary-600 text-white" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             Derniers 30 jours
@@ -94,14 +94,14 @@ export default function AdminDashboardPage() {
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold uppercase text-slate-400">Chiffre d'affaires</span>
-            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+            <div className="p-2.5 rounded-xl bg-primary-50 text-primary-600 border border-primary-200">
               <DollarSign size={20} />
             </div>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">
             {stats?.totalRevenue ? `${stats.totalRevenue.toFixed(2)} $` : "0.00 $"} CAD
           </p>
-          <span className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+          <span className="text-[11px] text-primary-700 font-bold flex items-center gap-1">
             <TrendingUp size={12} /> +100% ventes au Canada
           </span>
         </div>
@@ -129,7 +129,7 @@ export default function AdminDashboardPage() {
           <p className="text-2xl font-extrabold text-slate-900">
             {stats?.totalProducts || products.length || 0}
           </p>
-          <span className="text-[11px] text-emerald-700 font-bold">Produits actifs</span>
+          <span className="text-[11px] text-primary-700 font-bold">Produits actifs</span>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-2">
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
             </h3>
             <Link
               href="/admin/commandes"
-              className="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1"
+              className="text-xs text-primary-700 font-bold hover:underline flex items-center gap-1"
             >
               Voir tout <ArrowUpRight size={14} />
             </Link>
@@ -207,7 +207,7 @@ export default function AdminDashboardPage() {
                     <span className="font-bold text-slate-900 block truncate max-w-[150px]">
                       {p.name}
                     </span>
-                    <span className="text-[10px] text-emerald-700 font-bold">
+                    <span className="text-[10px] text-primary-700 font-bold">
                       {p.price.toFixed(2)} $ CAD
                     </span>
                   </div>
