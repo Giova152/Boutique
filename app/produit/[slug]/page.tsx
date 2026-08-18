@@ -173,6 +173,7 @@ export default function ProductDetailPage({
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-slate-100/70 border border-slate-200 group">
               <Image
                 src={selectedImage}
+                unoptimized
                 alt={product.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-108 cursor-zoom-in"
@@ -196,7 +197,7 @@ export default function ProductDetailPage({
                         : "border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <Image src={img} alt="" fill className="object-cover" />
+                    <Image src={img} unoptimized alt="" fill className="object-cover" />
                   </button>
                 ))}
               </div>

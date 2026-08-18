@@ -46,7 +46,7 @@ export default function ImageUploader({ value, onChange, label = "Photo du produ
 
       {value ? (
         <div className="relative w-40 h-40 rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-100 group shadow-sm">
-          <Image src={value} alt="Preview" fill className="object-cover" />
+          <Image src={value} unoptimized alt="Preview" fill className="object-cover" />
           <button
             type="button"
             onClick={() => onChange("")}

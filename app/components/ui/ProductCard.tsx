@@ -71,6 +71,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
         <Link href={`/produit/${product.slug}`} className="block w-full h-full">
           <Image
             src={imageUrl}
+            unoptimized
             alt={product.name}
             fill
             className="object-cover group-hover:scale-108 transition-transform duration-500"
