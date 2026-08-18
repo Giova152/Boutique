@@ -16,6 +16,8 @@ export async function sendAdminOrderNotification(order: {
 
   const adminEmail = process.env.ADMIN_EMAIL || "admin@vegedermbiocosmeceutiques.com";
 
+  const hostUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
   console.log(`
 =================================================================
 📧 NOUVELLE COMMANDE REÇUE — VEGEDERM BIO COSMECEUTIQUES
@@ -33,7 +35,7 @@ ${order.items
   )
   .join("\n")}
 
-Lien Panneau Admin : http://localhost:3000/admin/commandes/${order.id}
+Lien Panneau Admin : ${hostUrl}/admin/commandes/${order.id}
 =================================================================
 `);
 
@@ -62,7 +64,7 @@ Lien Panneau Admin : http://localhost:3000/admin/commandes/${order.id}
             <p><strong>Client :</strong> ${order.guestName} (${order.guestEmail})</p>
             <p><strong>Total :</strong> ${order.total.toFixed(2)} $ CAD</p>
             <p><strong>Adresse (Canada) :</strong> ${addressObj.street}, ${addressObj.city}, ${addressObj.province} ${addressObj.postalCode} 🇨🇦</p>
-            <a href="http://localhost:3000/admin/commandes/${order.id}" style="background: #10b565; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 12px;">
+            <a href="${hostUrl}/admin/commandes/${order.id}" style="background: #10b565; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 12px;">
               Voir dans le Panneau Admin →
             </a>
           </div>
