@@ -104,13 +104,13 @@ export default function ShopHomePage() {
             <Sparkles size={14} aria-hidden="true" /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
           </div>
 
-          <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white max-w-4xl mx-auto leading-tight">
-            Soins Bio-Cosméceutiques Botaniques <br className="hidden sm:inline" />
-            & Pommades d&apos;Exception
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+            Pommades Bio-Cosméceutiques <br className="hidden sm:inline" />
+            &amp; Soins Botaniques
           </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
-            Formules riches concentrées en huiles végétales et beurres rares. Restaurez l&apos;hydratation et la vitalité de votre peau et de vos cheveux.
+          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+            Formules riches en huiles végétales et beurres rares pour la peau et les cheveux.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-300 font-semibold">
@@ -156,7 +156,7 @@ export default function ShopHomePage() {
                       onClick={() => setSelectedCategory("")}
                       className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                         selectedCategory === ""
-                          ? "bg-primary-500 text-white shadow-sm"
+                          ? "bg-primary-600 text-white shadow-sm"
                           : "text-slate-700 hover:bg-slate-100"
                       }`}
                     >
@@ -168,7 +168,7 @@ export default function ShopHomePage() {
                         onClick={() => setSelectedCategory(cat.slug)}
                         className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                           selectedCategory === cat.slug
-                            ? "bg-primary-500 text-white shadow-sm"
+                            ? "bg-primary-600 text-white shadow-sm"
                             : "text-slate-700 hover:bg-slate-100"
                         }`}
                       >
@@ -232,7 +232,7 @@ export default function ShopHomePage() {
                         onClick={() => setSelectedCategory("")}
                         className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                           selectedCategory === ""
-                            ? "bg-primary-500 text-white shadow-sm"
+                            ? "bg-primary-600 text-white shadow-sm"
                             : "text-slate-700 hover:bg-slate-100"
                         }`}
                       >
@@ -244,7 +244,7 @@ export default function ShopHomePage() {
                           onClick={() => setSelectedCategory(cat.slug)}
                           className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                             selectedCategory === cat.slug
-                              ? "bg-primary-500 text-white shadow-sm"
+                              ? "bg-primary-600 text-white shadow-sm"
                               : "text-slate-700 hover:bg-slate-100"
                           }`}
                         >
@@ -321,7 +321,7 @@ export default function ShopHomePage() {
                 </p>
                 <button
                   onClick={handleResetFilters}
-                  className="px-5 py-2.5 bg-primary-500 text-white rounded-xl text-xs font-bold shadow-btn hover:bg-primary-600 transition-all"
+                  className="px-5 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-bold shadow-btn hover:bg-primary-700 transition-all"
                 >
                   Afficher tout le catalogue
                 </button>

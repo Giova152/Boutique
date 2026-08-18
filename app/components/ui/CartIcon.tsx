@@ -15,7 +15,7 @@ export default function CartIcon() {
     >
       <ShoppingBag size={22} aria-hidden="true" />
       {totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce-in shadow-md" aria-hidden="true">
+        <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce-in shadow-md" aria-hidden="true">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}

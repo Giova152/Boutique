@@ -26,11 +26,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
+      "inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
 
     const variants = {
       primary:
-        "bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 shadow-btn hover:shadow-lg hover:-translate-y-0.5",
+        "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 shadow-btn hover:shadow-lg hover:-translate-y-0.5",
       secondary:
         "bg-cream-100 text-primary-700 hover:bg-primary-50 border border-cream-300 hover:border-primary-200 hover:-translate-y-0.5",
       ghost:

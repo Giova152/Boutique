@@ -22,17 +22,26 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Veuillez fournir votre nom complet." }, { status: 400 });
       }
 
-      // Vérifier si l'adresse courriel est déjà utilisée
-      const existingCustomer = await prisma.customer.findUnique({
-        where: { email: cleanEmail },
-      });
+      // 1. SÉCURITÉ : Vérifier si l'adresse est réservée à l'administration
       const existingAdmin = await prisma.admin.findUnique({
         where: { email: cleanEmail },
       });
 
-      if (existingCustomer || existingAdmin) {
+      if (existingAdmin) {
         return NextResponse.json(
-          { error: "Cette adresse courriel est déjà enregistrée. Veuillez vous connecter." },
+          { error: "🛑 Cette adresse courriel est réservée au personnel d'administration. Elle ne peut pas être utilisée pour créer un compte acheteur." },
+          { status: 400 }
+        );
+      }
+
+      // 2. Vérifier si l'adresse est déjà un compte acheteur existant
+      const existingCustomer = await prisma.customer.findUnique({
+        where: { email: cleanEmail },
+      });
+
+      if (existingCustomer) {
+        return NextResponse.json(
+          { error: "Cette adresse courriel est déjà enregistrée pour un compte acheteur. Veuillez vous connecter." },
           { status: 400 }
         );
       }
@@ -78,6 +87,17 @@ export async function POST(request: Request) {
         );
       }
 
+      // SÉCURITÉ : Bloquer si c'est une adresse administrateur
+      const existingAdmin = await prisma.admin.findUnique({
+        where: { email: cleanEmail },
+      });
+      if (existingAdmin) {
+        return NextResponse.json(
+          { error: "🛑 Cette adresse courriel est réservée à l'administration." },
+          { status: 400 }
+        );
+      }
+
       // Récupérer le code stocké
       const storedCodeSetting = await prisma.storeSettings.findUnique({
         where: { key: `vcode_${cleanEmail}` },
@@ -88,7 +108,7 @@ export async function POST(request: Request) {
 
       if (!storedCodeSetting || !storedExpiresSetting) {
         return NextResponse.json(
-          { error: "Aucun code trouvé pour ce courriel. Veuillez cliquer sur 'Recevoir un code'." },
+          { error: "Aucun code trouvé pour ce courriel. Veuillez cliquer sur 'Recevoir mon code'." },
           { status: 400 }
         );
       }

@@ -185,7 +185,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-new {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-600);
   color: white;
   box-shadow: 0 2px 8px rgba(16, 181, 101, 0.3);
 }
@@ -224,13 +224,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-600);
   color: white;
   box-shadow: var(--shadow-btn);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-600);
+  background-color: var(--color-primary-700);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(16, 181, 101, 0.4);
 }

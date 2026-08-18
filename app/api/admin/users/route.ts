@@ -46,13 +46,26 @@ export async function POST(request: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    const existing = await prisma.admin.findUnique({
+    // 1. Vérifier si l'email existe déjà dans la table Admin
+    const existingAdmin = await prisma.admin.findUnique({
       where: { email: cleanEmail },
     });
 
-    if (existing) {
+    if (existingAdmin) {
       return NextResponse.json(
         { error: "Cet email est déjà enregistré pour un administrateur." },
+        { status: 400 }
+      );
+    }
+
+    // 2. SÉCURITÉ : Vérifier si l'email existe déjà dans la table Customer (Acheteur)
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { email: cleanEmail },
+    });
+
+    if (existingCustomer) {
+      return NextResponse.json(
+        { error: "🛑 Cette adresse courriel appartient déjà à un compte client acheteur. Un administrateur doit posséder une adresse courriel distincte." },
         { status: 400 }
       );
     }
@@ -113,7 +126,7 @@ export async function PUT(request: Request) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Vérifier si l'email n'est pas déjà pris par UN AUTRE admin
+    // 1. Vérifier si l'email n'est pas déjà pris par UN AUTRE admin
     const existingWithEmail = await prisma.admin.findFirst({
       where: {
         email: cleanEmail,
@@ -124,6 +137,18 @@ export async function PUT(request: Request) {
     if (existingWithEmail) {
       return NextResponse.json(
         { error: "Cette adresse courriel est déjà utilisée par un autre administrateur." },
+        { status: 400 }
+      );
+    }
+
+    // 2. SÉCURITÉ : Vérifier si l'email existe dans la table Customer (Acheteur)
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { email: cleanEmail },
+    });
+
+    if (existingCustomer) {
+      return NextResponse.json(
+        { error: "🛑 Cette adresse courriel appartient déjà à un compte client acheteur. Veuillez utiliser une adresse différente pour l'administration." },
         { status: 400 }
       );
     }

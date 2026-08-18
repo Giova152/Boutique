@@ -43,7 +43,7 @@ export default function CartDrawer() {
             <ShoppingBag className="text-primary-400" size={20} aria-hidden="true" />
             <h2 className="text-lg font-serif font-bold text-white">Mon Panier</h2>
             {totalQuantity > 0 && (
-              <span className="text-xs bg-primary-500 text-white font-bold px-2.5 py-0.5 rounded-full">
+              <span className="text-xs bg-primary-600 text-white font-bold px-2.5 py-0.5 rounded-full">
                 {totalQuantity}
               </span>
             )}
