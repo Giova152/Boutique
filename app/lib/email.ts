@@ -21,6 +21,88 @@ export interface AdminInvitationEmailData {
 }
 
 /**
+ * Envoie un courriel avec un code de confirmation à 6 chiffres pour valider un nouveau compte acheteur.
+ */
+export async function sendVerificationCodeEmail(data: { name: string; email: string; code: string }) {
+  const emailHtml = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Code de confirmation — VEGEDERM</title>
+  </head>
+  <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+    <div style="max-width: 540px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
+      
+      <!-- Header -->
+      <div style="background-color: #064e3b; padding: 28px 24px; text-align: center; color: #ffffff;">
+        <h1 style="margin: 0; font-size: 20px; font-family: Georgia, serif; color: #ffffff;">VEGEDERM BIO COSMECEUTIQUES</h1>
+        <p style="margin: 4px 0 0 0; font-size: 11px; color: #a7f3d0; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px;">Validation de votre Compte Acheteur</p>
+      </div>
+
+      <!-- Content -->
+      <div style="padding: 28px 24px; text-align: center;">
+        <p style="font-size: 15px; margin-top: 0; text-align: left;">Bonjour <strong>${data.name}</strong>,</p>
+        <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: left;">
+          Pour finaliser la création de votre compte client et valider votre adresse courriel chez <strong>VEGEDERM BIO COSMECEUTIQUES</strong>, voici votre code de vérification :
+        </p>
+
+        <!-- Code Box -->
+        <div style="background-color: #ecfdf5; border: 2px dashed #059669; border-radius: 16px; padding: 20px; margin: 24px 0; text-align: center;">
+          <span style="font-size: 32px; font-weight: 800; font-family: monospace; letter-spacing: 6px; color: #065f46;">
+            ${data.code}
+          </span>
+          <p style="font-size: 11px; color: #047857; margin: 8px 0 0 0; font-weight: bold;">Ce code expire dans 15 minutes.</p>
+        </div>
+
+        <p style="font-size: 12px; color: #94a3b8; text-align: left; line-height: 1.5;">
+          Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message en toute sécurité.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
+        © ${new Date().getFullYear()} VEGEDERM BIO COSMECEUTIQUES — Soins Bio & Naturels
+      </div>
+    </div>
+  </body>
+  </html>
+  `;
+
+  console.log(`
+=================================================================
+🔑 CODE DE VÉRIFICATION COMPTE CLIENT
+=================================================================
+Destinataire : ${data.email} (${data.name})
+CODE : ${data.code}
+=================================================================
+`);
+
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: Boolean(process.env.SMTP_SECURE),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"VEGEDERM CLIENT" <bienvenue@vegedermbiocosmeceutiques.com>',
+        to: data.email,
+        subject: `🔑 ${data.code} est votre code de confirmation — VEGEDERM`,
+        html: emailHtml,
+      });
+    } catch (err) {
+      console.error("Échec de l'envoi du code par SMTP:", err);
+    }
+  }
+}
+
+/**
  * Envoie un courriel personnalisé d'invitation avec les accès lors de la création d'un administrateur.
  */
 export async function sendAdminInvitationEmail(adminData: AdminInvitationEmailData) {
