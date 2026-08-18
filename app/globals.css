@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap");
+@import "tailwindcss";
+
+@config "../tailwind.config.ts";
+
+@theme {
+  --color-primary-50: #f0fdf7;
+  --color-primary-100: #dcfcea;
+  --color-primary-200: #bbf7d4;
+  --color-primary-300: #86efb4;
+  --color-primary-400: #4ade8a;
+  --color-primary-500: #10b565;
+  --color-primary-600: #0d9955;
+  --color-primary-700: #0a7d45;
+  --color-primary-800: #096438;
+  --color-primary-900: #07502e;
+  --color-primary-950: #03291a;
+
+  --color-charcoal-800: #1a1a2e;
+  --color-charcoal-900: #0f172a;
+  --color-charcoal-950: #090d16;
+
+  --color-cream-50: #fdfcf9;
+  --color-cream-100: #faf7f0;
+  --color-cream-200: #f5ede0;
+
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  --font-inter: "Inter", system-ui, sans-serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
+  --primary: #10b565;
+  --primary-light: #dcfcea;
+  --primary-dark: #0d9955;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  color: #0f172a;
+  background-color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom badges */
+.badge-new {
+  background-color: #10b565;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(16, 181, 101, 0.3);
+}
+
+.badge-sale {
+  background-color: #d97706;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.badge-out {
+  background-color: #475569;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+/* Button hover effects */
+.btn-primary {
+  background-color: #10b565;
+  color: #ffffff;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+  background-color: #0d9955;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(16, 181, 101, 0.35);
+}
+
+/* Skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
