@@ -12,7 +12,7 @@ import { User, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 export default function CustomerLoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("admin@pommades.ca");
+  const [email, setEmail] = useState("admin@vegedermbiocosmeceutiques.com");
   const [password, setPassword] = useState("Admin2024!");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,9 +39,9 @@ export default function CustomerLoginPage() {
         const role = (session?.user as { role?: string })?.role;
 
         if (role === "admin" || role === "superadmin") {
-          router.push("/admin");
+          window.location.href = "/admin";
         } else {
-          router.push("/compte/commandes");
+          window.location.href = "/compte/commandes";
         }
       }
     } else {
@@ -126,7 +126,7 @@ export default function CustomerLoginPage() {
               <p className="font-bold text-emerald-800 flex items-center gap-1">
                 <ShieldCheck size={14} /> Compte Admin (Redirige vers /admin) :
               </p>
-              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">admin@pommades.ca</code></p>
+              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">admin@vegedermbiocosmeceutiques.com</code></p>
               <p className="pl-5 text-[11px]">MDP : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">Admin2024!</code></p>
             </div>
 
