@@ -5,25 +5,35 @@ export async function POST(request: Request) {
   try {
     const { code, subtotal } = await request.json();
 
-    if (!code) {
+    if (!code || typeof code !== "string" || !code.trim()) {
       return NextResponse.json(
-        { success: false, message: "Code promo vide" },
+        { success: false, message: "Veuillez entrer un code promo." },
         { status: 400 }
       );
     }
 
-    const promo = await prisma.promoCode.findUnique({
-      where: { code: code.toUpperCase() },
+    const cleanCode = code.trim().toUpperCase();
+
+    // Recherche insensible à la casse et sans espaces superflus
+    const promo = await prisma.promoCode.findFirst({
+      where: {
+        code: {
+          equals: cleanCode,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (!promo || !promo.active) {
       return NextResponse.json({
         success: false,
-        message: "Code promo invalide ou expiré.",
+        message: "Code promo invalide, expiré ou inexistant.",
       });
     }
 
-    if (promo.minPurchase > subtotal) {
+    const currentSubtotal = parseFloat(subtotal) || 0;
+
+    if (promo.minPurchase && promo.minPurchase > currentSubtotal) {
       return NextResponse.json({
         success: false,
         message: `Ce code nécessite un achat minimum de ${promo.minPurchase.toFixed(2)} $ CAD.`,
@@ -39,22 +49,25 @@ export async function POST(request: Request) {
 
     let discount = 0;
     if (promo.type === "percentage") {
-      discount = (subtotal * promo.value) / 100;
+      discount = (currentSubtotal * promo.value) / 100;
     } else {
       discount = promo.value;
     }
+
+    const finalDiscount = Math.min(discount, currentSubtotal);
 
     return NextResponse.json({
       success: true,
       code: promo.code,
       type: promo.type,
       value: promo.value,
-      discount: Math.min(discount, subtotal),
-      message: `Code ${promo.code} appliqué (-${discount.toFixed(2)} $ CAD)`,
+      discount: finalDiscount,
+      message: `Code ${promo.code} appliqué avec succès (-${finalDiscount.toFixed(2)} $ CAD) !`,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Erreur validation promo code:", error);
     return NextResponse.json(
-      { success: false, message: "Erreur lors de la validation du promo code" },
+      { success: false, message: "Erreur lors de la validation du code promo." },
       { status: 500 }
     );
   }

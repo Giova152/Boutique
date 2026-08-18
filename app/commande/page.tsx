@@ -39,11 +39,14 @@ const CANADIAN_PROVINCES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, promoDiscount, clearCart } = useCart();
+  const { items, subtotal, promoDiscount, promoCode, applyPromoCode, removePromoCode, clearCart } = useCart();
   const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "card">("stripe");
+  const [promoInput, setPromoInput] = useState("");
+  const [loadingPromo, setLoadingPromo] = useState(false);
+  const [promoMsg, setPromoMsg] = useState<{ success?: boolean; text?: string }>({});
 
   const [formData, setFormData] = useState({
     name: "Jean Tremblay",
@@ -399,13 +402,61 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* FORMULAIRE CODE PROMO SUR LA PAGE DE PAIEMENT */}
+              <div className="pt-3 border-t border-slate-100">
+                {!promoCode ? (
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!promoInput.trim()) return;
+                      setLoadingPromo(true);
+                      setPromoMsg({});
+                      const res = await applyPromoCode(promoInput.trim());
+                      setLoadingPromo(false);
+                      if (res.success) {
+                        setPromoMsg({ success: true, text: res.message });
+                        setPromoInput("");
+                      } else {
+                        setPromoMsg({ success: false, text: res.message });
+                      }
+                    }}
+                    className="space-y-1.5"
+                  >
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Code promo (ex: VEGEDERM10)"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold uppercase text-slate-900 focus:outline-none focus:border-emerald-600"
+                      />
+                      <Button variant="secondary" size="sm" loading={loadingPromo} type="submit" className="font-bold text-xs border-slate-300 shrink-0">
+                        Appliquer
+                      </Button>
+                    </div>
+                    {promoMsg.text && (
+                      <p className={`text-[11px] font-bold ${promoMsg.success ? "text-emerald-700" : "text-rose-600"}`}>
+                        {promoMsg.text}
+                      </p>
+                    )}
+                  </form>
+                ) : (
+                  <div className="flex justify-between items-center text-xs bg-emerald-50 text-emerald-900 p-2.5 rounded-xl border border-emerald-200 font-bold">
+                    <span>Code <strong>{promoCode}</strong> (-{promoDiscount.toFixed(2)} $)</span>
+                    <button type="button" onClick={removePromoCode} className="text-emerald-800 underline font-bold">
+                      Retirer
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-2 text-xs text-slate-700 font-semibold pt-3 border-t border-slate-100">
                 <div className="flex justify-between">
                   <span>Sous-total</span>
                   <span className="font-bold text-slate-900">{subtotal.toFixed(2)} $</span>
                 </div>
                 {promoDiscount > 0 && (
-                  <div className="flex justify-between text-primary-700 font-bold">
+                  <div className="flex justify-between text-emerald-700 font-bold">
                     <span>Rabais appliqué</span>
                     <span>- {promoDiscount.toFixed(2)} $</span>
                   </div>
@@ -420,7 +471,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-base font-extrabold text-slate-900 pt-3 border-t border-slate-200">
                   <span>Total final (CAD)</span>
-                  <span className="text-primary-600 text-xl">{total.toFixed(2)} $</span>
+                  <span className="text-emerald-600 text-xl">{total.toFixed(2)} $</span>
                 </div>
               </div>
 
