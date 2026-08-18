@@ -12,8 +12,8 @@ import { User, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 export default function CustomerLoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("midogiova@gmail.com");
-  const [password, setPassword] = useState("Admin2024!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -126,26 +126,7 @@ export default function CustomerLoginPage() {
             </Button>
           </form>
 
-          {/* Quick Demo Credentials Guide */}
-          <div className="bg-slate-100 border border-slate-200 p-4 rounded-2xl text-xs text-slate-700 space-y-2">
-            <p className="font-bold text-slate-900">💡 Identifiants de test (Auto-Redirection) :</p>
-            
-            <div className="pt-1 space-y-1">
-              <p className="font-bold text-emerald-800 flex items-center gap-1">
-                <ShieldCheck size={14} /> Compte Admin (Redirige vers /admin) :
-              </p>
-              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">midogiova@gmail.com</code></p>
-              <p className="pl-5 text-[11px]">MDP : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">Admin2024!</code></p>
-            </div>
 
-            <div className="pt-1 space-y-1 border-t border-slate-200">
-              <p className="font-bold text-slate-800 flex items-center gap-1">
-                <User size={14} /> Compte Client (Redirige vers Espace Client) :
-              </p>
-              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">jean.tremblay@example.ca</code></p>
-              <p className="pl-5 text-[11px]">MDP : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">Client2024!</code></p>
-            </div>
-          </div>
 
           <div className="pt-2 text-center border-t border-slate-100">
             <button
