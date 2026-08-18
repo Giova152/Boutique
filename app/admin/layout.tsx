@@ -15,6 +15,7 @@ import {
   LogOut,
   Store,
   ShieldCheck,
+  CreditCard,
   ExternalLink,
   Menu,
   X,
@@ -37,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "Codes promo", href: "/admin/codes-promo", icon: Tag },
     { label: "Clients", href: "/admin/clients", icon: Users },
     { label: "Administrateurs", href: "/admin/administrateurs", icon: ShieldCheck },
+    { label: "Paiements Stripe", href: "/admin/parametres", icon: CreditCard },
     { label: "Paramètres boutique", href: "/admin/parametres", icon: Settings },
   ];
 
@@ -46,14 +48,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-64 bg-slate-900 text-white shrink-0 hidden md:flex flex-col border-r border-slate-800 sticky top-0 h-screen">
         {/* Header Branding */}
         <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
             V
           </div>
           <div>
             <span className="font-serif text-sm font-bold tracking-tight text-white block">
               VEGEDERM ADMIN
             </span>
-            <span className="text-[10px] text-primary-400 font-bold tracking-wider uppercase">
+            <span className="text-[10px] text-emerald-400 font-bold tracking-wider uppercase">
               Gestion Boutique
             </span>
           </div>
@@ -64,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-primary-950/80 text-primary-300 hover:bg-primary-900 border border-primary-800 text-xs font-bold transition-colors"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-950/80 text-emerald-300 hover:bg-emerald-900 border border-emerald-800 text-xs font-bold transition-colors"
           >
             <span className="flex items-center gap-2">
               <Store size={16} /> Voir la boutique
@@ -75,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Navigation links */}
         <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
@@ -83,11 +85,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             return (
               <Link
-                key={item.href}
+                key={index}
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   isActive
-                    ? "bg-primary-600 text-white shadow-md"
+                    ? "bg-emerald-600 text-white shadow-md"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -121,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="relative w-4/5 max-w-xs bg-slate-900 text-white flex flex-col h-full z-10 shadow-2xl">
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-extrabold text-sm">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm">
                   V
                 </div>
                 <span className="font-serif text-sm font-bold text-white">
@@ -137,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-              {navItems.map((item) => {
+              {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive =
                   pathname === item.href ||
@@ -145,12 +147,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 return (
                   <Link
-                    key={item.href}
+                    key={index}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                       isActive
-                        ? "bg-primary-600 text-white shadow-md"
+                        ? "bg-emerald-600 text-white shadow-md"
                         : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -166,10 +168,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href="/"
                 target="_blank"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-3 py-2 rounded-xl bg-primary-950 text-primary-300 border border-primary-800 text-xs font-bold"
+                className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-bold"
               >
                 <span className="flex items-center gap-2">
-                  <Store size={16} /> Voir boutique
+                  <Store size={16} /> Voir la boutique
                 </span>
                 <ExternalLink size={12} />
               </Link>
@@ -204,13 +206,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 text-xs">
-            <span className="hidden sm:inline-block bg-primary-50 text-primary-800 font-bold px-2.5 py-1 rounded-full border border-primary-200 text-[11px]">
+            <span className="hidden sm:inline-block bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-full border border-emerald-200 text-[11px]">
               Session Active
             </span>
             <Link
               href="/"
               target="_blank"
-              className="md:hidden text-primary-700 font-bold underline text-xs"
+              className="md:hidden text-emerald-700 font-bold underline text-xs"
             >
               Boutique ↗
             </Link>
