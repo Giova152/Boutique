@@ -96,31 +96,32 @@ export default function AdminProductsPage() {
             <p className="font-semibold text-gray-600">Aucune pommade trouvée</p>
           </div>
         ) : (
-          <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-100">
-              <tr>
-                <th className="p-4">Produit</th>
-                <th className="p-4">Catégorie</th>
-                <th className="p-4">Prix CAD</th>
-                <th className="p-4">Stock</th>
-                <th className="p-4">Statut</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 font-medium">
-              {products.map((p) => {
-                let img = "/images/products/lumiere-noire.png";
-                try {
-                  const arr = JSON.parse(p.images);
-                  if (arr[0]) img = arr[0];
-                } catch {}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs min-w-[600px]">
+              <thead className="bg-gray-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-100">
+                <tr>
+                  <th className="p-4">Produit</th>
+                  <th className="p-4">Catégorie</th>
+                  <th className="p-4">Prix CAD</th>
+                  <th className="p-4">Stock</th>
+                  <th className="p-4">Statut</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {products.map((p) => {
+                  let img = "/images/products/lumiere-noire.png";
+                  try {
+                    const arr = JSON.parse(p.images);
+                    if (arr[0]) img = arr[0];
+                  } catch {}
 
-                return (
-                  <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="p-4 flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-                        <Image src={img} alt="" fill className="object-cover" />
-                      </div>
+                  return (
+                    <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="p-4 flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <Image src={img} unoptimized alt="" fill className="object-cover" />
+                        </div>
                       <div>
                         <span className="font-bold text-gray-900 block">{p.name}</span>
                         <span className="text-[11px] text-gray-400">Note : {p.avgRating} ★</span>
@@ -182,6 +183,7 @@ export default function AdminProductsPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
