@@ -91,7 +91,7 @@ export default function ShopHomePage() {
       </div>
 
       {/* Hero Banner — Desktop & Tablet Only */}
-      <section className="hidden md:block relative bg-slate-950 text-white overflow-hidden py-16 md:py-24 border-b border-slate-800">
+      <section className="hidden md:block relative bg-slate-950 text-white overflow-hidden py-8 md:py-10 border-b border-slate-800">
         {/* Dark overlay image background */}
         <div className="absolute inset-0 z-0 opacity-20 bg-cover bg-center">
           <Image
@@ -106,7 +106,7 @@ export default function ShopHomePage() {
         {/* Ambient Gradient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase tracking-widest shadow-lg">
             <Sparkles size={14} /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
           </div>
