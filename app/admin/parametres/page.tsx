@@ -20,11 +20,10 @@ import {
   Zap,
   Key,
   ShieldCheck,
-  ChevronDown,
-  ChevronUp,
+  HelpCircle,
+  ArrowRight,
 } from "lucide-react";
 
-// --- Types Stripe ---
 interface StripeStatus {
   connected: boolean;
   connection_type: "oauth" | "manual" | "none";
@@ -68,7 +67,6 @@ function SettingsContent() {
   });
 
   const [clientIdInput, setClientIdInput] = useState("");
-  const [showClientIdConfig, setShowClientIdConfig] = useState(false);
   const [showManualConfig, setShowManualConfig] = useState(false);
 
   const [showSecretKey, setShowSecretKey] = useState(false);
@@ -160,17 +158,20 @@ function SettingsContent() {
 
   const handleSaveClientId = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clientIdInput.trim()) {
+      showToast("Veuillez entrer votre Client ID Stripe Connect (format ca_...)", "error");
+      return;
+    }
     setSavingClientId(true);
     try {
       const res = await fetch("/api/admin/stripe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stripe_client_id: clientIdInput }),
+        body: JSON.stringify({ stripe_client_id: clientIdInput.trim() }),
       });
       const data = await res.json();
       if (res.ok) {
-        showToast("Stripe Connect Client ID enregistré avec succès !", "success");
-        setShowClientIdConfig(false);
+        showToast("Client ID Stripe Connect enregistré avec succès !", "success");
         await fetchStripeStatus();
       } else {
         showToast(data.error || "Erreur lors de l'enregistrement", "error");
@@ -226,6 +227,8 @@ function SettingsContent() {
     }
   };
 
+  const hasClientId = Boolean(stripeStatus.stripe_client_id || stripeStatus.has_env_client_id);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
@@ -250,7 +253,7 @@ function SettingsContent() {
             <div className="flex items-center gap-2">
               <CreditCard size={22} className="text-violet-600" />
               <h2 className="font-serif font-bold text-lg text-slate-900">
-                Paiements & Stripe Connect
+                Paiements &amp; Stripe Connect
               </h2>
             </div>
             <p className="text-xs text-slate-500">
@@ -261,13 +264,13 @@ function SettingsContent() {
           {/* Statut Badge */}
           {stripeStatus.connected ? (
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-extrabold shadow-2xs">
-                <CheckCircle2 size={15} className="text-primary-600" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold shadow-2xs">
+                <CheckCircle2 size={15} className="text-emerald-600" />
                 {stripeStatus.connection_type === "oauth" ? "Stripe Connect Lié (OAuth)" : "Stripe Connecté (Clés API)"}
               </span>
             </div>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold self-start sm:self-auto">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold self-start sm:self-auto">
               <AlertCircle size={15} className="text-amber-600" />
               Non connecté
             </span>
@@ -284,7 +287,7 @@ function SettingsContent() {
                 </span>
                 {stripeStatus.stripe_connect_account_id && (
                   <div className="font-mono text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-primary-600" />
+                    <ShieldCheck size={16} className="text-emerald-600" />
                     ID Compte : <span className="bg-white px-2 py-0.5 rounded border border-violet-200 text-violet-900">{stripeStatus.stripe_connect_account_id}</span>
                   </div>
                 )}
@@ -317,13 +320,17 @@ function SettingsContent() {
                 Connexion via Stripe Connect OAuth (Recommandé)
               </h3>
               <p className="text-xs text-slate-500 max-w-xl">
-                En cliquant sur le bouton ci-dessous, vous serez redirigé sur le site sécurisé de Stripe pour vous connecter ou créer votre compte en 1 clic.
+                En cliquant sur le bouton ci-dessous, vous serez redirigé sur le site sécurisé de Stripe pour vous connecter en 1 clic.
               </p>
             </div>
 
             <a
               href="/api/admin/stripe/connect/authorize"
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 shrink-0 text-center"
+              className={`inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 shrink-0 text-center ${
+                hasClientId
+                  ? "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                  : "bg-slate-800 text-white hover:bg-slate-900"
+              }`}
             >
               <CreditCard size={18} />
               {stripeStatus.connected ? "Reconnecter avec Stripe OAuth" : "Lier mon compte Stripe"}
@@ -331,42 +338,43 @@ function SettingsContent() {
             </a>
           </div>
 
-          {/* Configuration du Client ID Stripe Connect (Optionnel/Avancé) */}
-          <div className="pt-3 border-t border-slate-200/60">
-            <button
-              type="button"
-              onClick={() => setShowClientIdConfig(!showClientIdConfig)}
-              className="text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition-colors"
-            >
-              {showClientIdConfig ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              Configuration avancée du Client ID Stripe Connect (STRIPE_CLIENT_ID)
-            </button>
+          {/* Saisie du Client ID si pas encore configuré */}
+          <div className="pt-4 border-t border-slate-200/60 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <HelpCircle size={16} className="text-violet-600" />
+              <span>Étape 1 : Renseigner votre Client ID Stripe Connect (STRIPE_CLIENT_ID)</span>
+            </div>
 
-            {showClientIdConfig && (
-              <form onSubmit={handleSaveClientId} className="mt-3 space-y-3 bg-white p-4 rounded-xl border border-slate-200">
-                <p className="text-xs text-slate-600">
-                  Le <strong>Client ID</strong> (format <code>ca_...</code>) se trouve dans votre Dashboard Stripe &gt; Paramètres &gt; Connect application settings.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    placeholder="ca_123456789..."
-                    value={clientIdInput}
-                    onChange={(e) => setClientIdInput(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:outline-none focus:border-violet-600"
-                  />
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    loading={savingClientId}
-                    className="!bg-slate-900 font-bold"
-                  >
-                    Enregistrer Client ID
-                  </Button>
-                </div>
-              </form>
-            )}
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Pour activer la connexion OAuth Stripe, copiez votre <strong>Client ID</strong> (format <code>ca_...</code>) depuis votre dashboard Stripe dans{" "}
+              <a
+                href="https://dashboard.stripe.com/settings/connect"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-700 font-extrabold underline inline-flex items-center gap-1"
+              >
+                Paramètres Stripe Connect <ExternalLink size={11} />
+              </a> :
+            </p>
+
+            <form onSubmit={handleSaveClientId} className="flex flex-col sm:flex-row gap-2.5 bg-white p-3.5 rounded-xl border border-slate-200">
+              <input
+                type="text"
+                placeholder="ca_123456789ABCXYZ..."
+                value={clientIdInput}
+                onChange={(e) => setClientIdInput(e.target.value)}
+                className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-violet-600"
+              />
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                loading={savingClientId}
+                className="!bg-violet-600 hover:!bg-violet-700 font-bold shrink-0"
+              >
+                Enregistrer Client ID <ArrowRight size={14} />
+              </Button>
+            </form>
           </div>
         </div>
 
@@ -454,7 +462,7 @@ function SettingsContent() {
                   loading={savingStripeKeys}
                   className="!bg-slate-900 font-bold"
                 >
-                  <Save size={15} /> Save Keys Manually
+                  <Save size={15} /> Enregistrer les clés manuellement
                 </Button>
               </div>
             </form>
@@ -469,7 +477,7 @@ function SettingsContent() {
         {/* Section 1: Informations Générales */}
         <div className="space-y-4">
           <h3 className="font-serif font-bold text-base text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-            <Settings size={18} className="text-primary-600" /> Informations Générales
+            <Settings size={18} className="text-emerald-600" /> Informations Générales
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -482,7 +490,7 @@ function SettingsContent() {
                 required
                 value={settings.store_name}
                 onChange={(e) => setSettings({ ...settings, store_name: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-primary-600 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-emerald-600 focus:outline-none"
               />
             </div>
 
@@ -495,7 +503,7 @@ function SettingsContent() {
                 required
                 value={settings.store_email}
                 onChange={(e) => setSettings({ ...settings, store_email: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-primary-600 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-semibold focus:border-emerald-600 focus:outline-none"
               />
             </div>
           </div>
@@ -504,7 +512,7 @@ function SettingsContent() {
         {/* Section 2: Frais de Livraison (13$ de base) */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <h3 className="font-serif font-bold text-base text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-            <Truck size={18} className="text-primary-600" /> Tarification Livraison (Canada)
+            <Truck size={18} className="text-emerald-600" /> Tarification Livraison (Canada)
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -519,7 +527,7 @@ function SettingsContent() {
                 value={settings.flat_shipping_rate}
                 onChange={(e) => setSettings({ ...settings, flat_shipping_rate: e.target.value })}
                 placeholder="13.00"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-primary-600 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-emerald-600 focus:outline-none"
               />
               <p className="text-[11px] text-slate-500 mt-1">Tarif par défaut appliqué au panier.</p>
             </div>
@@ -535,7 +543,7 @@ function SettingsContent() {
                 value={settings.free_shipping_threshold}
                 onChange={(e) => setSettings({ ...settings, free_shipping_threshold: e.target.value })}
                 placeholder="75.00"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-primary-600 focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-slate-900 text-xs font-extrabold focus:border-emerald-600 focus:outline-none"
               />
               <p className="text-[11px] text-slate-500 mt-1">Gratuit pour toute commande supérieure ou égale à ce montant.</p>
             </div>
@@ -545,7 +553,7 @@ function SettingsContent() {
         {/* Section 3: Favicon & Logo */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <h3 className="font-serif font-bold text-base text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
-            <ImageIcon size={18} className="text-primary-600" /> Icône du site (Favicon)
+            <ImageIcon size={18} className="text-emerald-600" /> Icône du site (Favicon)
           </h3>
 
           <ImageUploader
@@ -556,7 +564,7 @@ function SettingsContent() {
         </div>
 
         <div className="pt-4 flex justify-end">
-          <Button type="submit" variant="primary" size="lg" loading={saving} className="!bg-primary-600 font-bold">
+          <Button type="submit" variant="primary" size="lg" loading={saving} className="!bg-emerald-600 font-bold">
             <Save size={18} /> Enregistrer les paramètres généraux
           </Button>
         </div>
