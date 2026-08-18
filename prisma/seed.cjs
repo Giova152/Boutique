@@ -1,14 +1,7 @@
-import { PrismaClient } from "../app/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcryptjs";
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
-const connectionString = process.env.DATABASE_URL || "file:./dev.db";
-const adapter = (connectionString.startsWith("postgresql://") || connectionString.startsWith("postgres://"))
-  ? new PrismaPg({ connectionString })
-  : new PrismaBetterSqlite3({ url: "file:./dev.db" });
-
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding Vegederm Bio Cosméceutiques database from WooCommerce data...");
