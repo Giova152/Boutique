@@ -12,7 +12,7 @@ import { User, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 export default function CustomerLoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("admin@vegedermbiocosmeceutiques.com");
+  const [email, setEmail] = useState("midogiova@gmail.com");
   const [password, setPassword] = useState("Admin2024!");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -103,7 +103,15 @@ export default function CustomerLoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">Mot de passe *</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-bold text-slate-800">Mot de passe *</label>
+                <Link
+                  href="/compte/mot-de-passe-oublie"
+                  className="text-[11px] font-bold text-emerald-700 hover:underline"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <input
                 type="password"
                 required
@@ -126,7 +134,7 @@ export default function CustomerLoginPage() {
               <p className="font-bold text-emerald-800 flex items-center gap-1">
                 <ShieldCheck size={14} /> Compte Admin (Redirige vers /admin) :
               </p>
-              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">admin@vegedermbiocosmeceutiques.com</code></p>
+              <p className="pl-5 text-[11px]">Email : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">midogiova@gmail.com</code></p>
               <p className="pl-5 text-[11px]">MDP : <code className="text-slate-900 bg-white px-1.5 py-0.5 rounded font-bold border border-slate-200">Admin2024!</code></p>
             </div>
 

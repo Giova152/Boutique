@@ -14,7 +14,7 @@ export async function sendAdminOrderNotification(order: {
     addressObj = typeof order.address === "string" ? JSON.parse(order.address) : order.address;
   } catch {}
 
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@vegedermbiocosmeceutiques.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "midogiova@gmail.com";
 
   const hostUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 

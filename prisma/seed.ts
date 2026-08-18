@@ -1,7 +1,5 @@
-const { PrismaClient } = require("../app/generated/prisma/client");
-const bcrypt = require("bcryptjs");
-
-const prisma = new PrismaClient();
+import { prisma } from "../app/lib/prisma.js";
+import bcrypt from "bcryptjs";
 
 async function main() {
   console.log("Seeding Vegederm Bio Cosméceutiques database from WooCommerce data...");
@@ -58,7 +56,7 @@ async function main() {
     },
   });
 
-  // Create Real Vegederm Products from WooCommerce Screenshots
+  // Create Real Vegederm Products
   await prisma.product.createMany({
     data: [
       {
@@ -265,7 +263,7 @@ async function main() {
   const adminPassword = await bcrypt.hash("Admin2024!", 10);
   await prisma.admin.create({
     data: {
-      email: "admin@vegedermbiocosmeceutiques.com",
+      email: "midogiova@gmail.com",
       name: "Admin Vegederm",
       passwordHash: adminPassword,
       role: "superadmin",
@@ -278,12 +276,12 @@ async function main() {
       { key: "store_name", value: "VEGEDERM BIO COSMECEUTIQUES" },
       { key: "store_email", value: "contact@vegedermbiocosmeceutiques.com" },
       { key: "free_shipping_threshold", value: "75" },
-      { key: "flat_shipping_rate", value: "13.00" }, // 13$ CAD shipping rate
+      { key: "flat_shipping_rate", value: "13.00" },
       { key: "favicon_url", value: "/favicon.ico" },
     ],
   });
 
-  console.log("Database seeded successfully with real Vegederm WooCommerce products!");
+  console.log("Database seeded successfully with real Vegederm products!");
 }
 
 main()
