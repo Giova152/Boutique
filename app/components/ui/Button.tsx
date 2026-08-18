@@ -26,23 +26,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
+      "inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none";
 
     const variants = {
       primary:
-        "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 shadow-btn hover:shadow-lg hover:-translate-y-0.5",
+        "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-md hover:shadow-lg hover:-translate-y-0.5",
       secondary:
-        "bg-cream-100 text-primary-700 hover:bg-primary-50 border border-cream-300 hover:border-primary-200 hover:-translate-y-0.5",
+        "bg-slate-100 text-slate-800 hover:bg-slate-200 border border-slate-300 hover:-translate-y-0.5",
       ghost:
-        "text-slate-600 hover:text-primary-600 hover:bg-primary-50",
+        "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50",
       danger:
-        "bg-red-500 text-white hover:bg-red-600 active:bg-red-700 shadow-sm hover:-translate-y-0.5",
+        "bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 shadow-sm hover:-translate-y-0.5",
       outline:
-        "border-2 border-primary-500 text-primary-600 hover:bg-primary-50 hover:-translate-y-0.5",
+        "border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 hover:-translate-y-0.5",
     };
 
     const sizes = {
-      sm: "px-3 py-1.5 text-xs",
+      sm: "px-3.5 py-1.5 text-xs",
       md: "px-5 py-2.5 text-sm",
       lg: "px-8 py-3.5 text-base",
     };

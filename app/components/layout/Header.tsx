@@ -59,7 +59,7 @@ export default function Header({ onSearch, searchQuery = "" }: HeaderProps) {
             className="flex items-center gap-3 shrink-0 group focus-visible-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-xl"
             aria-label="VEGEDERM BIO COSMECEUTIQUES - Accueil"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:bg-primary-600 transition-colors" aria-hidden="true">
+            <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:bg-primary-600 transition-colors" aria-hidden="true">
               V
             </div>
             <div>

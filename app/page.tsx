@@ -86,8 +86,8 @@ export default function ShopHomePage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header onSearch={(q) => setSearchQuery(q)} searchQuery={searchQuery} />
 
-      <section className="relative bg-slate-950 text-white overflow-hidden py-10 md:py-14 lg:py-16 border-b border-slate-800">
-        <div className="absolute inset-0 z-0 opacity-20 bg-cover bg-center">
+      <section className="relative bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white overflow-hidden py-12 md:py-16 border-b border-slate-800">
+        <div className="absolute inset-0 z-0 opacity-25">
           <Image
             src="/images/hero-banner.png"
             alt=""
@@ -97,19 +97,19 @@ export default function ShopHomePage() {
           />
         </div>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-950/90 border border-primary-500/50 text-primary-400 text-xs font-bold uppercase tracking-widest shadow-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase tracking-widest shadow-lg">
             <Sparkles size={14} aria-hidden="true" /> VEGEDERM BIO COSMECEUTIQUES • Fabriqué au Canada 🇨🇦
           </div>
 
-          <h1 className="font-serif text-2xl sm:text-3xl md:text-5xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white max-w-3xl mx-auto leading-tight drop-shadow-md">
             Pommades Bio-Cosméceutiques <br className="hidden sm:inline" />
             &amp; Soins Botaniques
           </h1>
 
-          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-200 font-medium leading-relaxed drop-shadow-xs">
             Formules riches en huiles végétales et beurres rares pour la peau et les cheveux.
           </p>
 
@@ -199,7 +199,7 @@ export default function ShopHomePage() {
                 <Filter size={16} className="text-primary-500" aria-hidden="true" />
                 <span>Filtres</span>
                 {hasActiveFilters && (
-                  <span className="w-5 h-5 rounded-full bg-primary-500 text-white text-[10px] flex items-center justify-center">
+                  <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] flex items-center justify-center">
                     {[selectedCategory, selectedSkinType, onlyInStock, searchQuery].filter(Boolean).length}
                   </span>
                 )}

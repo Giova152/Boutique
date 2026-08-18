@@ -23,7 +23,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3 group" aria-label="VEGEDERM BIO COSMECEUTIQUES - Accueil">
-              <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:bg-primary-600 transition-colors" aria-hidden="true">
+              <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:bg-primary-600 transition-colors" aria-hidden="true">
                 V
               </div>
               <div>

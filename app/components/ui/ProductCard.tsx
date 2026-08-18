@@ -123,7 +123,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
                 ? "bg-slate-900 text-white"
                 : product.stock <= 0
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                : "bg-primary-600 text-white hover:bg-primary-700 shadow-btn hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98]"
               }
             `}
             aria-label={added ? "Ajouté au panier" : product.stock <= 0 ? "Produit épuisé" : `Ajouter ${product.name} au panier`}
